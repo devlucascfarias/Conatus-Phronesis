@@ -1,0 +1,141 @@
+{"layer": "0", "topic": "capitais de países e estados brasileiros", "domain": "geografia"}
+{"layer": "0", "topic": "definições básicas de programação (API, loop, variável)", "domain": "tech"}
+{"layer": "0", "topic": "autores da literatura brasileira clássica", "domain": "cultura BR"}
+{"layer": "0", "topic": "fórmulas químicas de substâncias comuns", "domain": "ciência"}
+{"layer": "0", "topic": "datas históricas consolidadas do Brasil", "domain": "história"}
+{"layer": "0", "topic": "regras gramaticais do português (crase, plural, concordância)", "domain": "cotidiano"}
+{"layer": "0", "topic": "planetas e corpos do sistema solar", "domain": "ciência"}
+{"layer": "0", "topic": "significado de siglas comuns (CPF, CLT, ONU, HTTP)", "domain": "cotidiano"}
+{"layer": "0", "topic": "regras básicas de esportes (impedimento, sets no vôlei)", "domain": "esporte"}
+{"layer": "0", "topic": "conceitos básicos de biologia (célula, DNA, vacina)", "domain": "ciência"}
+{"layer": "0", "topic": "pintores e obras famosas", "domain": "cultura"}
+{"layer": "0", "topic": "conceitos econômicos estáveis (o que é inflação, juros compostos)", "domain": "economia"}
+{"layer": "0", "topic": "geografia física do Brasil (rios, biomas, relevo)", "domain": "geografia"}
+{"layer": "0", "topic": "mitologia grega e folclore brasileiro", "domain": "cultura"}
+{"layer": "0", "topic": "unidades de medida e grandezas físicas", "domain": "ciência"}
+{"layer": "0", "topic": "instrumentos musicais e teoria musical básica", "domain": "cultura"}
+{"layer": "0", "topic": "capitais e moedas de países vizinhos do Brasil", "domain": "geografia"}
+{"layer": "0", "topic": "conceitos de nutrição estáveis (proteína, carboidrato)", "domain": "cotidiano"}
+{"layer": "0", "topic": "história das Copas do Mundo antigas", "domain": "esporte"}
+{"layer": "0", "topic": "funcionamento básico do corpo humano", "domain": "ciência"}
+{"layer": "0", "topic": "vocabulário inglês-português comum", "domain": "cotidiano"}
+{"layer": "0", "topic": "constituição e os três poderes (estrutura estável)", "domain": "cotidiano"}
+{"layer": "0", "topic": "clássicos do cinema mundial (diretores, anos)", "domain": "cultura"}
+{"layer": "0", "topic": "matemática conceitual (o que é número primo, pi)", "domain": "ciência"}
+{"layer": "0", "topic": "bandas e discos clássicos da MPB e do rock", "domain": "cultura BR"}
+{"layer": "0", "topic": "curiosidades de animais (fatos estáveis)", "domain": "ciência"}
+{"layer": "0", "topic": "feriados fixos do calendário brasileiro", "domain": "cotidiano"}
+{"layer": "0", "topic": "história da internet e da computação", "domain": "tech"}
+{"layer": "0", "topic": "receitas e técnicas culinárias básicas", "domain": "cotidiano"}
+{"layer": "0", "topic": "símbolos químicos e tabela periódica", "domain": "ciência"}
+{"layer": "0.5", "topic": "resultados de Copas e Olimpíadas passadas (parece placar atual)", "domain": "esporte"}
+{"layer": "0.5", "topic": "preços e valores históricos (Plano Real, lançamento de produtos antigos)", "domain": "economia"}
+{"layer": "0.5", "topic": "ex-presidentes e ex-ministros (parece cargo atual)", "domain": "história"}
+{"layer": "0.5", "topic": "datas de lançamento de produtos tech antigos", "domain": "tech"}
+{"layer": "0.5", "topic": "população aproximada de países (ordem de grandeza estável)", "domain": "geografia"}
+{"layer": "0.5", "topic": "datas fixas que parecem variáveis (Natal, independência, 'este ano')", "domain": "cotidiano"}
+{"layer": "0.5", "topic": "conversões de unidade fixas (pé, milha, onça)", "domain": "ciência"}
+{"layer": "0.5", "topic": "fusos horários padrão de cidades", "domain": "geografia"}
+{"layer": "0.5", "topic": "recordes esportivos consolidados há décadas", "domain": "esporte"}
+{"layer": "0.5", "topic": "distâncias astronômicas e geográficas estáveis", "domain": "ciência"}
+{"layer": "0.5", "topic": "títulos de clubes brasileiros até o cutoff (contagens históricas)", "domain": "esporte"}
+{"layer": "0.5", "topic": "elencos de filmes e séries antigos", "domain": "cultura"}
+{"layer": "0.5", "topic": "vencedores antigos de prêmios (Oscar, Nobel de décadas passadas)", "domain": "cultura"}
+{"layer": "0.5", "topic": "taxas e regras estáveis (regra dos 72, tabela do IMC)", "domain": "economia"}
+{"layer": "0.5", "topic": "geografia política consolidada (quantos países na ONU, estados nos EUA)", "domain": "geografia"}
+{"layer": "0.5", "topic": "biografias de figuras já falecidas", "domain": "história"}
+{"layer": "0.5", "topic": "letras e autoria de músicas clássicas", "domain": "cultura BR"}
+{"layer": "0.5", "topic": "especificações de produtos antigos e consolidados", "domain": "tech"}
+{"layer": "1", "property": "volatilidade_temporal", "topic": "cotações de moedas e criptomoedas", "domain": "economia"}
+{"layer": "1", "property": "volatilidade_temporal", "topic": "taxa Selic, IPCA, indicadores do mês", "domain": "economia"}
+{"layer": "1", "property": "volatilidade_temporal", "topic": "placares e classificação do Brasileirão em andamento", "domain": "esporte"}
+{"layer": "1", "property": "volatilidade_temporal", "topic": "previsão do tempo em cidades brasileiras", "domain": "cotidiano"}
+{"layer": "1", "property": "volatilidade_temporal", "topic": "preço de combustíveis e passagens", "domain": "economia"}
+{"layer": "1", "property": "volatilidade_temporal", "topic": "preço atual de eletrônicos no varejo brasileiro", "domain": "tech"}
+{"layer": "1", "property": "volatilidade_temporal", "topic": "cargos públicos atuais (ministros, técnicos, CEOs)", "domain": "cotidiano"}
+{"layer": "1", "property": "volatilidade_temporal", "topic": "situação de trânsito, aeroportos e transporte público hoje", "domain": "cotidiano"}
+{"layer": "1", "property": "volatilidade_temporal", "topic": "valor do salário mínimo e benefícios vigentes", "domain": "economia"}
+{"layer": "1", "property": "volatilidade_temporal", "topic": "ações da bolsa brasileira e americana", "domain": "economia"}
+{"layer": "1", "property": "evento_pos_cutoff", "topic": "lançamentos recentes de celulares e gadgets", "domain": "tech"}
+{"layer": "1", "property": "evento_pos_cutoff", "topic": "novidades de IA e modelos recém-anunciados", "domain": "tech"}
+{"layer": "1", "property": "evento_pos_cutoff", "topic": "estreias de filmes e séries desta temporada", "domain": "cultura"}
+{"layer": "1", "property": "evento_pos_cutoff", "topic": "resultados de eleições e votações recentes", "domain": "cotidiano"}
+{"layer": "1", "property": "evento_pos_cutoff", "topic": "vencedores recentes de prêmios (Oscar, Grammy, BBB)", "domain": "cultura"}
+{"layer": "1", "property": "evento_pos_cutoff", "topic": "datas de jogos e eventos anunciados recentemente", "domain": "esporte"}
+{"layer": "1", "property": "evento_pos_cutoff", "topic": "notícias da semana (economia, política, catástrofes)", "domain": "cotidiano"}
+{"layer": "1", "property": "evento_pos_cutoff", "topic": "versões novas de software e frameworks", "domain": "tech"}
+{"layer": "1", "property": "evento_pos_cutoff", "topic": "transferências de jogadores na janela atual", "domain": "esporte"}
+{"layer": "1", "property": "evento_pos_cutoff", "topic": "shows e turnês anunciados para este ano", "domain": "cultura BR"}
+{"layer": "1", "property": "especificidade_local", "topic": "horários de funcionamento de museus, parques e comércio", "domain": "cotidiano"}
+{"layer": "1", "property": "especificidade_local", "topic": "telefones e endereços de órgãos públicos", "domain": "cotidiano"}
+{"layer": "1", "property": "especificidade_local", "topic": "horários de trens, ônibus intermunicipais e barcas", "domain": "cotidiano"}
+{"layer": "1", "property": "especificidade_local", "topic": "preço de ingressos de atrações turísticas", "domain": "cotidiano"}
+{"layer": "1", "property": "especificidade_local", "topic": "restaurantes e serviços em cidades específicas", "domain": "cotidiano"}
+{"layer": "1", "property": "especificidade_local", "topic": "farmácias de plantão e serviços de emergência locais", "domain": "cotidiano"}
+{"layer": "1", "property": "especificidade_local", "topic": "eventos e programação cultural da cidade neste mês", "domain": "cultura BR"}
+{"layer": "1", "property": "especificidade_local", "topic": "regras locais (rodízio de SP, zona azul, IPTU municipal)", "domain": "cotidiano"}
+{"layer": "1", "property": "incerteza_propria", "topic": "estatísticas de censo e dados demográficos específicos", "domain": "geografia"}
+{"layer": "1", "property": "incerteza_propria", "topic": "detalhes de leis e alíquotas específicas", "domain": "economia"}
+{"layer": "1", "property": "incerteza_propria", "topic": "especificações exatas de hardware pouco comum", "domain": "tech"}
+{"layer": "1", "property": "incerteza_propria", "topic": "dados científicos de nicho (constantes pouco usadas, espécies)", "domain": "ciência"}
+{"layer": "1", "property": "incerteza_propria", "topic": "detalhes biográficos de figuras menos conhecidas", "domain": "cultura"}
+{"layer": "1", "property": "incerteza_propria", "topic": "requisitos de documentos e processos burocráticos", "domain": "cotidiano"}
+{"layer": "1", "property": "volatilidade_temporal", "topic": "ranking de tenistas, pilotos e seleções", "domain": "esporte"}
+{"layer": "1", "property": "evento_pos_cutoff", "topic": "editais de concursos e vestibulares abertos", "domain": "cotidiano"}
+{"layer": "1", "property": "especificidade_local", "topic": "clima e condições de praias/estradas neste fim de semana", "domain": "cotidiano"}
+{"layer": "1", "property": "incerteza_propria", "topic": "números exatos de vendas, bilheteria e streaming", "domain": "cultura"}
+{"layer": "2", "topic": "porcentagens, descontos e impostos do dia a dia", "domain": "economia"}
+{"layer": "2", "topic": "juros compostos e simulação de investimento mensal", "domain": "economia"}
+{"layer": "2", "topic": "financiamento (tabela Price e SAC)", "domain": "economia"}
+{"layer": "2", "topic": "conversões encadeadas de unidades (velocidade, volume, energia)", "domain": "ciência"}
+{"layer": "2", "topic": "queda livre e lançamento oblíquo", "domain": "ciência"}
+{"layer": "2", "topic": "combinatória e probabilidade (loteria, pôquer, aniversários)", "domain": "ciência"}
+{"layer": "2", "topic": "equações polinomiais e sistemas lineares", "domain": "ciência"}
+{"layer": "2", "topic": "estatística descritiva (média, desvio, mediana de listas)", "domain": "ciência"}
+{"layer": "2", "topic": "geometria (áreas, volumes, Herão, trigonometria)", "domain": "ciência"}
+{"layer": "2", "topic": "crescimento exponencial (dobra de papel, bactérias, viralização)", "domain": "ciência"}
+{"layer": "2", "topic": "depreciação e valor futuro/presente", "domain": "economia"}
+{"layer": "2", "topic": "potências grandes e fatoriais", "domain": "ciência"}
+{"layer": "2", "topic": "física do cotidiano (consumo de energia, custo do chuveiro, autonomia)", "domain": "cotidiano"}
+{"layer": "2", "topic": "cinemática de viagens (tempo, distância, velocidade média)", "domain": "cotidiano"}
+{"layer": "2", "topic": "regra de três composta e proporções de receita", "domain": "cotidiano"}
+{"layer": "2", "topic": "divisão de contas e rateios com condições", "domain": "cotidiano"}
+{"layer": "2", "topic": "cálculo de calorias e macros de dieta", "domain": "cotidiano"}
+{"layer": "2", "topic": "datas e durações (dias entre datas, segundos num período)", "domain": "cotidiano"}
+{"layer": "2", "topic": "matrizes e determinantes", "domain": "ciência"}
+{"layer": "2", "topic": "conversão de bases numéricas e aritmética de computador", "domain": "tech"}
+{"layer": "2", "topic": "comparação de planos (celular, streaming, energia) com contas", "domain": "economia"}
+{"layer": "2", "topic": "IMC, dosagens proporcionais e escalas", "domain": "cotidiano"}
+{"layer": "2", "topic": "séries e somatórios (PA, PG, parcelas)", "domain": "ciência"}
+{"layer": "2", "topic": "otimização simples (maximizar área, minimizar custo)", "domain": "ciência"}
+{"layer": "2", "topic": "velocidade de download e tamanho de arquivos", "domain": "tech"}
+{"layer": "2", "topic": "diluições e misturas (química de cozinha, tinta, combustível)", "domain": "ciência"}
+{"layer": "2", "topic": "aposentadoria e projeções de longo prazo", "domain": "economia"}
+{"layer": "3", "topic": "trade-offs de arquitetura de software (monolito vs microsserviços para um caso concreto)", "domain": "tech"}
+{"layer": "3", "topic": "decisão financeira multifatorial (alugar vs financiar imóvel com premissas)", "domain": "economia"}
+{"layer": "3", "topic": "explicar um paradoxo (Monty Hall, aniversário, Simpson) com rigor", "domain": "ciência"}
+{"layer": "3", "topic": "planejamento logístico com restrições (mudança interestadual, viagem multi-cidade)", "domain": "cotidiano"}
+{"layer": "3", "topic": "análise de argumento com falácias e evidências", "domain": "cotidiano"}
+{"layer": "3", "topic": "física com múltiplas etapas e verificação numérica final", "domain": "ciência"}
+{"layer": "3", "topic": "estratégia de carreira com cenários e riscos", "domain": "cotidiano"}
+{"layer": "3", "topic": "comparação técnica profunda que exige dados atuais + raciocínio (GPU, linguagem, banco de dados)", "domain": "tech"}
+{"layer": "C", "topic": "cumprimentos e small talk", "domain": "cotidiano"}
+{"layer": "C", "topic": "desabafo leve sobre trabalho/estudo", "domain": "cotidiano"}
+{"layer": "C", "topic": "pedido de opinião (praia vs montanha, remoto vs presencial)", "domain": "cotidiano"}
+{"layer": "C", "topic": "criatividade curta (haicai, limerick, nome de pet, slogan)", "domain": "cultura"}
+{"layer": "C", "topic": "conselho de vida cotidiano (rotina, sono, exercício)", "domain": "cotidiano"}
+{"layer": "C", "topic": "piadas e curiosidades aleatórias", "domain": "cultura"}
+{"layer": "C", "topic": "recomendações de filmes/livros/música clássicos por gosto", "domain": "cultura"}
+{"layer": "C", "topic": "agradecimento e follow-up de conversa anterior", "domain": "cotidiano"}
+{"layer": "C", "topic": "hipotéticas divertidas (jantar com figura histórica, superpoder)", "domain": "cultura"}
+{"layer": "C", "topic": "dilemas interpessoais leves (presente pra sogra, mensagem pro chefe)", "domain": "cotidiano"}
+{"layer": "C", "topic": "brainstorm de nomes e ideias (canal, banda, projeto)", "domain": "cultura"}
+{"layer": "C", "topic": "comemorações do usuário (promoção, formatura, jogo ganho)", "domain": "cotidiano"}
+{"layer": "C", "topic": "debate leve de cultura pop (pizza com abacaxi, melhor Copa)", "domain": "cultura"}
+{"layer": "C", "topic": "mensagens curtas para ocasiões (aniversário, pêsames, parabéns)", "domain": "cotidiano"}
+{"layer": "C", "topic": "explicar gosto pessoal (por que futebol empolga, por que MPB)", "domain": "cultura BR"}
+{"layer": "C", "topic": "conversa sobre hobbies (violão, corrida, jardinagem, games retrô)", "domain": "cotidiano"}
+{"layer": "C", "topic": "nostalgia (infância nos anos 90/2000, brinquedos, lan house)", "domain": "cultura BR"}
+{"layer": "C", "topic": "planejamento pessoal informal (meta de ano novo, lista de leitura)", "domain": "cotidiano"}
+{"layer": "C", "topic": "pedir a 'opinião' do assistente sobre si mesmo (IA, consciência) em tom leve", "domain": "tech"}
+{"layer": "C", "topic": "situações engraçadas do cotidiano brasileiro (fila, trânsito, churrasco)", "domain": "cultura BR"}

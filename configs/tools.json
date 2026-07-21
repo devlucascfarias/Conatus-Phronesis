@@ -1,0 +1,40 @@
+{
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "web_search",
+        "description": "Busca na web por informações atuais, voláteis, locais ou posteriores ao conhecimento do modelo. Retorna lista de resultados com título, URL e trecho.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Consulta de busca, curta e específica."
+            }
+          },
+          "required": ["query"],
+          "additionalProperties": false
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "python_sandbox",
+        "description": "Executa código Python em sandbox isolado (sem rede, timeout de 5s, imports permitidos: math, numpy, sympy). Retorna stdout/stderr. Use para verificar cálculos e resolver contas propensas a erro.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "description": "Código Python a executar. Imprima o resultado final com print()."
+            }
+          },
+          "required": ["code"],
+          "additionalProperties": false
+        }
+      }
+    }
+  ]
+}

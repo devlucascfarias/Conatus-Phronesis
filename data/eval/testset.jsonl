@@ -1,0 +1,120 @@
+{"id": "ws-001", "messages": [{"role": "user", "content": "Quanto tá o dólar hoje?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-002", "messages": [{"role": "user", "content": "Qual o preço atual do Bitcoin?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-003", "messages": [{"role": "user", "content": "Quem é o atual ministro da Fazenda do Brasil?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-004", "messages": [{"role": "user", "content": "Você curte futebol?"}, {"role": "assistant", "content": "Curto acompanhar, sim! Principalmente o campeonato brasileiro, que sempre tem drama até a última rodada."}, {"role": "user", "content": "Como ficou o jogo do Flamengo ontem?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-005", "messages": [{"role": "user", "content": "Vai chover em São Paulo amanhã?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-006", "messages": [{"role": "user", "content": "Qual a cotação do euro agora?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-007", "messages": [{"role": "user", "content": "Quem ganhou a última edição do Big Brother Brasil?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-008", "messages": [{"role": "user", "content": "Qual é a taxa Selic atual?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-009", "messages": [{"role": "user", "content": "Saiu o resultado da Mega-Sena de ontem? Quais foram os números?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-010", "messages": [{"role": "user", "content": "Que horas abre o Museu do Ipiranga?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-011", "messages": [{"role": "user", "content": "Qual o telefone da prefeitura de Campinas?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-012", "messages": [{"role": "user", "content": "Tem algum show do Caetano Veloso marcado para este ano?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-013", "messages": [{"role": "user", "content": "Qual o preço do iPhone mais recente aqui no Brasil?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-014", "messages": [{"role": "user", "content": "O aeroporto de Congonhas está operando normalmente hoje?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-015", "messages": [{"role": "user", "content": "Quais filmes estreiam no cinema esta semana?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-016", "messages": [{"role": "user", "content": "Quem é o técnico atual da seleção brasileira?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-017", "messages": [{"role": "user", "content": "Quanto custa a entrada pra subir o Cristo Redentor?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-018", "messages": [{"role": "user", "content": "Qual a previsão do tempo pro fim de semana em Florianópolis?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-019", "messages": [{"role": "user", "content": "Tem greve de ônibus em Curitiba hoje?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-020", "messages": [{"role": "user", "content": "Qual o valor do salário mínimo vigente?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-021", "messages": [{"role": "user", "content": "Saiu alguma novidade sobre a próxima versão do Android?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-022", "messages": [{"role": "user", "content": "Qual foi o IPCA do mês passado?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-023", "messages": [{"role": "user", "content": "Quem está na liderança do Brasileirão?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-024", "messages": [{"role": "user", "content": "O restaurante Xapuri em Belo Horizonte abre aos domingos?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-025", "messages": [{"role": "user", "content": "Tô pensando em trocar de celular."}, {"role": "assistant", "content": "Boa! Que faixa de preço você tá pensando, e o que mais pesa pra você — câmera, bateria, desempenho?"}, {"role": "user", "content": "Uns 2 mil. Quais os melhores modelos nessa faixa agora?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-026", "messages": [{"role": "user", "content": "Qual o preço médio da gasolina no Brasil agora?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-027", "messages": [{"role": "user", "content": "Lançaram data para o próximo jogo do GTA?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-028", "messages": [{"role": "user", "content": "Quem venceu o Oscar de melhor filme este ano?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-029", "messages": [{"role": "user", "content": "O que saiu da reunião do Copom desta semana?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-030", "messages": [{"role": "user", "content": "Quantos habitantes tem Boa Vista segundo o censo mais recente?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-031", "messages": [{"role": "user", "content": "Como está a classificação da Série B?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-032", "messages": [{"role": "user", "content": "A CPTM tá com alguma linha parada agora?"}], "expected_tool": "web_search", "layer": "1", "lang": "pt-BR"}
+{"id": "ws-033", "messages": [{"role": "user", "content": "What's the current price of gold?"}], "expected_tool": "web_search", "layer": "1", "lang": "en"}
+{"id": "ws-034", "messages": [{"role": "user", "content": "Who is the current CEO of OpenAI?"}], "expected_tool": "web_search", "layer": "1", "lang": "en"}
+{"id": "ws-035", "messages": [{"role": "user", "content": "What's the weather like in London tomorrow?"}], "expected_tool": "web_search", "layer": "1", "lang": "en"}
+{"id": "ws-036", "messages": [{"role": "user", "content": "When is the next SpaceX launch scheduled?"}], "expected_tool": "web_search", "layer": "1", "lang": "en"}
+{"id": "ws-037", "messages": [{"role": "user", "content": "What time does the Louvre close today?"}], "expected_tool": "web_search", "layer": "1", "lang": "en"}
+{"id": "ws-038", "messages": [{"role": "user", "content": "What came out of the latest Fed meeting?"}], "expected_tool": "web_search", "layer": "1", "lang": "en"}
+{"id": "ws-039", "messages": [{"role": "user", "content": "How much does a Netflix subscription cost now?"}], "expected_tool": "web_search", "layer": "1", "lang": "en"}
+{"id": "ws-040", "messages": [{"role": "user", "content": "Who won the most recent Champions League final?"}], "expected_tool": "web_search", "layer": "1", "lang": "en"}
+{"id": "py-001", "messages": [{"role": "user", "content": "Quanto é 37,5% de 18.420?"}], "expected_tool": "python_sandbox", "layer": "2", "lang": "pt-BR"}
+{"id": "py-002", "messages": [{"role": "user", "content": "Se eu investir R$ 1.500 por mês a 0,9% ao mês, quanto terei depois de 10 anos?"}], "expected_tool": "python_sandbox", "layer": "2", "lang": "pt-BR"}
+{"id": "py-003", "messages": [{"role": "user", "content": "Quais são as raízes de x³ - 7x + 6 = 0?"}], "expected_tool": "python_sandbox", "layer": "2", "lang": "pt-BR"}
+{"id": "py-004", "messages": [{"role": "user", "content": "Converte 145 km/h pra m/s e me diz quanto tempo leva pra percorrer 380 metros nessa velocidade."}], "expected_tool": "python_sandbox", "layer": "2", "lang": "pt-BR"}
+{"id": "py-005", "messages": [{"role": "user", "content": "Quantas mãos de 5 cartas diferentes existem num baralho de 52?"}], "expected_tool": "python_sandbox", "layer": "2", "lang": "pt-BR"}
+{"id": "py-006", "messages": [{"role": "user", "content": "Uma bola é solta de 45 m de altura. Quanto tempo até atingir o chão, com g = 9,8 m/s²?"}], "expected_tool": "python_sandbox", "layer": "2", "lang": "pt-BR"}
+{"id": "py-007", "messages": [{"role": "user", "content": "Qual o determinante da matriz [[2,3,1],[0,5,-2],[1,4,7]]?"}], "expected_tool": "python_sandbox", "layer": "2", "lang": "pt-BR"}
+{"id": "py-008", "messages": [{"role": "user", "content": "Se um carro deprecia 12% ao ano, quanto vale um carro de R$ 80.000 depois de 7 anos?"}], "expected_tool": "python_sandbox", "layer": "2", "lang": "pt-BR"}
+{"id": "py-009", "messages": [{"role": "user", "content": "Quanto é 2 elevado a 38?"}], "expected_tool": "python_sandbox", "layer": "2", "lang": "pt-BR"}
+{"id": "py-010", "messages": [{"role": "user", "content": "Calcula o desvio padrão desses valores: 12, 15, 22, 8, 19, 25, 31."}], "expected_tool": "python_sandbox", "layer": "2", "lang": "pt-BR"}
+{"id": "py-011", "messages": [{"role": "user", "content": "Preciso saber a prestação de um financiamento de R$ 200.000 em 360 meses a 0,75% ao mês, tabela Price."}], "expected_tool": "python_sandbox", "layer": "2", "lang": "pt-BR"}
+{"id": "py-012", "messages": [{"role": "user", "content": "Quantos segundos tem um ano bissexto?"}], "expected_tool": "python_sandbox", "layer": "2", "lang": "pt-BR"}
+{"id": "py-013", "messages": [{"role": "user", "content": "Resolve esse sistema pra mim: 3x + 2y = 12 e x - y = 1."}], "expected_tool": "python_sandbox", "layer": "2", "lang": "pt-BR"}
+{"id": "py-014", "messages": [{"role": "user", "content": "Qual a área de um triângulo com lados 13, 14 e 15?"}], "expected_tool": "python_sandbox", "layer": "2", "lang": "pt-BR"}
+{"id": "py-015", "messages": [{"role": "user", "content": "Se eu dobrar uma folha de papel de 0,1 mm de espessura 42 vezes, que espessura ela teria?"}], "expected_tool": "python_sandbox", "layer": "2", "lang": "pt-BR"}
+{"id": "py-016", "messages": [{"role": "user", "content": "Um projétil é lançado a 60 m/s num ângulo de 35°. Qual o alcance horizontal, desprezando o ar?"}], "expected_tool": "python_sandbox", "layer": "2", "lang": "pt-BR"}
+{"id": "py-017", "messages": [{"role": "user", "content": "What's the final amount on $10,000 at 4.5% compound interest over 12 years?"}], "expected_tool": "python_sandbox", "layer": "2", "lang": "en"}
+{"id": "py-018", "messages": [{"role": "user", "content": "What is 17! divided by 13!?"}], "expected_tool": "python_sandbox", "layer": "2", "lang": "en"}
+{"id": "py-019", "messages": [{"role": "user", "content": "Solve for x: 2x² - 5x - 3 = 0."}], "expected_tool": "python_sandbox", "layer": "2", "lang": "en"}
+{"id": "py-020", "messages": [{"role": "user", "content": "A rectangular tank is 2.4 m × 1.1 m × 0.9 m. How many liters does it hold, and how long to fill it at 12 L/min?"}], "expected_tool": "python_sandbox", "layer": "2", "lang": "en"}
+{"id": "n0-001", "messages": [{"role": "user", "content": "Qual é a capital da Austrália?"}], "expected_tool": "none", "layer": "0", "lang": "pt-BR"}
+{"id": "n0-002", "messages": [{"role": "user", "content": "Quantos lados tem um hexágono?"}], "expected_tool": "none", "layer": "0", "lang": "pt-BR"}
+{"id": "n0-003", "messages": [{"role": "user", "content": "Quem escreveu Dom Casmurro?"}], "expected_tool": "none", "layer": "0", "lang": "pt-BR"}
+{"id": "n0-004", "messages": [{"role": "user", "content": "Qual é a fórmula química da água?"}], "expected_tool": "none", "layer": "0", "lang": "pt-BR"}
+{"id": "n0-005", "messages": [{"role": "user", "content": "Em que ano os portugueses chegaram ao Brasil?"}], "expected_tool": "none", "layer": "0", "lang": "pt-BR"}
+{"id": "n0-006", "messages": [{"role": "user", "content": "O que significa a sigla CPU?"}], "expected_tool": "none", "layer": "0", "lang": "pt-BR"}
+{"id": "n0-007", "messages": [{"role": "user", "content": "Qual é o maior planeta do sistema solar?"}], "expected_tool": "none", "layer": "0", "lang": "pt-BR"}
+{"id": "n0-008", "messages": [{"role": "user", "content": "Quantos estados tem o Brasil?"}], "expected_tool": "none", "layer": "0", "lang": "pt-BR"}
+{"id": "n0-009", "messages": [{"role": "user", "content": "Qual a diferença entre \"mas\" e \"mais\"?"}], "expected_tool": "none", "layer": "0", "lang": "pt-BR"}
+{"id": "n0-010", "messages": [{"role": "user", "content": "O que é fotossíntese?"}], "expected_tool": "none", "layer": "0", "lang": "pt-BR"}
+{"id": "n0-011", "messages": [{"role": "user", "content": "Quem pintou a Mona Lisa?"}], "expected_tool": "none", "layer": "0", "lang": "pt-BR"}
+{"id": "n0-012", "messages": [{"role": "user", "content": "Qual o plural de \"cidadão\"?"}], "expected_tool": "none", "layer": "0", "lang": "pt-BR"}
+{"id": "n0-013", "messages": [{"role": "user", "content": "Quantos minutos tem um dia?"}], "expected_tool": "none", "layer": "0", "lang": "pt-BR"}
+{"id": "n0-014", "messages": [{"role": "user", "content": "Em que continente fica o Egito?"}], "expected_tool": "none", "layer": "0", "lang": "pt-BR"}
+{"id": "n0-015", "messages": [{"role": "user", "content": "O que é um número primo?"}], "expected_tool": "none", "layer": "0", "lang": "pt-BR"}
+{"id": "n0-016", "messages": [{"role": "user", "content": "Qual a velocidade da luz no vácuo?"}], "expected_tool": "none", "layer": "0", "lang": "pt-BR"}
+{"id": "n0-017", "messages": [{"role": "user", "content": "Quem foi Santos Dumont?"}], "expected_tool": "none", "layer": "0", "lang": "pt-BR"}
+{"id": "n0-018", "messages": [{"role": "user", "content": "Qual é o símbolo químico do ouro?"}], "expected_tool": "none", "layer": "0", "lang": "pt-BR"}
+{"id": "n0-019", "messages": [{"role": "user", "content": "Quantas cordas tem um violão?"}], "expected_tool": "none", "layer": "0", "lang": "pt-BR"}
+{"id": "n0-020", "messages": [{"role": "user", "content": "O que significa HTTP?"}], "expected_tool": "none", "layer": "0", "lang": "pt-BR"}
+{"id": "n0-021", "messages": [{"role": "user", "content": "What's the capital of Canada?"}], "expected_tool": "none", "layer": "0", "lang": "en"}
+{"id": "n0-022", "messages": [{"role": "user", "content": "How many continents are there?"}], "expected_tool": "none", "layer": "0", "lang": "en"}
+{"id": "n0-023", "messages": [{"role": "user", "content": "Who wrote Romeo and Juliet?"}], "expected_tool": "none", "layer": "0", "lang": "en"}
+{"id": "n0-024", "messages": [{"role": "user", "content": "What does DNA stand for?"}], "expected_tool": "none", "layer": "0", "lang": "en"}
+{"id": "n0-025", "messages": [{"role": "user", "content": "What's the boiling point of water at sea level?"}], "expected_tool": "none", "layer": "0", "lang": "en"}
+{"id": "nb-001", "messages": [{"role": "user", "content": "Quem ganhou a Copa do Mundo de 2002?"}], "expected_tool": "none", "layer": "0.5", "lang": "pt-BR"}
+{"id": "nb-002", "messages": [{"role": "user", "content": "Quanto valia um dólar em reais quando o Plano Real foi lançado, em 1994?"}], "expected_tool": "none", "layer": "0.5", "lang": "pt-BR"}
+{"id": "nb-003", "messages": [{"role": "user", "content": "Qual era a capital do Brasil antes de Brasília?"}], "expected_tool": "none", "layer": "0.5", "lang": "pt-BR"}
+{"id": "nb-004", "messages": [{"role": "user", "content": "Quem era o presidente do Brasil em 2010?"}], "expected_tool": "none", "layer": "0.5", "lang": "pt-BR"}
+{"id": "nb-005", "messages": [{"role": "user", "content": "Qual foi o placar da final da Copa de 70?"}], "expected_tool": "none", "layer": "0.5", "lang": "pt-BR"}
+{"id": "nb-006", "messages": [{"role": "user", "content": "Quando foi lançado o primeiro iPhone?"}], "expected_tool": "none", "layer": "0.5", "lang": "pt-BR"}
+{"id": "nb-007", "messages": [{"role": "user", "content": "Qual a população aproximada do Brasil?"}], "expected_tool": "none", "layer": "0.5", "lang": "pt-BR"}
+{"id": "nb-008", "messages": [{"role": "user", "content": "Quantas Copas do Mundo o Pelé ganhou como jogador?"}], "expected_tool": "none", "layer": "0.5", "lang": "pt-BR"}
+{"id": "nb-009", "messages": [{"role": "user", "content": "Qual a distância média da Terra à Lua?"}], "expected_tool": "none", "layer": "0.5", "lang": "pt-BR"}
+{"id": "nb-010", "messages": [{"role": "user", "content": "Que dia cai o Natal este ano?"}], "expected_tool": "none", "layer": "0.5", "lang": "pt-BR"}
+{"id": "nb-011", "messages": [{"role": "user", "content": "Quanto é um pé em centímetros?"}], "expected_tool": "none", "layer": "0.5", "lang": "pt-BR"}
+{"id": "nb-012", "messages": [{"role": "user", "content": "Qual o fuso horário de Brasília em relação ao UTC?"}], "expected_tool": "none", "layer": "0.5", "lang": "pt-BR"}
+{"id": "nb-013", "messages": [{"role": "user", "content": "Who won the 2014 World Cup final?"}], "expected_tool": "none", "layer": "0.5", "lang": "en"}
+{"id": "nb-014", "messages": [{"role": "user", "content": "When did the Berlin Wall fall?"}], "expected_tool": "none", "layer": "0.5", "lang": "en"}
+{"id": "nb-015", "messages": [{"role": "user", "content": "How many ounces are in a pound?"}], "expected_tool": "none", "layer": "0.5", "lang": "en"}
+{"id": "cv-001", "messages": [{"role": "user", "content": "Oi, tudo bem?"}], "expected_tool": "none", "layer": "C", "lang": "pt-BR"}
+{"id": "cv-002", "messages": [{"role": "user", "content": "Tô meio desanimado hoje, dia difícil no trabalho."}], "expected_tool": "none", "layer": "C", "lang": "pt-BR"}
+{"id": "cv-003", "messages": [{"role": "user", "content": "Me conta uma curiosidade aleatória."}], "expected_tool": "none", "layer": "C", "lang": "pt-BR"}
+{"id": "cv-004", "messages": [{"role": "user", "content": "O que você acha de trabalhar de casa versus presencial?"}], "expected_tool": "none", "layer": "C", "lang": "pt-BR"}
+{"id": "cv-005", "messages": [{"role": "user", "content": "Me ajuda a pensar num nome pro meu cachorro? Ele é um golden retriever."}], "expected_tool": "none", "layer": "C", "lang": "pt-BR"}
+{"id": "cv-006", "messages": [{"role": "user", "content": "Escreve um haicai sobre café."}], "expected_tool": "none", "layer": "C", "lang": "pt-BR"}
+{"id": "cv-007", "messages": [{"role": "user", "content": "Valeu pela ajuda de ontem, deu tudo certo!"}], "expected_tool": "none", "layer": "C", "lang": "pt-BR"}
+{"id": "cv-008", "messages": [{"role": "user", "content": "Você prefere praia ou montanha?"}], "expected_tool": "none", "layer": "C", "lang": "pt-BR"}
+{"id": "cv-009", "messages": [{"role": "user", "content": "Tenho uma entrevista de emprego amanhã. Alguma dica pra ficar calmo?"}], "expected_tool": "none", "layer": "C", "lang": "pt-BR"}
+{"id": "cv-010", "messages": [{"role": "user", "content": "Me indica um filme de suspense clássico pra ver hoje à noite?"}], "expected_tool": "none", "layer": "C", "lang": "pt-BR"}
+{"id": "cv-011", "messages": [{"role": "user", "content": "Escreve uma mensagem curta de aniversário pra minha avó."}], "expected_tool": "none", "layer": "C", "lang": "pt-BR"}
+{"id": "cv-012", "messages": [{"role": "user", "content": "Qual a graça de futebol? Nunca entendi o hype."}], "expected_tool": "none", "layer": "C", "lang": "pt-BR"}
+{"id": "cv-013", "messages": [{"role": "user", "content": "Se você pudesse jantar com qualquer pessoa da história, quem seria?"}], "expected_tool": "none", "layer": "C", "lang": "pt-BR"}
+{"id": "cv-014", "messages": [{"role": "user", "content": "Meu chefe vive mudando as prioridades do nada. Como você lidaria?"}], "expected_tool": "none", "layer": "C", "lang": "pt-BR"}
+{"id": "cv-015", "messages": [{"role": "user", "content": "Conta uma piada boba."}], "expected_tool": "none", "layer": "C", "lang": "pt-BR"}
+{"id": "cv-016", "messages": [{"role": "user", "content": "Tô pensando em começar a correr de manhã. Boa ideia?"}], "expected_tool": "none", "layer": "C", "lang": "pt-BR"}
+{"id": "cv-017", "messages": [{"role": "user", "content": "Hey! How's it going?"}], "expected_tool": "none", "layer": "C", "lang": "en"}
+{"id": "cv-018", "messages": [{"role": "user", "content": "Write a short limerick about a lazy cat."}], "expected_tool": "none", "layer": "C", "lang": "en"}
+{"id": "cv-019", "messages": [{"role": "user", "content": "I just got promoted at work!"}], "expected_tool": "none", "layer": "C", "lang": "en"}
+{"id": "cv-020", "messages": [{"role": "user", "content": "What's your take on pineapple on pizza?"}], "expected_tool": "none", "layer": "C", "lang": "en"}

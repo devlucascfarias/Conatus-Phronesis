@@ -1,0 +1,54 @@
+# Configuração da geração sintética (Fase 1/2)
+
+api:
+  provider: anthropic
+  model: claude-sonnet-5          # modelo gerador
+  temperature: 0.9
+  max_tokens: 2048
+  # preços por Mtok para o estimador de custo (atualizar conforme tabela vigente)
+  price_input_per_mtok_usd: 3.0
+  price_output_per_mtok_usd: 15.0
+
+dataset:
+  target_total: 2000              # iteração 1
+  pilot_size: 20                  # Fase 1: gerar e PARAR para revisão manual
+
+# Proporções por camada (soma = 1.0) — seção 4.1 do PLANO.md
+layers:
+  "0":   { share: 0.20, preamble_max_words: 0 }
+  "0.5": { share: 0.12, preamble_max_words: 25 }
+  "1":   { share: 0.25, preamble_max_words: 40 }
+  "2":   { share: 0.18, preamble_max_words: null }
+  "3":   { share: 0.05, preamble_max_words: null }
+  "C":   { share: 0.20, preamble_max_words: null }
+
+# Propriedades da camada 1 (verbalizadas no rationale)
+layer1_properties:
+  - volatilidade_temporal        # preços, cargos, placares, clima
+  - evento_pos_cutoff            # lançamentos, notícias
+  - especificidade_local         # horários, endereços
+  - incerteza_propria            # dúvida sobre um dado específico
+
+# Regras transversais
+mix:
+  lang: { pt-BR: 0.80, en: 0.20 }
+  register_informal: 0.40        # ~40% com traços descontraídos visíveis
+  multi_turn_share: 0.25         # 2–4 turnos de usuário
+  layer2_selfcorrection: 0.30    # sandbox contradiz e o modelo se corrige
+  imperfect_tool_responses: 0.10 # camadas 1 e 2: busca pobre, erro de sintaxe etc.
+
+# Filtros do validate_data.py
+validation:
+  ngram_n: 6
+  ngram_max_freq: 3              # frase-fôrma: 6-grama de rationale com freq > 3
+  dedup_jaccard_threshold: 0.80  # dedup agressivo por similaridade
+  banned_slang:
+    - mano
+    - "véi"
+    - "vei"
+    - top demais
+    - brabo
+    - braba
+    - cringe
+    - "tipo assim"
+  sandbox_exec_timeout_s: 5

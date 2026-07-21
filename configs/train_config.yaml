@@ -1,0 +1,31 @@
+# Hiperparâmetros de treino (Fase 3) — QLoRA via Unsloth
+
+model:
+  base: Qwen/Qwen3-4B-Instruct-2507   # NÃO usar a variante Thinking-2507
+  guinea_pig: Qwen/Qwen3-1.7B         # cobaia para validar o pipeline
+  load_in_4bit: true
+  max_seq_len: 4096
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+
+training:
+  learning_rate: 2.0e-4
+  scheduler: cosine
+  warmup_ratio: 0.03
+  num_epochs: 1
+  per_device_batch_size: 2
+  gradient_accumulation_steps: 8      # batch efetivo ~16
+  seed: 42
+  logging_steps: 5
+  save_merged_16bit: true             # p/ avaliação na Fase 4
