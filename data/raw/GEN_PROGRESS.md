@@ -10,7 +10,7 @@
 
 ## Estado
 
-- Batches concluídos: **001** (tasks 1–30, 30 exemplos, 30/30 aprovados)
+- Batches concluídos: **001** (tasks 1–30), **002** (tasks 31–60)
 - Pilotos Fase 1: 20 exemplos aprovados (`data/raw/pilot.jsonl`)
-- **Total aprovado até agora: 50** (meta ~1.000)
-- Próxima task a escrever: **31**
+- **Total aprovado até agora: 80** (meta ~1.000)
+- Próxima task a escrever: **61**
