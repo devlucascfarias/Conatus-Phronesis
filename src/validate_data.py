@@ -155,8 +155,14 @@ def validate(files: list[Path]) -> None:
             if any(mk in full_text.lower() for mk in LAYER0_MARKERS):
                 reject(ex, "camada0_com_preambulo"); continue
         elif limit:
-            over = next((t for t in turns if TOOL_CALL_RE.search(t) or layer == "0.5"
-                         if word_count(preamble_text(t)) > limit), None)
+            # Camada 1: o rationale vive no turno com tool_call. Camada 0.5: não há tool_call, e em
+            # multi-turno os turnos-ponte iniciais são conversa — o rationale borderline está no
+            # ÚLTIMO turno do assistant, o único ao qual o limite se aplica.
+            if layer == "0.5":
+                to_check = turns[-1:] if turns else []
+            else:
+                to_check = [t for t in turns if TOOL_CALL_RE.search(t)]
+            over = next((t for t in to_check if word_count(preamble_text(t)) > limit), None)
             if over is not None:
                 reject(ex, f"preambulo_acima_de_{limit}_palavras"); continue
 

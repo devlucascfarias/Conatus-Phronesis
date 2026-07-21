@@ -10,7 +10,7 @@ api:
   price_output_per_mtok_usd: 15.0
 
 dataset:
-  target_total: 2000              # iteração 1
+  target_total: 1000              # iteração 1 (alvo reduzido: fazer ~1k sólidos, treinar, avaliar, então escalar)
   pilot_size: 20                  # Fase 1: gerar e PARAR para revisão manual
 
 # Proporções por camada (soma = 1.0) — seção 4.1 do PLANO.md

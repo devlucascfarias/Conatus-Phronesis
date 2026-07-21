@@ -1,8 +1,14 @@
 .env
 __pycache__/
 *.pyc
-data/raw/
 .ipynb_checkpoints/
+
+# data/raw/: ignora os planos de task (regeneráveis por seed) e versiona os exemplos escritos à mão
+data/raw/tasks_*.jsonl
+!data/raw/gen/
+!data/raw/gen/**
+!data/raw/pilot.jsonl
+!data/raw/GEN_PROGRESS.md
 
 # outputs/: versiona métricas e relatórios (leves), ignora adapters e modelos merged (pesados)
 outputs/adapter_*/
