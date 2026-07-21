@@ -21,7 +21,13 @@ IGNORE = -100
 
 
 def render_ids(tokenizer, messages, tools):
-    return tokenizer.apply_chat_template(messages, tools=tools, tokenize=True, add_generation_prompt=False)
+    """Lista plana de ids. Em transformers >= 4.49-ish, tokenize=True devolve um BatchEncoding
+    (dict-like), não uma lista de ints — extrai 'input_ids' explicitamente para não quebrar
+    a decodificação/máscara com versões mistas do transformers."""
+    out = tokenizer.apply_chat_template(messages, tools=tools, tokenize=True, add_generation_prompt=False)
+    if hasattr(out, "keys") and "input_ids" in out:
+        return list(out["input_ids"])
+    return list(out)
 
 
 def build_example(tokenizer, messages, tools):

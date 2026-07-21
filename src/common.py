@@ -1,9 +1,19 @@
 """Utilitários compartilhados do pipeline."""
 import json
 import re
+import sys
 from pathlib import Path
 
 import yaml
+
+# Console do Windows (cp1252) derruba print() com acentos/setas; força UTF-8 na saída.
+# Linux/Colab já usam UTF-8 por padrão, então isto é um no-op lá.
+for _stream in (sys.stdout, sys.stderr):
+    if getattr(_stream, "encoding", "").lower() != "utf-8":
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except (AttributeError, ValueError):
+            pass
 
 ROOT = Path(__file__).resolve().parents[1]
 
