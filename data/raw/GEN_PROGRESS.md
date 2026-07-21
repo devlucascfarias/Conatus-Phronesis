@@ -10,10 +10,10 @@
 
 ## Estado
 
-- Batches concluídos: **001** (1–30), **002** (31–60), **003** (61–90)
+- Batches concluídos: **001**–**005** (tasks 1–150)
 - Pilotos Fase 1: 20 exemplos aprovados (`data/raw/pilot.jsonl`)
-- **Total aprovado até agora: 110** (meta ~1.000)
-- Próxima task a escrever: **91**
+- **Total aprovado até agora: 170** (meta ~300 nesta rodada, depois treina/avalia)
+- Próxima task a escrever: **151**
 
 ### Lições recorrentes (evitar retrabalho)
 - **Camada 0.5 SEMPRE com rationale em parágrafo próprio + linha em branco + resposta.** O validador

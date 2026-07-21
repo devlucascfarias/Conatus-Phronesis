@@ -174,14 +174,20 @@ def validate(files: list[Path]) -> None:
         stage1.append(ex)
 
     # ---- passe 2: frase-fôrma (6-gramas de rationale com freq > N no corpus) ----
+    # Alvo do plano: os RATIONALES (camadas 0.5 e 1), onde variar o fraseado é exigência.
+    # Não se aplica à derivação matemática das camadas 2/3, onde repetir a fórmula-padrão
+    # (ex.: FV = PMT·((1+i)ⁿ−1)/i) é correto e desejável — consistência, não frase-fôrma.
     n = vcfg["ngram_n"]
+    rationale_layers = {"0.5", "1"}
     grams_per_ex = []
     counter = Counter()
     for ex in stage1:
         grams = set()
-        for t in assistant_turns(ex):
-            words = re.findall(r"\w+", preamble_text(t).lower())
-            grams |= {" ".join(words[i:i + n]) for i in range(max(0, len(words) - n + 1))}
+        ex_layer = str(ex.get("layer", ex.get("_task", {}).get("layer", "")))
+        if ex_layer in rationale_layers:
+            for t in assistant_turns(ex):
+                words = re.findall(r"\w+", preamble_text(t).lower())
+                grams |= {" ".join(words[i:i + n]) for i in range(max(0, len(words) - n + 1))}
         grams_per_ex.append(grams)
         counter.update(grams)
     overused = {g for g, c in counter.items() if c > vcfg["ngram_max_freq"]}

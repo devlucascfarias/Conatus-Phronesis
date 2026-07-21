@@ -1,32 +1,32 @@
 {
-  "input": 110,
-  "kept": 110,
+  "input": 170,
+  "kept": 170,
   "rejected_total": 0,
   "rejected_by_reason": {},
   "layer_distribution": {
     "0": {
-      "n": 26,
-      "share": 0.236
+      "n": 40,
+      "share": 0.235
     },
     "0.5": {
-      "n": 13,
-      "share": 0.118
+      "n": 23,
+      "share": 0.135
     },
     "1": {
-      "n": 26,
-      "share": 0.236
+      "n": 39,
+      "share": 0.229
     },
     "2": {
-      "n": 25,
-      "share": 0.227
+      "n": 39,
+      "share": 0.229
     },
     "3": {
-      "n": 3,
-      "share": 0.027
+      "n": 4,
+      "share": 0.024
     },
     "C": {
-      "n": 17,
-      "share": 0.155
+      "n": 25,
+      "share": 0.147
     }
   },
   "layer_targets": {
