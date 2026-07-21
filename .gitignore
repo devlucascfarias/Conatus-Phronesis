@@ -2,6 +2,9 @@
 __pycache__/
 *.pyc
 data/raw/
-outputs/
-!outputs/.gitkeep
 .ipynb_checkpoints/
+
+# outputs/: versiona métricas e relatórios (leves), ignora adapters e modelos merged (pesados)
+outputs/adapter_*/
+outputs/merged_*/
+outputs_*/
