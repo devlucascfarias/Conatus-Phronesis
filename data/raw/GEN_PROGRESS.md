@@ -10,7 +10,13 @@
 
 ## Estado
 
-- Batches concluídos: **001** (tasks 1–30), **002** (tasks 31–60)
+- Batches concluídos: **001** (1–30), **002** (31–60), **003** (61–90)
 - Pilotos Fase 1: 20 exemplos aprovados (`data/raw/pilot.jsonl`)
-- **Total aprovado até agora: 80** (meta ~1.000)
-- Próxima task a escrever: **61**
+- **Total aprovado até agora: 110** (meta ~1.000)
+- Próxima task a escrever: **91**
+
+### Lições recorrentes (evitar retrabalho)
+- **Camada 0.5 SEMPRE com rationale em parágrafo próprio + linha em branco + resposta.** O validador
+  mede o primeiro parágrafo do último turno; rationale colado à resposta estoura o limite de 25 palavras.
+- **Camada 2: stdout do sandbox tem que bater com a execução real** (arredondamento de float inclusive —
+  ex.: 249.90*0.85 imprime 212.41, não 212.42). Pré-calcular antes de escrever.
