@@ -7,9 +7,13 @@ Uso:
     python src/build_dataset.py data/clean/dataset.jsonl --out data/clean/train.jsonl
     python src/build_dataset.py data/clean/dataset.jsonl --show-masks   # teste: imprime spans de 3 exemplos
 
-A renderização é SEMPRE via tokenizer.apply_chat_template — nunca concatenação manual.
-A máscara é construída incrementalmente: renderiza messages[:i] e messages[:i+1] e marca
-os tokens novos como treináveis somente se o turno i for do assistant.
+A renderização é SEMPRE via tokenizer.apply_chat_template — nunca concatenação manual, e SEMPRE
+de uma vez só (a conversa inteira). Alguns templates (ex.: Qwen3-1.7B, híbrido de raciocínio)
+tratam o ÚLTIMO turno da conversa de forma especial (inserem um <think></think> vazio só nele);
+renderizar prefixos messages[:i] incrementalmente faria cada turno parecer "o último" na sua
+própria fatia e desalinharia a máscara. Por isso os spans do assistant são localizados por
+offset de caractere numa única renderização completa — o mesmo princípio do
+train_on_responses_only do Unsloth.
 """
 import argparse
 import json
@@ -18,36 +22,45 @@ from pathlib import Path
 from common import ROOT, load_tools, read_jsonl
 
 IGNORE = -100
+ASSISTANT_MARKER = "<|im_start|>assistant\n"
+TURN_MARKER = "<|im_start|>"
 
 
-def render_ids(tokenizer, messages, tools):
-    """Lista plana de ids. Em transformers >= 4.49-ish, tokenize=True devolve um BatchEncoding
-    (dict-like), não uma lista de ints — extrai 'input_ids' explicitamente para não quebrar
-    a decodificação/máscara com versões mistas do transformers."""
-    out = tokenizer.apply_chat_template(messages, tools=tools, tokenize=True, add_generation_prompt=False)
-    if hasattr(out, "keys") and "input_ids" in out:
-        return list(out["input_ids"])
-    return list(out)
+def assistant_spans(text: str) -> list[tuple[int, int]]:
+    """Posições de caractere [início, fim) de cada turno do assistant no texto renderizado."""
+    spans = []
+    pos = 0
+    while True:
+        start = text.find(ASSISTANT_MARKER, pos)
+        if start == -1:
+            break
+        content_start = start + len(ASSISTANT_MARKER)
+        next_marker = text.find(TURN_MARKER, content_start)
+        content_end = next_marker if next_marker != -1 else len(text)
+        spans.append((content_start, content_end))
+        pos = content_end
+    return spans
 
 
 def build_example(tokenizer, messages, tools):
-    """Retorna (input_ids, labels). Turnos não-assistant (e o que o template injeta em volta) ficam IGNORE."""
-    full_ids = render_ids(tokenizer, messages, tools)
-    labels = [IGNORE] * len(full_ids)
-    prev_len = 0
-    for i in range(len(messages)):
-        cur_ids = render_ids(tokenizer, messages[: i + 1], tools)
-        if messages[i]["role"] == "assistant":
-            for j in range(prev_len, min(len(cur_ids), len(full_ids))):
-                labels[j] = full_ids[j]
-        prev_len = len(cur_ids)
-    return full_ids, labels
+    """Retorna (input_ids, labels, text). Turnos não-assistant (e o que o template injeta em volta) ficam IGNORE."""
+    text = tokenizer.apply_chat_template(messages, tools=tools, tokenize=False, add_generation_prompt=False)
+    enc = tokenizer(text, add_special_tokens=False, return_offsets_mapping=True)
+    ids, offsets = list(enc["input_ids"]), enc["offset_mapping"]
+    spans = assistant_spans(text)
+    labels = [IGNORE] * len(ids)
+    for j, (tok_start, tok_end) in enumerate(offsets):
+        if tok_start == tok_end:
+            continue
+        if any(s <= tok_start < e for s, e in spans):
+            labels[j] = ids[j]
+    return ids, labels, text
 
 
 def show_masks(tokenizer, examples, tools, k=3):
     """Teste unitário visual: imprime os spans mascarados/treináveis de k exemplos."""
     for n, ex in enumerate(examples[:k], 1):
-        ids, labels = build_example(tokenizer, ex["messages"], tools)
+        ids, labels, _text = build_example(tokenizer, ex["messages"], tools)
         print(f"\n===== EXEMPLO {n} (camada {ex.get('layer', ex.get('_task', {}).get('layer', '?'))}) =====")
         span_tokens, span_masked = [], labels[0] == IGNORE
         for tid, lab in zip(ids, labels):
@@ -85,11 +98,10 @@ def main():
     n_long = 0
     with open(args.out, "w", encoding="utf-8") as f:
         for ex in examples:
-            ids, labels = build_example(tokenizer, ex["messages"], tools)
+            ids, labels, text = build_example(tokenizer, ex["messages"], tools)
             if len(ids) > args.max_len:
                 n_long += 1
                 continue
-            text = tokenizer.apply_chat_template(ex["messages"], tools=tools, tokenize=False, add_generation_prompt=False)
             f.write(json.dumps({"text": text, "input_ids": ids, "labels": labels}, ensure_ascii=False) + "\n")
     print(f"{len(examples) - n_long} exemplos → {args.out} ({n_long} descartados por exceder {args.max_len} tokens)")
     print("No Colab, alinhe o train_on_responses_only do Unsloth com esta máscara "
