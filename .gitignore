@@ -23,3 +23,5 @@ outputs_*/
 eidos/.work/
 eidos/.work_verify/
 eidos/results/transcripts/
+eidos/.work_gen/
+eidos/.work_smoke_crash/
