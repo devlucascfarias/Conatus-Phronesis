@@ -119,7 +119,21 @@ Lições anti-whack-a-mole herdadas: nunca deixar uma camada passar de ~30%, vig
 5. **Teto do 7B**: erros semânticos que compilam limpo vão existir (aprendido no Phronesis,
    limitação 6). O harness pega o que executa errado; o resto é documentação honesta.
 
+## Estado da Fase 0 (2026-07-22)
+
+FEITO — infraestrutura completa em `eidos/` (ver `eidos/README.md`):
+- `template_app/`: Next 14.2.35 + Tailwind 3.4 pinados, tsc verde, componentes-referência
+  do guia de estilo (Button/Card/Navbar).
+- `style_guide.md`: o "elegante e moderno" objetivo, de onde os checks derivam.
+- 100 casos em `eval_cases.jsonl` (fix-build 30, fix-visual 20, create-component 30,
+  terminal-ops 20), gerados por `gen_eval_cases.py`.
+- QA dos casos: `verify_cases.py` — 46 setups verificados por execução real (tsc/build);
+  fix-build quebra como prometido, fix-visual compila (bug só estético).
+- `run_eval.py`: harness com executores reais (read/write/edit/run_terminal com whitelist),
+  métricas de sucesso por família + reacted_to_error_rate vs blind_repeat_rate.
+
 ## Próximo passo imediato
 
-Fase 0: montar `eidos/template_app`, escrever os ~100 casos de eval com seus checks,
-e rodar o baseline do coder escolhido. Nada de dataset antes disso.
+Rodar o BASELINE do `Qwen2.5-Coder-7B-Instruct` cru no harness (Colab L4):
+`python eidos/run_eval.py --model Qwen/Qwen2.5-Coder-7B-Instruct`.
+A análise dos transcripts do baseline dita o dataset da Fase 1/2. Nada de exemplos antes.

@@ -17,3 +17,9 @@ data/raw/tasks_*.jsonl
 outputs/adapter_*/
 outputs/merged_*/
 outputs_*/
+
+# eidos/: workdirs do harness (com node_modules) e transcripts de eval sao locais;
+# metrics.json dos resultados e versionado junto com a analise, manualmente
+eidos/.work/
+eidos/.work_verify/
+eidos/results/transcripts/

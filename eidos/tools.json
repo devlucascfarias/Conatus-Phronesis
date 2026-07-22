@@ -1,0 +1,63 @@
+{
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "read_file",
+        "description": "Lê um arquivo do projeto e retorna o conteúdo com números de linha.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "path": { "type": "string", "description": "Caminho relativo à raiz do projeto, ex.: components/Button.tsx" }
+          },
+          "required": ["path"]
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "write_file",
+        "description": "Cria ou sobrescreve um arquivo com o conteúdo completo fornecido.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "path": { "type": "string", "description": "Caminho relativo à raiz do projeto" },
+            "content": { "type": "string", "description": "Conteúdo completo do arquivo" }
+          },
+          "required": ["path", "content"]
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "edit_file",
+        "description": "Substitui uma ocorrência exata de texto num arquivo existente. O trecho old deve ser único no arquivo.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "path": { "type": "string", "description": "Caminho relativo à raiz do projeto" },
+            "old": { "type": "string", "description": "Trecho exato a substituir (único no arquivo)" },
+            "new": { "type": "string", "description": "Texto substituto" }
+          },
+          "required": ["path", "old", "new"]
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "run_terminal",
+        "description": "Executa um comando no terminal na raiz do projeto e retorna stdout+stderr. Permitidos: npm, npx, node, ls, cat, mkdir, mv, cp, touch, echo.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "command": { "type": "string", "description": "Comando completo, ex.: npm install recharts" }
+          },
+          "required": ["command"]
+        }
+      }
+    }
+  ]
+}
