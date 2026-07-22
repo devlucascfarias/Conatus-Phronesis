@@ -11,13 +11,13 @@
 
 | Camada | Meta | Feito | Batches |
 |---|---|---|---|
-| L1 ciclo completo | 50 | 12 | e001, e002, e003 |
-| L2 entrega verificada | 50 | 11 | e001, e002, e003 |
-| L3 investigação autônoma | 50 | 9 | e001, e002, e003 |
-| L4 estilo completo | 50 | 9 | e001, e002, e003 |
-| L5 recuperação de tool | 50 | 10 | e001, e002, e003 |
-| LC conversa técnica | 50 | 9 | e001, e002, e003 |
-| **Total** | **300** | **60** | |
+| L1 ciclo completo | 50 | 16 | e001-e004 |
+| L2 entrega verificada | 50 | 14 | e001-e004 |
+| L3 investigação autônoma | 50 | 12 | e001-e004 |
+| L4 estilo completo | 50 | 12 | e001-e004 |
+| L5 recuperação de tool | 50 | 13 | e001-e004 |
+| LC conversa técnica | 50 | 12 | e001-e004 |
+| **Total** | **300** | **79** | |
 
 ## Batches
 
@@ -82,6 +82,51 @@ legado (estratégia incremental, en).
    quando o arquivo real é inline — diverge de verdade, testado isolado antes de rodar o
    batch inteiro.
 
+### Correção retroativa: vazamento de ANSI + path absoluto (achada entre e003 e e004)
+Antes de escrever e004, testei um novo bug de fronteira server/client (useReducer) e
+descobri que a saída REAL do `next build` embute códigos ANSI de cor crus (`\x1b[31m` etc)
+E o caminho ABSOLUTO da máquina de dev no code-frame do erro. Isso já tinha vazado, sem eu
+perceber, pros episódios `l1-08` (e002) e `l3-07` (e003) — os únicos 2 que usam build
+error antes desta correção. Fix na raiz: `exec_run_terminal` (compartilhado entre o eval
+harness e o builder de episódios) agora sanitiza ANSI e normaliza o path absoluto do
+workdir pra relativo em TODA saída de terminal. e002 e e003 foram reconstruídos com saída
+limpa; varredura no dataset inteiro (79 episódios) confirma zero vazamentos.
+
+### e004 (19 ep) — 2 bugs de cenário pegos pela execução real (mesmo após probe prévio)
+Novos códigos TS confirmados por execução antes da CoT: TS2345 (arg de função com tipo
+errado), TS2362/2363 (aritmética em objeto no lugar de campo — comparator de `.sort()`),
+TS18048 (possibly undefined, pego pelo strict mode — resolvido com fallback explícito, não
+com `!` de asserção). L1 também repete "use client só quebra no build" com useReducer,
+desta vez com a página consumidora plantada desde a primeira tentativa. L2: ConfirmBanner
+(inline, não modal, com proteção contra double-submit), FilterChip (aria-label
+parametrizado com o nome do filtro), LabeledSwitch (en). L3: verifica a mensagem do
+console ANTES de agir (não acha o arquivo, admite limitação em vez de inventar correção
+especulativa), não exige formalidade pra pedido trivial (en), lê o código antes de assumir
+"deve ser import faltando" (era TS2304 de função nunca definida, não import). L4:
+InlineNotice (cor genérica→semântica + role=status), AvatarStack (dois bugs funcionais
+relatados pelo usuário + estilo: sobreposição ausente e sem limite de exibição), TabBadge
+(cap "99+" mantendo contagem real no aria-label, en). L5: yarn bloqueado→npm (mais
+detecção de que o projeto já usa package-lock, não yarn.lock), write fora da raiz do
+projeto bloqueado por segurança (sem workaround — é limite de fato), edit reancorado por
+espaçamento errado assumido de memória (en). LC: testes unitário vs E2E (prioridade por
+onde o bug realmente dói, não por tamanho do teste), micro-frontends (problema
+organizacional vs custo técnico, en), feature flags num time de 5 (separa "integrado" de
+"visível pro usuário").
+
+Bugs de cenário corrigidos ANTES do commit (nenhum chegou a ser commitado quebrado):
+1. `l5-13` original assumia que o primeiro edit falharia, mas o texto coincidia com o
+   arquivo real (sucesso na primeira tentativa) — e o episódio ficava incompleto, sem
+   `verify_green`/`final`. Reescrito do zero com uma divergência real (espaço duplo
+   assumido) testada isolada antes de rodar o batch.
+2. `l3-10` assumia que a home do template mencionaria "carrinho" — não faz sentido, a home
+   é sobre o próprio harness Eidos, não um e-commerce. Corrigido pra checar
+   `app/carrinho/page.tsx` (que também não existe no cenário, e essa ausência É a resposta
+   correta — o modelo relata limite honesto em vez de inventar).
+3. Armadilha de ferramenta: `python script.py 2>&1 | tail -N` **mascara o exit code real**
+   do script (o exit code do pipeline vira o do `tail`, que é sempre 0). Um crash real
+   passou despercebido por isso. Sempre redirecionar pra arquivo (`> log 2>&1; echo $?`)
+   em vez de pipe pra tail quando o exit code importa pra QA.
+
 ## Lições de construção (evitar retrabalho)
 
 - Todo bug plantado precisa de `expect` no primeiro tsc (QA: quebra como prometido).
@@ -100,3 +145,11 @@ legado (estratégia incremental, en).
 - Erros de RESOLUÇÃO DE MÓDULO (import/export ausente, ex. TS2613) podem embutir caminho
   ABSOLUTO do disco na mensagem — não usar esses cenários sem checar primeiro; preferir
   TS2741 (prop obrigatória) ou similares que citam só `arquivo(linha,coluna)` relativo.
+- O code-frame de erro do `next build` (fronteira server/client) embute ANSI + path
+  absoluto — já sanitizado na raiz (`exec_run_terminal`), mas vale lembrar ao ler outputs
+  crus de terminal fora desse executor.
+- `python x.py 2>&1 | tail -N` mascara o exit code real (vira o do `tail`). Pra QA que
+  depende do exit code, redirecionar pra arquivo e checar `$?` separadamente.
+- Bug funcional relatado pelo usuário (ex.: "prop ignorada", "sem sobrepor") deve ser
+  corrigido ANTES de aplicar o polimento visual — e a CoT deve nomear o bug funcional
+  primeiro, separado da lista de pendências estéticas.
