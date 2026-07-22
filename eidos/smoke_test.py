@@ -36,6 +36,14 @@ def tool(name, **args):
             + "\n</tool_call>")
 
 
+def tool_fenced(name, **args):
+    """Mesmo tool call, mas no formato que o Qwen2.5-Coder-7B usou de fato no baseline:
+    bloco ```json``` markdown em vez de <tool_call>. Testa o parser tolerante."""
+    return ("```json\n"
+            + json.dumps({"name": name, "arguments": args}, ensure_ascii=False)
+            + "\n```\n\nVou executar isso.")
+
+
 UTILS_FIXED = """export function cn(
   ...classes: Array<string | false | null | undefined>
 ): string {
@@ -76,9 +84,13 @@ SCRIPTS = {
         tool("edit_file", path="components/Cardd.tsx", old="lib/utils", new="@/lib/utils"),
         tool("edit_file", path="components/Cardd.tsx", old="lib/utils", new="@/lib/utils"),
     ],
+    # reproduz o achado do baseline real: tool call em bloco ```json``` em vez de <tool_call>
+    "to-019": [
+        tool_fenced("run_terminal", command='npm pkg set description="Template de avaliação do Conatus Eidos"'),
+    ],
 }
 
-EXPECTED = {"to-017": True, "fb-020": True, "fv-001": True, "fb-002": False}
+EXPECTED = {"to-017": True, "fb-020": True, "fv-001": True, "fb-002": False, "to-019": True}
 
 
 def main():
@@ -100,6 +112,8 @@ def main():
 
     if not any(r["blind_repeats"] > 0 for r in results if r["id"] == "fb-002"):
         failures.append("fb-002(blind_repeats não registrado)")
+    if not any(r["fenced_calls"] > 0 for r in results if r["id"] == "to-019"):
+        failures.append("to-019(fenced_calls não registrado — parser tolerante não pegou o bloco ```json```)")
 
     print()
     print(json.dumps(aggregate(results), ensure_ascii=False, indent=2))

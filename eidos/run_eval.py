@@ -16,7 +16,11 @@ Fluxo por caso:
 Métricas agregadas:
     success rate por família e total, iterações médias até sucesso, tool_json_valid_rate,
     blind_repeat_rate (repetiu ação idêntica logo após um resultado de erro),
-    reacted_to_error_rate (após erro, a ação seguinte foi diferente).
+    reacted_to_error_rate (após erro, a ação seguinte foi diferente),
+    fenced_format_rate (achado do baseline: o Qwen2.5-Coder-7B recebe a instrução de usar
+    <tool_call>...</tool_call> — confirmado no prompt renderizado — mas costuma devolver o
+    JSON em bloco ```json``` markdown em vez da tag. O parser aceita os dois formatos pra
+    medir DECISÃO separada de FORMATO; esta métrica rastreia quanto disso ainda acontece).
 """
 import argparse
 import json
@@ -154,6 +158,30 @@ EXECUTORS = {
 
 ERROR_MARKERS = re.compile(r"\[exit [1-9]|Erro:|error TS|Error:|Failed to compile|TimeoutError", re.IGNORECASE)
 
+# Achado do baseline (2026-07-22): Qwen2.5-Coder-7B-Instruct recebe a instrução de usar
+# <tool_call> (confirmado no prompt renderizado pelo tokenizer) mas devolve o JSON num bloco
+# ```json``` markdown por hábito de coder-chat. Aceita como fallback pra não confundir "decidiu
+# errado" com "formatou diferente"; ver fenced_format_rate na agregação.
+FENCE_RE = re.compile(r"```(?:json)?\s*(\{.*?\})\s*```", re.DOTALL)
+
+
+def extract_calls_lenient(reply: str) -> tuple[list[dict], bool]:
+    """(calls, used_fallback). Tenta <tool_call> primeiro; se vazio, tenta bloco ```json {...}```
+    com as chaves name/arguments. used_fallback indica que o formato não foi o protocolo pedido."""
+    calls = extract_tool_calls(reply)
+    if calls:
+        return calls, False
+    m = FENCE_RE.search(reply)
+    if not m:
+        return [], False
+    try:
+        obj = json.loads(m.group(1))
+    except json.JSONDecodeError:
+        return [], False
+    if isinstance(obj, dict) and "name" in obj and "arguments" in obj:
+        return [obj], True
+    return [], False
+
 
 # ---------------------------------------------------------------- checks
 
@@ -204,6 +232,8 @@ def run_case(case: dict, generate, workdir: Path, verbose=False) -> dict:
     reacted = 0
     errors_seen = 0
     iters = 0
+    fenced_calls = 0
+    total_calls = 0
     t0 = time.time()
 
     for _ in range(case.get("max_iters", 6) + 1):
@@ -211,11 +241,14 @@ def run_case(case: dict, generate, workdir: Path, verbose=False) -> dict:
         messages.append({"role": "assistant", "content": reply})
         if verbose:
             print(f"  modelo> {reply[:200]}...")
-        raw_calls = extract_tool_calls(reply)
+        raw_calls, used_fallback = extract_calls_lenient(reply)
         json_flags.extend("_invalid" not in c for c in raw_calls)
         calls = [c for c in raw_calls if "_invalid" not in c]
         if not calls:
             break
+        total_calls += len(calls)
+        if used_fallback:
+            fenced_calls += len(calls)
         iters += 1
         call = calls[0]
         sig = json.dumps(call, sort_keys=True, ensure_ascii=False)
@@ -248,6 +281,7 @@ def run_case(case: dict, generate, workdir: Path, verbose=False) -> dict:
         "errors_seen": errors_seen, "reacted": reacted, "blind_repeats": blind_repeats,
         "json_flags": json_flags, "elapsed_s": round(time.time() - t0, 1),
         "messages": messages, "ran_commands": ran_commands,
+        "total_calls": total_calls, "fenced_calls": fenced_calls,
     }
 
 
@@ -259,6 +293,8 @@ def aggregate(results: list[dict]) -> dict:
         fams[r["family"]].append(r)
     all_json = [f for r in results for f in r["json_flags"]]
     err_events = sum(r["reacted"] + r["blind_repeats"] for r in results)
+    total_calls = sum(r["total_calls"] for r in results)
+    fenced_calls = sum(r["fenced_calls"] for r in results)
     return {
         "n_cases": len(results),
         "success_rate": round(sum(r["success"] for r in results) / max(1, len(results)), 3),
@@ -274,6 +310,7 @@ def aggregate(results: list[dict]) -> dict:
             sum(r["reacted"] for r in results) / err_events, 3) if err_events else None,
         "blind_repeat_rate": round(
             sum(r["blind_repeats"] for r in results) / err_events, 3) if err_events else None,
+        "fenced_format_rate": round(fenced_calls / total_calls, 3) if total_calls else None,
         "avg_elapsed_s": round(sum(r["elapsed_s"] for r in results) / max(1, len(results)), 1),
     }
 
