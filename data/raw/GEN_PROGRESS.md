@@ -10,10 +10,10 @@
 
 ## Estado
 
-- Batches concluídos: **001**–**008** (tasks 1–240)
+- Batches concluídos: **001**–**010** (tasks 1–300) — FASE 2 (iteração 1) COMPLETA
 - Pilotos Fase 1: 20 exemplos aprovados (`data/raw/pilot.jsonl`)
-- **Total aprovado até agora: 260** (meta ~300 nesta rodada, depois treina/avalia)
-- Próxima task a escrever: **241**
+- **Total aprovado: 320** (300 gerados + 20 pilotos), 320/320 na validação
+- Próximo passo: treinar o 4B na Fase 3 e avaliar na Fase 4; análise de erro guia se vale escalar além de 300
 
 ### Lições recorrentes (evitar retrabalho)
 - **Camada 0.5 SEMPRE com rationale em parágrafo próprio + linha em branco + resposta.** O validador

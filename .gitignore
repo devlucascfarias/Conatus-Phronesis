@@ -3,6 +3,9 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 
+# train.jsonl é artefato de build (build_dataset.py), regenerado no Colab a partir de dataset.jsonl
+data/clean/train.jsonl
+
 # data/raw/: ignora os planos de task (regeneráveis por seed) e versiona os exemplos escritos à mão
 data/raw/tasks_*.jsonl
 !data/raw/gen/
