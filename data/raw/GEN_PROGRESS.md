@@ -10,9 +10,9 @@
 
 ## Estado
 
-- Batches concluídos: **001**–**014** (300 base + 16 cam3 + 47 corretivo + 24 corretivo2 + 26 rebalanceamento)
+- Batches concluídos: **001**–**015** (300 base + 16 cam3 + 47 corretivo + 24 corretivo2 + 26 rebalanceamento + 10 polimento)
 - Pilotos Fase 1: 20 exemplos aprovados (`data/raw/pilot.jsonl`)
-- **Total aprovado: 433** (413 gerados + 20 pilotos), 433/433 na validação
+- **Total aprovado: 443** (423 gerados + 20 pilotos), 443/443 na validação
 - Próximo passo: treinar o 4B na Fase 3 e avaliar na Fase 4; análise de erro guia se vale escalar além de 300
 
 ### Lições recorrentes (evitar retrabalho)
@@ -50,3 +50,14 @@ SEM camada 1. Foco em coerência e tom natural, perguntas frescas fora do testse
 Pós-batch: C 18.2%%, camada 1 diluída p/ 28.9%%, camada 0 17.1%%. Total 433, 433/433 na validação.
 Esperado na próxima eval: web_search/sandbox mantêm, camada C melhora (amostras + preâmbulo),
 FP-trivial segue 0; vigiar na demo Fase 5 se a resposta de conversa volta a ficar coerente.
+
+### Mini-lote de polimento final (batch 015) — pós-avaliação da iteração 4
+Iter-4 confirmou o rebalanceamento (demo: dólar e cálculo coerentes; métricas ≈ iter-3 dentro
+do ruído de 3/120), com 3 residuais localizados. 10 exemplos dirigidos, um por residual:
+(1) 4 camada C "me conta uma curiosidade" com fatos VERDADEIROS e verificáveis (Vênus,
+tubarões vs árvores, ossos do bebê, Lua se afastando) — o modelo inventava conteúdo incoerente;
+(2) 3 camada 1 anti-punt na categoria "resultado que acho que sei" (MasterChef, Lotofácil,
+Jabuti — temas frescos, sem repetir Quina/BBB dos batches 012-013 nem o testset);
+(3) 3 camada 2 trigonometria com `import math` explícito (pêndulo, projétil, escada) — py-016
+usava sin/pi sem import. Total 443, 443/443 na validação. DECISÃO COMBINADA: esta é a última
+rodada de dados — seja qual for a eval, fecha-se o dataset (retorno decrescente).
