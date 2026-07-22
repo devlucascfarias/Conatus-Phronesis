@@ -10,9 +10,9 @@
 
 ## Estado
 
-- Batches concluídos: **001**–**012** (300 base + 16 camada 3 + 47 corretivo)
+- Batches concluídos: **001**–**013** (300 base + 16 cam3 + 47 corretivo + 24 corretivo2)
 - Pilotos Fase 1: 20 exemplos aprovados (`data/raw/pilot.jsonl`)
-- **Total aprovado: 383** (363 gerados + 20 pilotos), 383/383 na validação
+- **Total aprovado: 407** (387 gerados + 20 pilotos), 407/407 na validação
 - Próximo passo: treinar o 4B na Fase 3 e avaliar na Fase 4; análise de erro guia se vale escalar além de 300
 
 ### Lições recorrentes (evitar retrabalho)
@@ -30,3 +30,13 @@ buscar (super-aplicou o padrão da 0.5, virou hedge sem buscar, às vezes alucin
 dirigidos: ~26 camada 1 'volátil→busca→resposta confiante' (sem hedge), 6 pares contrastivos
 0.5-vs-1, 8 camada 2 'mostra conta compacta→CHAMA o sandbox', 4 'na dúvida, busca primeiro'.
 Camada 1 subiu p/ 25.1% (no alvo). imperfect_tool_responses reduzido 0.10→0.06 no gen_config.
+
+### Lote corretivo 2 (batch 013) — pós-avaliação da iteração 2
+Iter-2 recuperou recall de web_search (0.35->0.525) e resolveu python_sandbox (0.65->0.95),
+mas restaram 2 padrões de falha de busca: (1) 'é fixo, não preciso buscar' em horário/taxa
+(museu, Selic) -> alucina; (2) 'não tenho acesso, consulte o site oficial' -> manda o usuário
+buscar. 24 exemplos dirigidos: rationales que REJEITAM explicitamente 'é fixo' (horários de
+museu/parque/biblioteca, taxas), e que REJEITAM o punt ('eu busco, não te mando procurar':
+preços, shows, resultados), + 4 contrastivos estáveis (fundação vs horário). 
+ATENÇÃO: camada 1 subiu p/ 30.7%% (alvo 25%%) e C caiu p/ 14.3%% (alvo 20%%) — desequilíbrio
+deliberado pra fechar recall; vigiar na Fase 4 se surge over-search ou perda de conversa.
