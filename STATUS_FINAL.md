@@ -43,7 +43,11 @@ líquida; parar aqui foi decisão deliberada, não desistência.
 
 1. **ws-008 (Selic)**: voltou a responder de memória com valor desatualizado.
 2. **`import math`**: py-016 agora usa `math.sin`/`math.pi` (aprendeu o vocabulário do
-   batch_015) mas omite a linha `import math` — erraria em execução real.
+   batch_015) mas omite a linha `import math` no primeiro tiro. MITIGADO pelo harness:
+   `inference_loop.py` executa o código de verdade, devolve o stderr (NameError) como
+   turno `tool` e permite até 3 iterações — o modelo foi treinado (imperfect_tool) a
+   corrigir e re-executar. A eval da Fase 4 é single-shot e não captura essa recuperação;
+   verificar na demo Fase 5 (pergunta do projétil) se a autocorreção acontece na prática.
 3. **Demo do cálculo**: escolheu `int(0.375*18420)` → 6907, truncando o 6907,5 correto.
 4. **Resposta do dólar**: cita o valor certo da fonte, mas inventou causa ("alta do
    petróleo") que não estava no snippet — confabulação leve pós-busca.
