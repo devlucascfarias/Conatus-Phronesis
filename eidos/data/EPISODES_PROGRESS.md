@@ -11,13 +11,13 @@
 
 | Camada | Meta | Feito | Batches |
 |---|---|---|---|
-| L1 ciclo completo | 50 | 8 | e001, e002 |
-| L2 entrega verificada | 50 | 7 | e001, e002 |
-| L3 investigação autônoma | 50 | 6 | e001, e002 |
-| L4 estilo completo | 50 | 6 | e001, e002 |
-| L5 recuperação de tool | 50 | 6 | e001, e002 |
-| LC conversa técnica | 50 | 7 | e001, e002 |
-| **Total** | **300** | **40** | |
+| L1 ciclo completo | 50 | 12 | e001, e002, e003 |
+| L2 entrega verificada | 50 | 11 | e001, e002, e003 |
+| L3 investigação autônoma | 50 | 9 | e001, e002, e003 |
+| L4 estilo completo | 50 | 9 | e001, e002, e003 |
+| L5 recuperação de tool | 50 | 10 | e001, e002, e003 |
+| LC conversa técnica | 50 | 9 | e001, e002, e003 |
+| **Total** | **300** | **60** | |
 
 ## Batches
 
@@ -50,6 +50,38 @@ compilá-lo (arquivo órfão fora da árvore de build). Corrigido plantando tamb
 que importa e usa o componente — só aí o erro de fronteira server/client se manifesta.
 Lição: setup de cenário precisa considerar a ÁRVORE DE IMPORTS do Next, não só o arquivo.
 
+### e003 (20 ep) — 3 bugs pegos ANTES de escrever a CoT (probe isolado)
+Testei os bugs de L1 num script isolado contra o template real ANTES de escrever a CoT,
+pra citar o código TS verdadeiro em vez de chutar. Descartei um cenário de "export default
+ausente" (TS2613) porque a mensagem do TypeScript pra esse erro embute o CAMINHO ABSOLUTO
+do disco — vazaria path de máquina de dev pro dataset; troquei por prop obrigatória
+ausente (TS2741), que sai limpo. Códigos confirmados por execução real: TS2322 (tipo
+incompatível: string numa prop number), TS2551 (typo de propriedade, .lenght), TS2741
+(prop obrigatória faltando — resolvido com placeholder honesto, não valor inventado),
+TS1005 (vírgula faltando, erro em cascata). L2: ToastNotification (auto-dismiss client),
+SearchEmptyState, FieldHint (tooltip só CSS com group-hover E focus-within, cobre teclado),
+ActivityItem (en, elemento semântico `<time>`). L3: repete o padrão "não precisa mandar
+nada" com bug NOVO (use-client em usePathnamepau — igual ao l1-08, só detectável no
+build), conserta em vez de só apontar quando pedem só o nome do arquivo (en, com
+julgamento sobre limite do pedido), escopo honesto (investiga o front, não acha bug, relata
+suspeita do back sem fingir certeza). L4: DiscountTag (cor genérica→semântica), DataRow
+(layout empilhado→flex), ToggleRow (checkbox→switch visual mantendo input real, en). L5:
+nome de tool errado (save_file→write_file), tipo errado no argumento (new como número),
+comando git bloqueado (fora da whitelist, sem alternativa — explica a limitação), edit
+reancorado por suposição de formatação errada (en). LC: monorepo vs multi-repo (critério =
+nº de repos compartilhando código, não tamanho do time), TypeScript strict mode em código
+legado (estratégia incremental, en).
+
+### Bugs corrigidos durante e003
+1. `l3-07` original usava `tsc` pra pegar erro de "use client" ausente — mas essa classe de
+   erro (fronteira server/client) só o `next build` detecta, o mesmo padrão do `l1-08`.
+   Corrigido: build em vez de tsc, e adicionada a página consumidora (mesma lição do e002).
+2. `l5-10` simulava um primeiro edit "errado" por suposição de formatação, mas o texto que
+   escrevi por engano CASOU com o arquivo real (sucesso na primeira tentativa, não o que o
+   cenário queria ensinar). Corrigido: a suposição errada agora assume JSX multi-linha
+   quando o arquivo real é inline — diverge de verdade, testado isolado antes de rodar o
+   batch inteiro.
+
 ## Lições de construção (evitar retrabalho)
 
 - Todo bug plantado precisa de `expect` no primeiro tsc (QA: quebra como prometido).
@@ -62,3 +94,9 @@ Lição: setup de cenário precisa considerar a ÁRVORE DE IMPORTS do Next, não
   de imports de alguma página.** Sempre plantar (ou apontar pra) o arquivo consumidor junto.
 - `validate_args`: `new` (edit_file, apagar trecho) e `content` (write_file, arquivo vazio)
   são strings vazias LEGÍTIMAS — só `path`/`old`/`command` não podem ser vazios.
+- **Testar bug novo ISOLADO antes de escrever a CoT** (probe rápido via `reset_workdir`+
+  `apply_setup`+`tsc`): mais barato que escrever a narrativa inteira e só descobrir depois
+  que o código TS citado está errado ou que o erro nem se manifesta.
+- Erros de RESOLUÇÃO DE MÓDULO (import/export ausente, ex. TS2613) podem embutir caminho
+  ABSOLUTO do disco na mensagem — não usar esses cenários sem checar primeiro; preferir
+  TS2741 (prop obrigatória) ou similares que citam só `arquivo(linha,coluna)` relativo.
