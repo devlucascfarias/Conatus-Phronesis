@@ -42,12 +42,13 @@ líquida; parar aqui foi decisão deliberada, não desistência.
 ## Limitações conhecidas da versão final (documentar, não corrigir)
 
 1. **ws-008 (Selic)**: voltou a responder de memória com valor desatualizado.
-2. **`import math`**: py-016 agora usa `math.sin`/`math.pi` (aprendeu o vocabulário do
-   batch_015) mas omite a linha `import math` no primeiro tiro. MITIGADO pelo harness:
-   `inference_loop.py` executa o código de verdade, devolve o stderr (NameError) como
-   turno `tool` e permite até 3 iterações — o modelo foi treinado (imperfect_tool) a
-   corrigir e re-executar. A eval da Fase 4 é single-shot e não captura essa recuperação;
-   verificar na demo Fase 5 (pergunta do projétil) se a autocorreção acontece na prática.
+2. **`import math`**: RESOLVIDO no harness. py-016 usa `math.sin`/`math.pi` sem a linha
+   de import no primeiro tiro, mas `inference_loop.py` agora injeta automaticamente os
+   imports da whitelist que o código referencia e não importa (`inject_missing_imports`,
+   com aliases np→numpy, sp→sympy) antes de executar — o código do py-016 roda e devolve
+   345.19 (verificado). Erros reais (lógica, sintaxe, timeout, import fora da whitelist)
+   continuam voltando crus pro modelo, que ainda tem o loop de até 3 iterações
+   (comportamento imperfect_tool treinado) como rede pra esses casos.
 3. **Demo do cálculo**: escolheu `int(0.375*18420)` → 6907, truncando o 6907,5 correto.
 4. **Resposta do dólar**: cita o valor certo da fonte, mas inventou causa ("alta do
    petróleo") que não estava no snippet — confabulação leve pós-busca.

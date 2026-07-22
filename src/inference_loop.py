@@ -103,10 +103,36 @@ def check_imports(code: str) -> str | None:
     return None
 
 
+ALIASES = {"np": "numpy", "sp": "sympy"}
+
+
+def inject_missing_imports(code: str) -> str:
+    """Prepend imports da whitelist que o código usa mas não importa (ex.: math.sin sem
+    'import math'). Só cobre módulos permitidos; qualquer outro erro volta cru pro modelo."""
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:
+        return code  # deixa o SyntaxError chegar ao modelo, é sinal útil
+    imported = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imported |= {a.asname or a.name.split(".")[0] for a in node.names}
+        elif isinstance(node, ast.ImportFrom):
+            imported |= {a.asname or a.name for a in node.names}
+    used = {n.id for n in ast.walk(tree) if isinstance(n, ast.Name)}
+    lines = []
+    for name in sorted(used - imported):
+        module = ALIASES.get(name, name)
+        if module in ALLOWED_IMPORTS:
+            lines.append(f"import {module}\n" if name == module else f"import {module} as {name}\n")
+    return "".join(lines) + code
+
+
 def exec_python_sandbox(code: str) -> str:
     err = check_imports(code)
     if err:
         return err
+    code = inject_missing_imports(code)
     with tempfile.NamedTemporaryFile("w", suffix=".py", delete=False, encoding="utf-8") as f:
         f.write(code)
         path = f.name
