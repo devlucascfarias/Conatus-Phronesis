@@ -11,13 +11,13 @@
 
 | Camada | Meta | Feito | Batches |
 |---|---|---|---|
-| L1 ciclo completo | 50 | 23 | e001-e006 |
-| L2 entrega verificada | 50 | 21 | e001-e006 |
-| L3 investigação autônoma | 50 | 18 | e001-e006 |
-| L4 estilo completo | 50 | 18 | e001-e006 |
-| L5 recuperação de tool | 50 | 19 | e001-e006 |
-| LC conversa técnica | 50 | 18 | e001-e006 |
-| **Total** | **300** | **117** | |
+| L1 ciclo completo | 50 | 26 | e001-e007 |
+| L2 entrega verificada | 50 | 25 | e001-e007 |
+| L3 investigação autônoma | 50 | 20 | e001-e007 |
+| L4 estilo completo | 50 | 21 | e001-e007 |
+| L5 recuperação de tool | 50 | 22 | e001-e007 |
+| LC conversa técnica | 50 | 21 | e001-e007 |
+| **Total** | **300** | **135** | |
 
 ## Batches
 
@@ -181,6 +181,27 @@ vazamento passou despercebido. Generalizado: `_sanitize_terminal_output` agora t
 mascara qualquer caminho de home de usuário (`C:\Users\X\...`, `/home/X/...`,
 `/Users/X/...`) via regex, não só o prefixo do workdir. Varredura no dataset inteiro
 (117 episódios) confirma zero vazamentos após o fix.
+
+### e007 (18 ep) — sem nenhum bug de cenário; segunda instância de "bug de lógica, tsc limpo"
+Códigos/comportamentos confirmados por execução antes da CoT: TS7053 (index signature
+ausente, resolvido com tipo literal em vez de index signature genérica), TS18047
+(possibly null de `document.querySelector`). `l1-25` é o SEGUNDO cenário (depois de
+`l1-20`) de bug de lógica pura que o `tsc` não pega — desestruturação de tupla na ordem
+trocada (`[max, min]` vs o real `[min, max]`), reforçando que "ciclo completo" cobre ler
+código com atenção, não só rodar compilador. L2: LoadingPlaceholder (skeleton com larguras
+assimétricas, não uniformes), FormFieldError (aria-describedby via id exposto),
+PriceRangeSlider (clamping mútuo entre os dois sliders pra nunca inverter a faixa),
+LanguageSwitcher (en, select nativo por a11y/mobile em vez de dropdown custom). L3: lê a
+linha EXATA que o QA apontou em vez de investigar às cegas (achou off-by-one real,
+`i=1` em vez de `i=0`), elimina candidatos por ordem de probabilidade em vez de checar
+os 3 arquivos ao acaso (en). L4: TagList (empilhado→scroll horizontal), EmptyCart (estado
+vazio sem link de saída — "beco sem saída" corrigido), FooterLinks (bug de roteamento
+relatado pelo usuário: `<a>` vs `<Link>`, en). L5: `npm run` com typo no nome do script
+(biuld→build), edit com espaço extra assumido (reancora relendo), comando composto com
+`rm` bloqueado onde o rebuild sozinho já resolve o objetivo sem precisar do `rm` (en). LC:
+estratégia de i18n (pluralização/locale como critério, não só troca de string), Server
+Actions vs API routes (critério = quem mais chama a lógica, não moda, en), acessibilidade
+desde o início como hábito sem custo extra vs retrofit caro depois (pushback respeitoso).
 
 ## Lições de construção (evitar retrabalho)
 
