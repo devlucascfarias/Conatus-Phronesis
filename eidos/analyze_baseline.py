@@ -25,6 +25,15 @@ def check_label(check: dict) -> str:
     return t
 
 
+BUCKET = {
+    "tsc": "compila", "build": "compila",
+    "file_exists": "arquivo_criado",
+    "file_contains": "conteudo", "file_not_contains": "conteudo",
+    "package_dep": "pacote", "package_script": "pacote",
+    "ran_command": "comando",
+}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dir", type=Path, default=EIDOS / "results")
@@ -48,19 +57,24 @@ def main():
         one_iter_fail = [t["id"] for t in ts if t["iterations"] == 1 and not t["success"]]
         multi_iter_fail = [t["id"] for t in ts if t["iterations"] > 1 and not t["success"]]
         fail_counter = Counter()
+        bucket_cases = defaultdict(set)  # bucket -> {case ids que falharam nele}
         for t in ts:
             if t["success"]:
                 continue
             for c in t["checks"]:
                 if not c["passed"]:
                     fail_counter[check_label(c["check"])] += 1
+                    bucket_cases[BUCKET.get(c["check"]["type"], c["check"]["type"])].add(t["id"])
 
         print(f"=== {fam} ({n} casos, {sum(t['success'] for t in ts)} sucesso) ===")
         print(f"  0 iterações (passivo, nenhuma tool chamada): {len(zero_iter)} -> {zero_iter}")
         print(f"  1 iteração e falhou (ação única insuficiente): {len(one_iter_fail)} -> {one_iter_fail}")
         print(f"  >1 iteração e falhou (agiu mais, ainda errou): {len(multi_iter_fail)} -> {multi_iter_fail}")
-        print("  checks que mais reprovaram:")
-        for label, count in fail_counter.most_common(6):
+        print("  quantos CASOS (não checks) falharam em cada categoria (não exclusivo, um caso pode estar em >1):")
+        for bucket, ids in sorted(bucket_cases.items(), key=lambda kv: -len(kv[1])):
+            print(f"    {len(ids):3d} casos  [{bucket}] -> {sorted(ids)}")
+        print("  todos os checks que reprovaram (sem corte):")
+        for label, count in fail_counter.most_common(1000):
             print(f"    {count:3d}x  {label}")
         print()
 
