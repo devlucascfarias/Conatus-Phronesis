@@ -11,13 +11,13 @@
 
 | Camada | Meta | Feito | Batches |
 |---|---|---|---|
-| L1 ciclo completo | 50 | 16 | e001-e004 |
-| L2 entrega verificada | 50 | 14 | e001-e004 |
-| L3 investigação autônoma | 50 | 12 | e001-e004 |
-| L4 estilo completo | 50 | 12 | e001-e004 |
-| L5 recuperação de tool | 50 | 13 | e001-e004 |
-| LC conversa técnica | 50 | 12 | e001-e004 |
-| **Total** | **300** | **79** | |
+| L1 ciclo completo | 50 | 20 | e001-e005 |
+| L2 entrega verificada | 50 | 17 | e001-e005 |
+| L3 investigação autônoma | 50 | 15 | e001-e005 |
+| L4 estilo completo | 50 | 15 | e001-e005 |
+| L5 recuperação de tool | 50 | 16 | e001-e005 |
+| LC conversa técnica | 50 | 15 | e001-e005 |
+| **Total** | **300** | **98** | |
 
 ## Batches
 
@@ -126,6 +126,27 @@ Bugs de cenário corrigidos ANTES do commit (nenhum chegou a ser commitado quebr
    do script (o exit code do pipeline vira o do `tail`, que é sempre 0). Um crash real
    passou despercebido por isso. Sempre redirecionar pra arquivo (`> log 2>&1; echo $?`)
    em vez de pipe pra tail quando o exit code importa pra QA.
+
+### e005 (19 ep) — primeiro batch sem NENHUM bug de cenário (probe prévio + disciplina pagando)
+Códigos TS confirmados por execução antes da CoT: TS2588 (reatribuição de const → `let`),
+TS2365 (await faltando: Promise usada em aritmética), TS2323/2393 (identificador
+duplicado, merge). L1 também ganhou um caso sem NENHUM erro de tipo: `l1-20` é bug de
+LÓGICA (desconto tratado como 1000% em vez de 10% por esquecer de dividir por 100) — o
+tsc passa limpo, e o modelo precisa ler o código em vez de rodar o compilador de novo,
+reforçando que "ciclo completo" não é só sobre erros de tipo. L2: BackToTopButton (scroll
+listener passive + cleanup), ReadingTime (contagem de palavras robusta a espaços
+múltiplos), ExpandableText (en, botão só aparece se precisa truncar). L3: verifica e
+REFUTA a hipótese de bug do próprio usuário em vez de aplicar a correção baseada nela
+cegamente, reproduz "funciona na minha máquina" e aponta lockfile como suspeito nº 1 (en),
+lê o código antes de assumir arquitetura nova pra uma feature (carrinho mockado). L4:
+RatingSummary (bug de plural relatado pelo usuário confirmado + estilo), TimestampBadge
+(ISO crua → tempo relativo, mas a data completa preservada no `title`), SocialLinks (en,
+bug de segurança que vem de brinde: `target="_blank"` sem `rel="noopener noreferrer"`).
+L5: path aninhado errado (assume `components/ui/`, corrige pro flat), extensão errada
+(assume `.jsx`, projeto é `.tsx`), `content` como lista em vez de string (en). LC: REST vs
+GraphQL (critério = overfetching/underfetching crônico, não moda), BEM na era Tailwind (o
+problema original sumiu, mas sobrevive em miniatura pra classes customizadas extraídas,
+en), kit de UI pra MVP (shadcn-like > biblioteca fechada, pela saída de emergência depois).
 
 ## Lições de construção (evitar retrabalho)
 
