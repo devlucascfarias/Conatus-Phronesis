@@ -39,8 +39,12 @@ class ScenarioError(AssertionError):
 
 class Episode:
     def __init__(self, layer: str, scenario: str, setup: dict | None = None,
-                 lang: str = "pt-BR", batch: str = ""):
+                 lang: str = "pt-BR", batch: str = "", allow_no_action: bool = False):
         self.layer, self.scenario, self.lang, self.batch = layer, scenario, lang, batch
+        # allow_no_action: opt-in explícito pra episódios fora de LC que legitimamente não
+        # agem (ex.: L3 reconhecendo que o pedido é vago demais pra investigar código —
+        # "saber quando NÃO agir" também é julgamento autônomo, não só "sempre agir").
+        self.allow_no_action = allow_no_action
         self.messages: list[dict] = []
         self.workdir = WORKDIR
         reset_workdir(self.workdir)
@@ -90,8 +94,9 @@ class Episode:
         tool_turns = [m for m in self.messages if m["role"] == "tool"]
         if self.layer == "LC" and tool_turns:
             raise ScenarioError(f"{self.scenario}: LC não pode ter turno tool")
-        if self.layer != "LC" and not tool_turns:
-            raise ScenarioError(f"{self.scenario}: camada {self.layer} sem nenhuma ação")
+        if self.layer != "LC" and not tool_turns and not self.allow_no_action:
+            raise ScenarioError(f"{self.scenario}: camada {self.layer} sem nenhuma ação "
+                                "(se for intencional, passe allow_no_action=True)")
         return {"layer": self.layer, "lang": self.lang, "messages": self.messages,
                 "_meta": {"scenario": self.scenario, "batch": self.batch}}
 

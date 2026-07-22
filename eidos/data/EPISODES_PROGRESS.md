@@ -11,13 +11,13 @@
 
 | Camada | Meta | Feito | Batches |
 |---|---|---|---|
-| L1 ciclo completo | 50 | 20 | e001-e005 |
-| L2 entrega verificada | 50 | 17 | e001-e005 |
-| L3 investigação autônoma | 50 | 15 | e001-e005 |
-| L4 estilo completo | 50 | 15 | e001-e005 |
-| L5 recuperação de tool | 50 | 16 | e001-e005 |
-| LC conversa técnica | 50 | 15 | e001-e005 |
-| **Total** | **300** | **98** | |
+| L1 ciclo completo | 50 | 23 | e001-e006 |
+| L2 entrega verificada | 50 | 21 | e001-e006 |
+| L3 investigação autônoma | 50 | 18 | e001-e006 |
+| L4 estilo completo | 50 | 18 | e001-e006 |
+| L5 recuperação de tool | 50 | 19 | e001-e006 |
+| LC conversa técnica | 50 | 18 | e001-e006 |
+| **Total** | **300** | **117** | |
 
 ## Batches
 
@@ -148,6 +148,40 @@ GraphQL (critério = overfetching/underfetching crônico, não moda), BEM na era
 problema original sumiu, mas sobrevive em miniatura pra classes customizadas extraídas,
 en), kit de UI pra MVP (shadcn-like > biblioteca fechada, pela saída de emergência depois).
 
+### e006 (19 ep) — 2 achados novos: L3 sem ação nenhuma, e vazamento fora do workdir
+Códigos/comportamentos confirmados por execução antes da CoT: `useState([])` sem generic
+causando cascata TS2322/2339 via inferência `never[]` (um dos bugs mais comuns de
+React+TS de verdade), TS2740 (Set no lugar de array), TS2322 de union type sem o literal
+novo, `npm install` com typo real (E404) corrigido pro nome certo. L2: PasswordStrengthMeter,
+CountdownTimer (cálculo por diferença de tempo real, não decremento, pra não desincronizar
+em aba em background), CharacterCounter (en), CopyableCodeBlock (en, botão só aparece no
+hover). L3: verificação pós-update de dependências, elimina hipóteses por eliminação (en),
+e um cenário NOVO — reconhecer que o pedido é vago demais pra investigar código ("vibe
+estranha" na página) e pedir especificidade em vez de adivinhar arquivo ao acaso. L4:
+CategoryPill, ReviewCard (avatar de iniciais + estrelas com aria-label), MetricDelta (en,
+cor+ícone nunca só cor, pra não depender de percepção de cor). L5: typo de nome de pacote
+real (clxs→clsx via E404), assume arquivo na raiz quando é nested, edit com CASING
+intencionalmente estranho onde o modelo aplica mas AVISA que a classe não é válida no
+Tailwind (transparência mesmo cumprindo o pedido). LC: CSS-in-JS vs Tailwind (Server
+Components como critério de época, não gosto), XState vs useReducer (teste = estados
+impossíveis vs lógica de ação), Storybook vale a pena pra time pequeno (distância entre
+criador/consumidor como critério).
+
+**Achado 1 — L3 pode legitimamente ter ZERO ações.** `l3-18` (pede especificidade em vez
+de investigar código pra pedido vago) violava a regra do builder que exigia ≥1 ação fora
+de LC. Mas "saber quando NÃO agir" é julgamento autônomo tão válido quanto "agir sozinho"
+— adicionado `allow_no_action=True` como opt-in explícito no `Episode()`, em vez de
+afrouxar a regra geral (que continua protegendo contra episódio vazio por acidente).
+
+**Achado 2 — vazamento de path FORA do workdir, sanitização anterior não pegava.**
+`l5-17` (`npm install` com typo) revelou que o erro E404 do npm cita o log do CACHE
+GLOBAL (`~/AppData/Local/npm-cache/_logs/...`), que fica fora do workdir — a sanitização
+de `l1-08`/`l3-07` (batch e002/e003) só normalizava o path DENTRO do workdir, então esse
+vazamento passou despercebido. Generalizado: `_sanitize_terminal_output` agora também
+mascara qualquer caminho de home de usuário (`C:\Users\X\...`, `/home/X/...`,
+`/Users/X/...`) via regex, não só o prefixo do workdir. Varredura no dataset inteiro
+(117 episódios) confirma zero vazamentos após o fix.
+
 ## Lições de construção (evitar retrabalho)
 
 - Todo bug plantado precisa de `expect` no primeiro tsc (QA: quebra como prometido).
@@ -174,3 +208,8 @@ en), kit de UI pra MVP (shadcn-like > biblioteca fechada, pela saída de emergê
 - Bug funcional relatado pelo usuário (ex.: "prop ignorada", "sem sobrepor") deve ser
   corrigido ANTES de aplicar o polimento visual — e a CoT deve nomear o bug funcional
   primeiro, separado da lista de pendências estéticas.
+- Erro de comando real do `npm` (ex.: E404) pode citar o caminho do CACHE GLOBAL
+  (`~/AppData/.../npm-cache/_logs/...`), fora do workdir — sanitização por prefixo do
+  workdir sozinha não pega; precisa de regex genérica pra qualquer path de home de usuário.
+- "Saber quando NÃO agir" é comportamento válido de L3 — não forçar toda camada
+  (exceto LC) a ter ≥1 ação; usar `allow_no_action=True` explicitamente quando for o caso.
