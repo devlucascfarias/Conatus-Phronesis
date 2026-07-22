@@ -53,6 +53,15 @@ líquida; parar aqui foi decisão deliberada, não desistência.
 4. **Resposta do dólar**: cita o valor certo da fonte, mas inventou causa ("alta do
    petróleo") que não estava no snippet — confabulação leve pós-busca.
 5. **python_sandbox recall 0,80**: 4 misses em 20 (responde direto sem verificar).
+6. **Erros semânticos que executam limpo** (o teto real do 4B, visto na demo pós-fechamento):
+   fórmula errada que roda sem exceção (projétil com `2*theta` no lugar de `sen(2θ)` →
+   25714 reportado como "257 metros"), truncamento recorrente em 3 variações (`:.0f`,
+   `int()`, `// 8`), leitura errada de magnitude da saída da tool e confabulação pós-busca.
+   Nenhum checker determinístico alcança código que executa com sucesso — sem stderr, não
+   há sinal pra realimentar. Mitigação aplicada: decodificação gulosa (`do_sample=False`)
+   na demo Fase 5 e no `inference_loop.py`, alinhando o deploy à eval (que sempre foi
+   gulosa e onde o modelo performa melhor); sampling a 0.7 fazia cada geração sortear uma
+   variação diferente do erro. Solução de verdade: modelo maior — fora do escopo fechado.
 
 ## Estado final dos artefatos
 
