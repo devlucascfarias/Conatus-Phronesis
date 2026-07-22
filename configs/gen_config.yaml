@@ -35,7 +35,9 @@ mix:
   register_informal: 0.40        # ~40% com traços descontraídos visíveis
   multi_turn_share: 0.25         # 2–4 turnos de usuário
   layer2_selfcorrection: 0.30    # sandbox contradiz e o modelo se corrige
-  imperfect_tool_responses: 0.10 # camadas 1 e 2: busca pobre, erro de sintaxe etc.
+  # Iteração 1 mostrou que hedge/incerteza demais ensina o modelo a NÃO buscar (recall de web_search
+  # caiu de 0.75 p/ 0.35). Reduzido de 0.10 p/ 0.06; e todo exemplo imperfeito DEVE buscar antes de ressalvar.
+  imperfect_tool_responses: 0.06 # camadas 1 e 2: busca pobre, erro de sintaxe etc.
 
 # Filtros do validate_data.py
 validation:

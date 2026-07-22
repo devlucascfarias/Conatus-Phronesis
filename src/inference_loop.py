@@ -4,10 +4,13 @@ Uso:
     python src/inference_loop.py --model outputs/merged_4b   # ou id do HF / caminho local
 
 Executores:
-    web_search    → Tavily se TAVILY_API_KEY estiver no .env/ambiente; senão DuckDuckGo (lib ddgs)
+    web_search    → Ollama web search (OLLAMA_SEARCH_KEY) → Tavily (TAVILY_API_KEY) → DuckDuckGo, nessa ordem
     python_sandbox → subprocess com timeout 5s, whitelist de imports (math, numpy, sympy), sem rede
 
 Máximo de 3 iterações de tool por turno do usuário.
+
+Também expõe run_agent(...) para uso programático (ex.: célula de demo no Colab), já que o
+chat de terminal usa input() e não roda bem dentro de uma célula de notebook.
 """
 import argparse
 import ast
@@ -34,7 +37,35 @@ def load_env():
                 os.environ.setdefault(key.strip(), val.strip())
 
 
+def exec_web_search_ollama(query: str) -> str:
+    """Ollama web search API. Chave em OLLAMA_SEARCH_KEY (secret do Colab).
+    Endpoint documentado: POST https://ollama.com/api/web_search com Bearer token.
+    Retorna {"results": [{title, url, content}]} — normalizamos para title/url/snippet."""
+    import urllib.request
+    key = os.environ["OLLAMA_SEARCH_KEY"]
+    req = urllib.request.Request(
+        "https://ollama.com/api/web_search",
+        data=json.dumps({"query": query}).encode("utf-8"),
+        headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=20) as resp:
+        payload = json.loads(resp.read().decode("utf-8"))
+    raw = payload.get("results", payload if isinstance(payload, list) else [])
+    results = [{"title": r.get("title"), "url": r.get("url"),
+                "snippet": (r.get("content") or r.get("snippet") or "")[:300]}
+               for r in raw][:5]
+    return json.dumps({"results": results}, ensure_ascii=False)
+
+
 def exec_web_search(query: str) -> str:
+    # 1) Ollama web search (preferido: chave já configurada no Colab)
+    if os.environ.get("OLLAMA_SEARCH_KEY"):
+        try:
+            return exec_web_search_ollama(query)
+        except Exception as e:
+            print(f"[ollama search falhou: {e}; tentando próximo provedor]", file=sys.stderr)
+    # 2) Tavily
     if os.environ.get("TAVILY_API_KEY"):
         try:
             from tavily import TavilyClient
@@ -42,8 +73,9 @@ def exec_web_search(query: str) -> str:
             results = [{"title": r["title"], "url": r["url"], "snippet": r["content"][:300]}
                        for r in resp.get("results", [])]
             return json.dumps({"results": results}, ensure_ascii=False)
-        except Exception as e:  # cai para o DuckDuckGo
+        except Exception as e:
             print(f"[tavily falhou: {e}; tentando DuckDuckGo]", file=sys.stderr)
+    # 3) DuckDuckGo (sem chave)
     try:
         from ddgs import DDGS
     except ImportError:
@@ -93,6 +125,31 @@ EXECUTORS = {"web_search": lambda a: exec_web_search(a["query"]),
              "python_sandbox": lambda a: exec_python_sandbox(a["code"])}
 
 
+def run_agent(messages, generate, max_iters=MAX_TOOL_ITERATIONS, verbose=True):
+    """Loop do agente para UM turno já com a mensagem do usuário em `messages`.
+    `generate(messages) -> str` é a função de geração do modelo. Executa tool calls
+    (web_search/python_sandbox) e realimenta, até `max_iters` iterações. Retorna a
+    lista `messages` atualizada. Usável direto numa célula de notebook (Colab)."""
+    for _ in range(max_iters + 1):
+        reply = generate(messages)
+        messages.append({"role": "assistant", "content": reply})
+        if verbose:
+            print(f"modelo> {reply}\n")
+        calls = [c for c in extract_tool_calls(reply) if "_invalid" not in c]
+        if not calls:
+            break
+        call = calls[0]
+        executor = EXECUTORS.get(call.get("name"))
+        result = executor(call.get("arguments", {})) if executor else f"Erro: tool desconhecida '{call.get('name')}'"
+        if verbose:
+            print(f"[{call.get('name')}] → {result[:400]}{'…' if len(result) > 400 else ''}\n")
+        messages.append({"role": "tool", "content": result})
+    else:
+        if verbose:
+            print("[limite de iterações de tool atingido neste turno]\n")
+    return messages
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", required=True)
@@ -132,21 +189,7 @@ def main():
         if not user or user.lower() in ("sair", "exit", "quit"):
             break
         messages.append({"role": "user", "content": user})
-
-        for _ in range(MAX_TOOL_ITERATIONS + 1):
-            reply = generate(messages)
-            messages.append({"role": "assistant", "content": reply})
-            print(f"modelo> {reply}\n")
-            calls = [c for c in extract_tool_calls(reply) if "_invalid" not in c]
-            if not calls:
-                break
-            call = calls[0]
-            executor = EXECUTORS.get(call.get("name"))
-            result = executor(call.get("arguments", {})) if executor else f"Erro: tool desconhecida '{call.get('name')}'"
-            print(f"[{call.get('name')}] → {result[:400]}{'…' if len(result) > 400 else ''}\n")
-            messages.append({"role": "tool", "content": result})
-        else:
-            print("[limite de 3 iterações de tool atingido neste turno]\n")
+        run_agent(messages, generate, verbose=True)
 
 
 if __name__ == "__main__":
