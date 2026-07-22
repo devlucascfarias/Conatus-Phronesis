@@ -273,6 +273,16 @@ def run_case(case: dict, generate, workdir: Path, verbose=False) -> dict:
         json_flags.extend("_invalid" not in c for c in raw_calls)
         calls = [c for c in raw_calls if "_invalid" not in c]
         if not calls:
+            if raw_calls:
+                # houve TENTATIVA de tool call, mas o JSON não parseou — devolver o erro em vez
+                # de encerrar em silêncio (senão subestimamos a persistência real do modelo)
+                iters += 1
+                errors_seen += 1
+                last_result_was_error = True
+                messages.append({"role": "tool", "content":
+                                 "Erro: o JSON do tool call não parseou (confira aspas duplas e "
+                                 "escapes). Reenvie a chamada corrigida."})
+                continue
             break
         total_calls += len(calls)
         if used_fallback:
