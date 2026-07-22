@@ -135,6 +135,21 @@ def exec_edit_file(workdir: Path, args: dict) -> str:
     return f"ok: {args.get('path')} editado"
 
 
+ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+
+
+def _sanitize_terminal_output(text: str, workdir: Path) -> str:
+    """Remove códigos ANSI de cor e normaliza o caminho absoluto do workdir pra relativo.
+    Achado real (2026-07-22): o code-frame do `next build` embute o path absoluto de disco
+    + ANSI cru na mensagem — sem isso, um dataset de treino vaza estrutura de máquina de
+    dev e enche o exemplo de escape sequences ilegíveis. Aplica-se tanto no eval quanto na
+    geração de episódios, já que os dois usam este mesmo executor."""
+    text = ANSI_RE.sub("", text)
+    abs_path = str(workdir.resolve())
+    text = text.replace(abs_path + "\\", "").replace(abs_path + "/", "").replace(abs_path, ".")
+    return text
+
+
 def exec_run_terminal(workdir: Path, args: dict) -> str:
     cmd = (args.get("command") or "").strip()
     first = cmd.split(" ", 1)[0] if cmd else ""
@@ -147,6 +162,7 @@ def exec_run_terminal(workdir: Path, args: dict) -> str:
     except subprocess.TimeoutExpired:
         return f"TimeoutError: comando excedeu {TERMINAL_TIMEOUT_S}s"
     out = (proc.stdout or "") + (("\n" + proc.stderr) if proc.stderr else "")
+    out = _sanitize_terminal_output(out, workdir)
     out = out.strip() or "(sem saída)"
     if len(out) > MAX_TOOL_RESULT_CHARS:
         out = out[:MAX_TOOL_RESULT_CHARS // 2] + "\n[... saída truncada ...]\n" + out[-MAX_TOOL_RESULT_CHARS // 2:]
