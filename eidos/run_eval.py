@@ -95,6 +95,8 @@ def apply_setup(workdir: Path, setup: dict):
 # ---------------------------------------------------------------- executores
 
 def _safe_path(workdir: Path, rel: str) -> Path | None:
+    if not rel or not rel.strip():
+        return None
     p = (workdir / rel).resolve()
     return p if str(p).startswith(str(workdir.resolve())) else None
 
@@ -102,7 +104,7 @@ def _safe_path(workdir: Path, rel: str) -> Path | None:
 def exec_read_file(workdir: Path, args: dict) -> str:
     p = _safe_path(workdir, args.get("path", ""))
     if p is None or not p.is_file():
-        return f"Erro: arquivo não encontrado: {args.get('path')}"
+        return f"Erro: arquivo não encontrado: {args.get('path')!r}"
     lines = p.read_text(encoding="utf-8").splitlines()
     return "\n".join(f"{i + 1}\t{l}" for i, l in enumerate(lines)) or "(arquivo vazio)"
 
@@ -110,7 +112,9 @@ def exec_read_file(workdir: Path, args: dict) -> str:
 def exec_write_file(workdir: Path, args: dict) -> str:
     p = _safe_path(workdir, args.get("path", ""))
     if p is None:
-        return "Erro: caminho fora do projeto"
+        return f"Erro: caminho vazio ou fora do projeto: {args.get('path')!r}"
+    if p.is_dir():
+        return f"Erro: '{args.get('path')}' é um diretório existente, não um arquivo"
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(args.get("content", ""), encoding="utf-8")
     return f"ok: {args.get('path')} gravado ({len(args.get('content', ''))} chars)"
@@ -155,6 +159,30 @@ EXECUTORS = {
     "edit_file": exec_edit_file,
     "run_terminal": exec_run_terminal,
 }
+
+TOOL_SCHEMAS = {t["function"]["name"]: t["function"]["parameters"]
+                for t in json.loads((EIDOS / "tools.json").read_text(encoding="utf-8"))["tools"]}
+
+
+def validate_args(name: str, args) -> str | None:
+    """Confere args contra o schema antes de despachar pro executor. Nunca deixa argumento
+    ausente/tipo errado chegar nos executores — um erro de string aqui é infinitamente melhor
+    que um crash que derruba a rodada inteira (aconteceu: write_file sem 'path' -> IsADirectoryError)."""
+    schema = TOOL_SCHEMAS.get(name)
+    if schema is None:
+        return f"Erro: tool desconhecida '{name}' (disponíveis: {', '.join(TOOL_SCHEMAS)})"
+    if not isinstance(args, dict):
+        return "Erro: 'arguments' precisa ser um objeto JSON"
+    for req in schema.get("required", []):
+        if req not in args or args[req] in (None, ""):
+            return (f"Erro: argumento obrigatório ausente ou vazio: '{req}' "
+                    f"(schema de {name}: {list(schema.get('properties', {}))})")
+    for key, val in args.items():
+        prop = schema.get("properties", {}).get(key)
+        if prop and prop.get("type") == "string" and not isinstance(val, str):
+            return f"Erro: argumento '{key}' deveria ser string"
+    return None
+
 
 ERROR_MARKERS = re.compile(r"\[exit [1-9]|Erro:|error TS|Error:|Failed to compile|TimeoutError", re.IGNORECASE)
 
@@ -258,11 +286,12 @@ def run_case(case: dict, generate, workdir: Path, verbose=False) -> dict:
             else:
                 reacted += 1
         actions.append(sig)
-        executor = EXECUTORS.get(call.get("name"))
-        if executor is None:
-            result = f"Erro: tool desconhecida '{call.get('name')}'"
+        args = call.get("arguments") or {}
+        err = validate_args(call.get("name"), args)
+        if err:
+            result = err
         else:
-            result = executor(workdir, call.get("arguments") or {})
+            result = EXECUTORS[call.get("name")](workdir, args)
         if call.get("name") == "run_terminal":
             ran_commands.append((call.get("arguments") or {}).get("command", ""))
         last_result_was_error = ERROR_MARKERS.search(result) is not None
@@ -365,8 +394,16 @@ def main():
     (args.out / "transcripts").mkdir(parents=True, exist_ok=True)
 
     results = []
+    crashed = []
     for i, case in enumerate(cases):
-        r = run_case(case, generate, args.workdir)
+        try:
+            r = run_case(case, generate, args.workdir)
+        except Exception as e:
+            # nunca deixa um caso ruim derrubar a rodada inteira (aconteceu: IsADirectoryError
+            # por argumento malformado do modelo, antes de validate_args existir)
+            print(f"  [{i + 1}/{len(cases)}] {case['id']} CRASHOU: {type(e).__name__}: {e}")
+            crashed.append(case["id"])
+            continue
         results.append(r)
         status = "OK " if r["success"] else "FAIL"
         print(f"  [{i + 1}/{len(cases)}] {r['id']} {status} ({r['iterations']} iters, {r['elapsed_s']}s)")
@@ -374,7 +411,10 @@ def main():
         (args.out / "transcripts" / f"{r['id']}.json").write_text(
             json.dumps(transcript, ensure_ascii=False, indent=1), encoding="utf-8")
 
+    if crashed:
+        print(f"\n{len(crashed)} caso(s) crasharam (bug de harness a investigar): {crashed}")
     metrics = aggregate(results)
+    metrics["crashed_cases"] = crashed
     metrics["model"] = args.model
     metrics["adapter"] = args.adapter
     (args.out / "metrics.json").write_text(json.dumps(metrics, ensure_ascii=False, indent=2),
