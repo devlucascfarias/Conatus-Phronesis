@@ -10,9 +10,9 @@
 
 ## Estado
 
-- Batches concluídos: **001**–**013** (300 base + 16 cam3 + 47 corretivo + 24 corretivo2)
+- Batches concluídos: **001**–**014** (300 base + 16 cam3 + 47 corretivo + 24 corretivo2 + 26 rebalanceamento)
 - Pilotos Fase 1: 20 exemplos aprovados (`data/raw/pilot.jsonl`)
-- **Total aprovado: 407** (387 gerados + 20 pilotos), 407/407 na validação
+- **Total aprovado: 433** (413 gerados + 20 pilotos), 433/433 na validação
 - Próximo passo: treinar o 4B na Fase 3 e avaliar na Fase 4; análise de erro guia se vale escalar além de 300
 
 ### Lições recorrentes (evitar retrabalho)
@@ -40,3 +40,13 @@ museu/parque/biblioteca, taxas), e que REJEITAM o punt ('eu busco, não te mando
 preços, shows, resultados), + 4 contrastivos estáveis (fundação vs horário). 
 ATENÇÃO: camada 1 subiu p/ 30.7%% (alvo 25%%) e C caiu p/ 14.3%% (alvo 20%%) — desequilíbrio
 deliberado pra fechar recall; vigiar na Fase 4 se surge over-search ou perda de conversa.
+
+### Lote de rebalanceamento (batch 014) — pós-avaliação da iteração 3
+Iter-3 fechou o problema de busca (accuracy 0.90, web_search F1 0.857, FP-trivial 0%), mas a
+demo Fase 5 mostrou regressão de coerência conversacional (camada C em 14.3%% vs alvo 20%%).
+Decisão (B) do STATUS_ITER3: 26 exemplos — 21 camada C (desabafo, comemoração, nostalgia,
+opinião, criatividade curta, papo, perguntas pessoais à IA; 17 pt-BR + 4 en) + 5 camada 0,
+SEM camada 1. Foco em coerência e tom natural, perguntas frescas fora do testset.
+Pós-batch: C 18.2%%, camada 1 diluída p/ 28.9%%, camada 0 17.1%%. Total 433, 433/433 na validação.
+Esperado na próxima eval: web_search/sandbox mantêm, camada C melhora (amostras + preâmbulo),
+FP-trivial segue 0; vigiar na demo Fase 5 se a resposta de conversa volta a ficar coerente.
