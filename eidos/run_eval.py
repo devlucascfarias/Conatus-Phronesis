@@ -173,8 +173,11 @@ def validate_args(name: str, args) -> str | None:
         return f"Erro: tool desconhecida '{name}' (disponíveis: {', '.join(TOOL_SCHEMAS)})"
     if not isinstance(args, dict):
         return "Erro: 'arguments' precisa ser um objeto JSON"
+    # vazio é inválido só onde vazio não faz sentido; edit_file com new="" (deletar trecho)
+    # e write_file com content="" (criar arquivo vazio) são usos legítimos
+    non_empty = {"path", "old", "command"}
     for req in schema.get("required", []):
-        if req not in args or args[req] in (None, ""):
+        if req not in args or args[req] is None or (req in non_empty and args[req] == ""):
             return (f"Erro: argumento obrigatório ausente ou vazio: '{req}' "
                     f"(schema de {name}: {list(schema.get('properties', {}))})")
     for key, val in args.items():
