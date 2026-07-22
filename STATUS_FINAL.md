@@ -63,6 +63,16 @@ líquida; parar aqui foi decisão deliberada, não desistência.
    gulosa e onde o modelo performa melhor); sampling a 0.7 fazia cada geração sortear uma
    variação diferente do erro. Solução de verdade: modelo maior — fora do escopo fechado.
 
+## Configuração de deploy validada (demo final, 2026-07-22)
+
+`do_sample=False` + `no_repeat_ngram_size=8` (célula Fase 5 e `inference_loop.py`).
+Demo de confirmação com os 4 cenários: dólar busca e cita a fonte (cochilo de transcrição
+de 1 centavo: 5,08 vs 5,07 do snippet + confabulação do "petróleo" — limitação 6); cálculo
+exato 6.907,50 COM estimativa de sanidade espontânea ("de 20.000 seria 7.500, então um
+pouco menos"); projétil correto (345 m, `from math import sin, cos, radians` por conta
+própria); curiosidade coerente do início ao fim, parou sozinha, sem loop (fatos imprecisos,
+limitação 6). Estado: ENTREGUE — resta apenas persistir o adapter fora da VM do Colab.
+
 ## Estado final dos artefatos
 
 - **Dataset**: 443 exemplos (batches 001–015 + pilot), 443/443 na validação,
