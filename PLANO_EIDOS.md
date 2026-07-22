@@ -1,8 +1,14 @@
 # Conatus Eidos — agente CLI especialista em frontend
 
 > Branch nova (`conatus-eidos`) herdando a infraestrutura do Conatus-Phronesis.
-> Missão: um modelo pequeno que trabalha como agente de terminal em projetos frontend
-> (React + Next + Tailwind), com disciplina de CLI e gosto visual — não um generalista.
+> Missão: um modelo pequeno (Qwen2.5-Coder-7B) que trabalha como agente de terminal em
+> projetos frontend (React + Next + Tailwind), com disciplina de CLI e gosto visual —
+> não um generalista. Este projeto valida a tese e a infra num porte barato de treinar.
+>
+> **Sucessor planejado: Conatus Poiesis.** Quando o Eidos estiver validado e entregue,
+> nasce um projeto separado (fork) escalando pro `Qwen3-Coder-30B-A3B-Instruct`, herdando
+> dataset e harness já provados aqui. Não confundir os dois nomes: Eidos = a forma/critério
+> provado no 7B; Poiesis = a capacidade plena construída sobre essa forma.
 
 ## Tese (herdada e comprovada no projeto anterior)
 
@@ -19,17 +25,19 @@ O conhecimento de React/CSS vem do modelo base (coder pré-treinado); o nosso SF
 
 ## Decisões tomadas (2026-07-22)
 
-- **Base — progressão em 2 estágios:**
-  1. **`Qwen2.5-Coder-7B-Instruct`** (denso, comprovado — HumanEval ~88-90%, forte em
-     JS/TS/React/Tailwind) para validar todo o pipeline (harness, dataset, treino, eval)
-     na GPU **L4** (24GB), que roda ele folgado em QLoRA 4-bit (~4-5GB de peso).
-  2. **Só depois de validado**, migrar pra **`Qwen3-Coder-30B-A3B-Instruct`** (MoE, 3B
-     ativos, benchmarks de fronteira, custo de inferência próximo de um 3B). Em 4-bit
-     pesa ~17-18GB só de peso — deve caber no L4 com margem apertada; ⚠️ TESTAR
-     CARREGAMENTO isolado (sem dataset novo) antes de comprometer com esse porte, pra
-     não descobrir OOM no meio de um treino caro.
+- **Base — Conatus Eidos usa `Qwen2.5-Coder-7B-Instruct`** (denso, comprovado —
+  HumanEval ~88-90%, forte em JS/TS/React/Tailwind), validando todo o pipeline (harness,
+  dataset, treino, eval) na GPU **L4** (24GB), que roda ele folgado em QLoRA 4-bit
+  (~4-5GB de peso). Este é o escopo INTEIRO do Eidos — não migra de modelo no meio.
   ⚠️ Não existe "Qwen3-Coder-7B" denso — a família Qwen3-Coder só tem o 30B-A3B e o
   flagship 480B-A35B. Confirmado no HF antes de assumir qualquer checkpoint.
+- **Sucessor (fora do escopo deste plano): Conatus Poiesis.** Projeto separado, a nascer
+  como fork do Eidos só depois deste estar validado e entregue. Herda dataset e harness
+  já provados aqui; troca a base para `Qwen3-Coder-30B-A3B-Instruct` (MoE, 3B ativos,
+  benchmarks de fronteira, custo de inferência próximo de um 3B). Em 4-bit pesa ~17-18GB
+  só de peso — deve caber no L4 com margem apertada; ⚠️ TESTAR CARREGAMENTO isolado antes
+  de comprometer um treino caro com esse porte. Não abrir a branch/planejar o Poiesis
+  antes do Eidos estar com adapter treinado e avaliado.
 - **Stack única:** React + Next + Tailwind. Dashboards e landing pages são casos de uso
   desse recorte, não escopos separados. Expandir stack só depois de uma versão entregue.
 - **Prioridade nº 1 do dataset:** o ciclo de correção com feedback do terminal.
