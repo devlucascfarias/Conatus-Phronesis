@@ -1,20 +1,23 @@
 """Monta a selecao do GPT-5.6 a incluir no proximo treino, protegendo a
 proporcao ja calibrada por eval real de camadas 0/0.5/1/C (nao mexe nelas).
 
-Decisao: manter TODO o pipeline original (479 itens) intocado. Da trilha
-GPT-5.6 (466 itens), incluir:
-  - calculo_rapido (50) e multiturno (16) inteiros — cobrem comportamento
-    (autocorrecao, reacao a follow-up) que nao existe em nenhum outro lugar
-    do dataset, entao diluir seria perder a licao.
-  - uma amostra estratificada de 34 itens de camada 3 das 8 familias
-    "dificeis" (~4-5 por familia) — da bastante peso ao reforco de rigor
-    sem deixar camada 3 dominar o dataset combinado.
-  - NADA das metades de camada 2 dessas 8 familias (ficam de fora deste
-    treino, continuam salvas nos arquivos brutos pra uso futuro).
+REVISAO pos-treino da v1 (34 itens de camada 3, ~10% do combinado): o eval real
+mostrou regressao (accuracy 0.850->0.808, web_search recall 0.75->0.625,
+web_search F1 0.833->0.758) e as amostras de revisao manual confirmaram queda
+de disciplina de tool-calling generalizada — nao so em camada 1, tambem em
+camada 2 (contas feitas so em prosa, sem chamar o sandbox). Suspeito principal:
+o volume de prosa longa da camada 3 (~250 palavras medias) deslocou o registro
+aprendido de "aciona a tool" pra "explica em texto".
 
-Resultado esperado: total combinado ~579, com camada 1 (web_search) em
-~25% (vs 30% atual, redução real mas nao pela metade) e camada 2/3 em
-~25%/~10% (reforco real sem estourar o dataset).
+Decisao revisada: reduzir a amostra de camada 3 de 34 para 2 por familia (16
+no total) — mantem uma amostra pequena do reforco de rigor sem dominar o
+dataset. calculo_rapido (50) e multiturno (16) continuam inteiros: sao camada
+2 compacta e reforcam (nao competem com) a disciplina de tool-calling que
+caiu. NADA das metades de camada 2 das 8 familias "dificeis" entra (mesma
+decisao da v1).
+
+Resultado esperado: camada 3 combinada ~5.8% (bem mais perto do alvo
+original de 5% do que os ~10% da v1).
 """
 import json
 
@@ -28,7 +31,7 @@ HARD_FAMILIES = [
     "data/raw/gpt56_analise_complexa.jsonl",
     "data/raw/gpt56_equacoes_diferenciais.jsonl",
 ]
-EXTRA_FAMILIES = {"data/raw/gpt56_algebra_linear.jsonl", "data/raw/gpt56_analise_complexa.jsonl"}
+CAMADA3_POR_FAMILIA = 2  # v1 usava 4-5; reduzido apos regressao medida no eval
 
 
 def load(fp):
@@ -47,8 +50,7 @@ selection = []
 for fp in HARD_FAMILIES:
     rows = load(fp)
     camada3 = [r for r in rows if str(r["layer"]) == "3"]
-    n = 5 if fp in EXTRA_FAMILIES else 4
-    picked = camada3[:n]
+    picked = camada3[:CAMADA3_POR_FAMILIA]
     print(fp, "-> selecionados", len(picked), "de", len(camada3), "camada 3")
     selection.extend(picked)
 

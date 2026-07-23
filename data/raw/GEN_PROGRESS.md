@@ -10,10 +10,47 @@
 
 ## Estado
 
-- Batches concluídos: **001**–**018** (300 base + 16 cam3 + 47 corretivo + 24 corretivo2 + 26 rebalanceamento
-  + 10 polimento + 20 identidade [016] + 16 recall câmbio/cargo [017] + 12 divisão real/curiosidade [018])
+- Batches concluídos: **001**–**019** (300 base + 16 cam3 + 47 corretivo + 24 corretivo2 + 26 rebalanceamento
+  + 10 polimento + 20 identidade [016] + 16 recall câmbio/cargo [017] + 12 divisão real/curiosidade [018]
+  + 14 disciplina de tool-calling [019])
 - Pilotos Fase 1: 20 exemplos aprovados (`data/raw/pilot.jsonl`)
-- **Total aprovado (pipeline original): 491** (471 gerados + 20 pilotos), 491/491 na validação
+- **Total aprovado (pipeline original): 505** (485 gerados + 20 pilotos), 505/505 na validação
+
+### Iteração pós-treino do 4B com o dataset combinado (579 → regressão medida)
+
+Treinou-se o 4B com os 579 exemplos (pipeline 491 + seleção GPT-5.6 v1, 100 itens incluindo 34
+de camada 3). `eval_harness.py --adapter outputs/adapter_4b` mostrou **regressão real** contra o
+baseline: accuracy 0,850→0,808, **web_search recall 0,75→0,625** (F1 0,833→0,758),
+`python_sandbox` recall estável (0,70→0,70) mas com queda de precisão (1,0→0,933).
+
+Revisão manual das amostras (`samples_for_review.md`) confirmou 3 padrões concretos de falha,
+todos regressões de disciplina de tool-calling (não erros de conteúdo):
+1. **Camada 2 faz conta em prosa, nunca chama o sandbox** (fórmula de Price, determinante 3×3
+   resolvidos inteiramente à mão).
+2. **Camada 1 aluc­ina com confiança em vez de buscar** (BBB — inventou vencedora e prêmio sem
+   nenhuma busca).
+3. **Camada 1 promete buscar mas não chama a tool** ("Buscando pra confirmar o calendário" sem
+   `<tool_call>` nenhum depois).
+
+**Hipótese**: o volume de prosa longa da camada 3 do GPT-5.6 (~250 palavras médias) deslocou o
+registro aprendido de "aciona a tool" pra "explica em texto", mesmo em contextos de camada 1/2
+onde isso é errado — a diluição de `web_search` que já estava prevista (30,1%→24,9%) se
+materializou como regressão de verdade, não só um número de proporção.
+
+**Correção em duas frentes:**
+1. `batch_019` (14 exemplos): 7 camada 2 (fórmulas financeiras/estatística/combinatória, sempre
+   com `<tool_call>` — nunca só em prosa) + 7 camada 1 (prêmios/realities/bilheteria — sempre busca
+   antes de nomear vencedor, e quando a fonte vem incompleta, refina a busca DE VERDADE, não só
+   promete refinar).
+2. `src/build_gpt56_selection.py` revisado: amostra de camada 3 das 8 famílias reduzida de
+   4-5/família (34 total) para **2/família (16 total)** — `calculo_rapido`/`multiturno` continuam
+   inteiros (camada 2 compacta, reforça em vez de competir com a disciplina de tool-calling).
+
+Resultado: `python src/validate_data.py data/raw/pilot.jsonl data/raw/gen/*.jsonl
+data/raw/gpt56_combined_selection.jsonl` → **587 aprovados, 0 rejeitados**. Camada 1 volta a
+25,7% (de 24,9%), camada 3 cai de 10,0% pra **6,8%** (bem mais perto do alvo de 5%). `train.jsonl`
+regenerado (587 exemplos, 0 descartados). Ainda não retreinado — próximo passo é rodar o 4B com
+esse dataset revisado e comparar de novo contra o baseline.
 
 ### Lote corretivo 4 (batch 018) — pós-demo do 4B treinado com o dataset novo
 
