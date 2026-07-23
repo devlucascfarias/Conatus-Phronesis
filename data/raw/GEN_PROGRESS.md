@@ -5,8 +5,9 @@
 - Exemplos em `data/raw/gen/batch_NNN.jsonl`, ~30 por arquivo, cada um com seu `_task`.
 - Validação: `python src/validate_data.py data/raw/gen/*.jsonl data/raw/pilot.jsonl`
   (pilot.jsonl aprovado na Fase 1 conta para o dataset final).
-- Regras: prompts/generator_system.md. Camada 0.5 = rationale em parágrafo separado (linha em branco)
-  antes da resposta. Camada 2 = stdout do sandbox EXATO (validador executa o código de verdade).
+- Regras: `prompts/generator_system.md`. Todo turno assistant das camadas 0/0.5/1/2/C abre
+  com `<think>` curto, dentro do teto da camada; a tool call fica fora do bloco. Camada 2 =
+  stdout do sandbox EXATO (o validador executa o código de verdade).
 
 ## Estado
 
@@ -15,6 +16,54 @@
   + 14 disciplina de tool-calling [019])
 - Pilotos Fase 1: 20 exemplos aprovados (`data/raw/pilot.jsonl`)
 - **Total aprovado (pipeline original): 505** (485 gerados + 20 pilotos), 505/505 na validação
+
+### Branch `phronesis-thinking` — reasoning em todas as camadas no Qwen3-8B
+
+Além dos 34 itens históricos de camada 3 já editados, o retrofit de
+`prompts/editor_thinking_todas_camadas.md` foi concluído em **755 itens / 1.179 turnos
+assistant**: todo o piloto e os batches de geração nas camadas 0/0.5/1/2/C, mais todos os
+266 itens de camada 2 das fontes GPT-5.6. A camada 3 não foi alterada nesta etapa.
+`gpt56_combined_selection.jsonl` continua com 82 itens (66 de camada 2 + 16 de camada 3),
+sem reintroduzir os 18 itens de camada 3 removidos do treino.
+
+O pipeline agora:
+
+- exige `<think>` bem-formado em todo turno assistant das camadas 0/0.5/1/2/C, respeita os
+  tetos 15/25/35/40/20 palavras e mantém `<tool_call>` fora dele;
+- deixa a camada 3 sem teto e opcional no validador, preservando os exemplos antigos não
+  abrangidos pelos dois retrofits;
+- exclui reasoning completo ou truncado das métricas de preâmbulo;
+- renderiza, avalia e executa com reasoning habilitado no `Qwen/Qwen3-8B`;
+- treina `<think>`, resposta visível e tool call dentro do mesmo span de loss do assistant.
+
+Auditoria: os 755 itens preservam integralmente a resposta visível, tool calls, retornos e
+demais mensagens; não há pensamentos duplicados nem repetição literal nas seis primeiras
+palavras. Na seleção efetiva de treino, 571 itens têm reasoning (948 turnos); os 24 itens
+antigos de camada 3 dos batches continuam sem `<think>`, deliberadamente. A validação
+principal aprovou **595/595** exemplos, e a validação separada das oito famílias completas
+aprovou **400/400**. A renderização real com o tokenizer do Qwen3-8B manteve **595/595**
+exemplos sob o limite de 4096 tokens, com zero descarte.
+
+### Correção de rota — `enable_thinking=True` fica global, sem roteador externo
+
+Decisão original: treinar `<think>` só na camada 3 e manter `enable_thinking=False` fixo na
+geração pras demais camadas, pra não arriscar o modelo abrindo reasoning real em pergunta
+trivial sem nunca ter visto exemplo disso. Problema: isso exigia decidir ANTES de gerar se
+a pergunta "merece" thinking — um roteador externo que não existe e que teria seu próprio
+risco de erro (classificar errado a dificuldade da pergunta).
+
+**Nova decisão**: `enable_thinking=True` fica ligado globalmente (notebook já ajustado). Em
+vez de rotear por fora, o dataset ensina o próprio modelo a **dosar o tamanho do `<think>`
+pela dificuldade real** — teto de palavras por camada em `configs/gen_config.yaml`
+(`think_max_words`: 0→15, 0.5→25, 1→35, 2→40, C→20, 3→sem teto), reforçado
+automaticamente por `src/validate_data.py` (rejeita item acima do teto da camada). O
+`<think>` não conta como preâmbulo visível — `strip_think_blocks()` já exclui o bloco da
+métrica, então mesmo a camada 0 (zero palavras de preâmbulo visível) pode ter `<think>` de
+até 15 palavras sem violar essa regra.
+
+O retrofit das camadas 0/0.5/1/2/C foi concluído e validado. O modelo passa a ver decisões
+curtas nas tarefas simples e reasoning progressivamente maior conforme a camada, sem
+depender de um roteador externo.
 
 ### Iteração pós-treino do 4B com o dataset combinado (579 → regressão medida)
 

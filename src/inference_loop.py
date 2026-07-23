@@ -1,7 +1,7 @@
 """Agente de terminal (Fase 5): gerar → detectar tool_call → executar → devolver.
 
 Uso:
-    python src/inference_loop.py --model outputs/merged_4b   # ou id do HF / caminho local
+    python src/inference_loop.py --model outputs/merged_8b   # ou id do HF / caminho local
 
 Executores:
     web_search    → Ollama web search (OLLAMA_SEARCH_KEY) → Tavily (TAVILY_API_KEY) → DuckDuckGo, nessa ordem
@@ -180,7 +180,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", required=True)
     ap.add_argument("--adapter", default=None)
-    ap.add_argument("--max-new-tokens", type=int, default=768)
+    ap.add_argument("--max-new-tokens", type=int, default=2048)
     args = ap.parse_args()
     load_env()
 
@@ -197,9 +197,9 @@ def main():
     tools = load_tools()
 
     def generate(messages) -> str:
-        # enable_thinking=False: mesma justificativa de build_dataset.py/eval_harness.py.
+        # O modelo-alvo deste branch usa o canal de reasoning do Qwen3-8B.
         prompt = tokenizer.apply_chat_template(
-            messages, tools=tools, tokenize=False, add_generation_prompt=True, enable_thinking=False
+            messages, tools=tools, tokenize=False, add_generation_prompt=True, enable_thinking=True
         )
         inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
         with torch.no_grad():

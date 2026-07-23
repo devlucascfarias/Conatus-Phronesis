@@ -1,8 +1,8 @@
 # Hiperparâmetros de treino (Fase 3) — QLoRA via Unsloth
 
 model:
-  base: Qwen/Qwen3-4B-Instruct-2507   # NÃO usar a variante Thinking-2507
-  base_8b: Qwen/Qwen3-8B              # alternativa maior (sem Instruct-2507 nesse tamanho)
+  base: Qwen/Qwen3-8B                  # alvo deste branch: híbrido com reasoning real
+  base_4b: Qwen/Qwen3-4B-Instruct-2507 # referência sem thinking para comparação
   guinea_pig: Qwen/Qwen3-1.7B         # cobaia para validar o pipeline
   load_in_4bit: true
   max_seq_len: 4096

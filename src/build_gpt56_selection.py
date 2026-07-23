@@ -13,11 +13,12 @@ Decisao revisada: reduzir a amostra de camada 3 de 34 para 2 por familia (16
 no total) — mantem uma amostra pequena do reforco de rigor sem dominar o
 dataset. calculo_rapido (50) e multiturno (16) continuam inteiros: sao camada
 2 compacta e reforcam (nao competem com) a disciplina de tool-calling que
-caiu. NADA das metades de camada 2 das 8 familias "dificeis" entra (mesma
-decisao da v1).
+caiu. Das 8 familias "dificeis", entram tambem os 22 itens de camada 2 por
+familia que nao pertencem ao held-out eval: os 3 primeiros ficam reservados
+para avaliacao e camada2[3:] fornece 176 itens adicionais de treino.
 
-Resultado esperado: camada 3 combinada ~5.8% (bem mais perto do alvo
-original de 5% do que os ~10% da v1).
+Resultado esperado da trilha GPT-5.6: 258 itens, preservando a amostra reduzida
+de camada 3 e incorporando integralmente a porcao treinavel de camada 2.
 """
 import json
 
@@ -52,6 +53,20 @@ for fp in HARD_FAMILIES:
     camada3 = [r for r in rows if str(r["layer"]) == "3"]
     picked = camada3[:CAMADA3_POR_FAMILIA]
     print(fp, "-> selecionados", len(picked), "de", len(camada3), "camada 3")
+    selection.extend(picked)
+
+for fp in HARD_FAMILIES:
+    rows = load(fp)
+    camada2 = [r for r in rows if str(r["layer"]) == "2"]
+    picked = camada2[3:]
+    print(
+        fp,
+        "-> selecionados",
+        len(picked),
+        "de",
+        len(camada2),
+        "camada 2 (3 reservados no held-out eval)",
+    )
     selection.extend(picked)
 
 for fp in ["data/raw/gpt56_calculo_rapido.jsonl", "data/raw/gpt56_multiturno.jsonl"]:

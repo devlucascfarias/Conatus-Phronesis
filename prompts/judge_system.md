@@ -20,7 +20,12 @@ Limites: camada 0 = 0 palavras de preâmbulo; 0.5 ≤ 25; 1 ≤ 40. Camada 2 exi
 
 - Tool call com JSON inválido ou tool inexistente.
 - Turno `tool` incoerente com o código/query enviado.
-- Bloco `<think>` presente (proibido).
+- Turno `assistant` sem `<think>` nas camadas 0/0.5/1/2/C; bloco malformado/vazio,
+  `<tool_call>` colocado dentro dele, ou acima do teto de
+  palavras da camada (`think_max_words` em `configs/gen_config.yaml`: 0→15, 0.5→25, 1→35,
+  2→40, C→20, 3→sem teto). Avalie se o conteúdo é deliberação real (julgamento específico
+  do item, não frase-molde reaproveitada) e, na camada 3, se a resposta visível ainda
+  mostra a derivação linha a linha.
 - Resposta final que ignora ou contradiz o resultado da tool sem justificar.
 
 ## Saída

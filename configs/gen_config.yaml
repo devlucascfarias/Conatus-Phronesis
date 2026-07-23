@@ -14,13 +14,18 @@ dataset:
   pilot_size: 20                  # Fase 1: gerar e PARAR para revisão manual
 
 # Proporções por camada (soma = 1.0) — seção 4.1 do PLANO.md
+# think_max_words (branch phronesis-thinking): teto de palavras do bloco <think> por camada.
+# Calibrado pra ficar curto nas camadas fáceis (o modelo aprende a dosar o esforço de
+# deliberação pela dificuldade real, não só o preâmbulo visível) e livre na camada 3
+# (raciocínio longo, ver prompts/editor_thinking_gpt56.md). Não conta como preâmbulo visível
+# — strip_think_blocks() em src/common.py já exclui o <think> da métrica de preambulo_max_words.
 layers:
-  "0":   { share: 0.20, preamble_max_words: 0 }
-  "0.5": { share: 0.12, preamble_max_words: 25 }
-  "1":   { share: 0.25, preamble_max_words: 40 }
-  "2":   { share: 0.18, preamble_max_words: null }
-  "3":   { share: 0.05, preamble_max_words: null }
-  "C":   { share: 0.20, preamble_max_words: null }
+  "0":   { share: 0.20, preamble_max_words: 0,  think_max_words: 15 }
+  "0.5": { share: 0.12, preamble_max_words: 25, think_max_words: 25 }
+  "1":   { share: 0.25, preamble_max_words: 40, think_max_words: 35 }
+  "2":   { share: 0.18, preamble_max_words: null, think_max_words: 40 }
+  "3":   { share: 0.05, preamble_max_words: null, think_max_words: null }
+  "C":   { share: 0.20, preamble_max_words: null, think_max_words: 20 }
 
 # Propriedades da camada 1 (verbalizadas no rationale)
 layer1_properties:

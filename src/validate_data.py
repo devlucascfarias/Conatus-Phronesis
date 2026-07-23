@@ -17,7 +17,19 @@ import tempfile
 from collections import Counter
 from pathlib import Path
 
-from common import ROOT, extract_tool_calls, load_tools, load_yaml, preamble_text, read_jsonl, word_count, TOOL_CALL_RE
+from common import (
+    ROOT,
+    THINK_TAG_RE,
+    TOOL_CALL_RE,
+    extract_tool_calls,
+    load_tools,
+    load_yaml,
+    preamble_text,
+    read_jsonl,
+    think_format_error,
+    think_text,
+    word_count,
+)
 
 CLEAN_DIR = ROOT / "data" / "clean"
 
@@ -138,8 +150,19 @@ def validate(files: list[Path]) -> None:
             reject(ex, "sem_turno_assistant"); continue
         full_text = "\n".join(turns)
 
-        if "<think>" in full_text:
-            reject(ex, "bloco_think_proibido"); continue
+        if layer in {"0", "0.5", "1", "2", "C"}:
+            missing_think = next((t for t in turns if not THINK_TAG_RE.search(t)), None)
+            if missing_think is not None:
+                reject(ex, "turno_assistant_sem_think"); continue
+        turns_with_think = [t for t in turns if THINK_TAG_RE.search(t)]
+        think_err = next((err for t in turns_with_think if (err := think_format_error(t))), None)
+        if think_err:
+            reject(ex, think_err); continue
+        think_limit = layers.get(layer, {}).get("think_max_words")
+        if think_limit is not None:
+            over_think = next((t for t in turns_with_think if word_count(think_text(t)) > think_limit), None)
+            if over_think is not None:
+                reject(ex, f"think_acima_de_{think_limit}_palavras"); continue
 
         err = next((e for t in turns for c in extract_tool_calls(t) if (e := check_schema(c, schemas))), None)
         if err:

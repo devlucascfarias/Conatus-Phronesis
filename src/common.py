@@ -18,6 +18,12 @@ for _stream in (sys.stdout, sys.stderr):
 ROOT = Path(__file__).resolve().parents[1]
 
 TOOL_CALL_RE = re.compile(r"<tool_call>\s*(\{.*?\})\s*</tool_call>", re.DOTALL)
+THINK_BLOCK_RE = re.compile(r"<think>.*?</think>\s*", re.DOTALL)
+THINK_TAG_RE = re.compile(r"</?think>")
+THINK_TURN_RE = re.compile(
+    r"\A<think>\n(?P<reasoning>.*?)\n</think>(?:\n\n(?P<visible>.*))?\Z",
+    re.DOTALL,
+)
 
 
 def load_yaml(rel_path: str) -> dict:
@@ -58,12 +64,44 @@ def extract_tool_calls(text: str) -> list[dict]:
     return calls
 
 
+def think_format_error(assistant_content: str) -> str | None:
+    """Valida o bloco de reasoning embutido no início de um turno assistant."""
+    text = assistant_content or ""
+    if not THINK_TAG_RE.search(text):
+        return None
+    match = THINK_TURN_RE.fullmatch(text)
+    if not match:
+        return "bloco_think_malformado"
+    reasoning = match.group("reasoning")
+    if not reasoning.strip():
+        return "bloco_think_vazio"
+    if THINK_TAG_RE.search(reasoning):
+        return "bloco_think_malformado"
+    if "<tool_call>" in reasoning or "</tool_call>" in reasoning:
+        return "tool_call_dentro_do_think"
+    return None
+
+
+def think_text(assistant_content: str) -> str:
+    """Retorna o conteúdo do bloco <think> de um turno (string vazia se não houver ou malformado)."""
+    match = THINK_TURN_RE.fullmatch(assistant_content or "")
+    return match.group("reasoning").strip() if match else ""
+
+
+def strip_think_blocks(text: str) -> str:
+    """Remove reasoning oculto antes de métricas sobre a resposta visível."""
+    visible = THINK_BLOCK_RE.sub("", text or "")
+    # Geração truncada pode terminar antes de </think>; isso não é preâmbulo visível.
+    return re.sub(r"<think>.*\Z", "", visible, flags=re.DOTALL)
+
+
 def preamble_text(assistant_content: str) -> str:
-    """Texto antes da primeira tool call; se não houver tool call, o primeiro parágrafo."""
-    m = TOOL_CALL_RE.search(assistant_content or "")
+    """Preâmbulo visível antes da tool call, sem contar blocos de reasoning."""
+    visible = strip_think_blocks(assistant_content)
+    m = TOOL_CALL_RE.search(visible)
     if m:
-        return assistant_content[: m.start()].strip()
-    return (assistant_content or "").strip().split("\n\n")[0].strip()
+        return visible[: m.start()].strip()
+    return visible.strip().split("\n\n")[0].strip()
 
 
 def word_count(text: str) -> int:

@@ -8,12 +8,11 @@ Uso:
     python src/build_dataset.py data/clean/dataset.jsonl --show-masks   # teste: imprime spans de 3 exemplos
 
 A renderização é SEMPRE via tokenizer.apply_chat_template — nunca concatenação manual, e SEMPRE
-de uma vez só (a conversa inteira). Alguns templates (ex.: Qwen3-1.7B, híbrido de raciocínio)
-tratam o ÚLTIMO turno da conversa de forma especial (inserem um <think></think> vazio só nele);
-renderizar prefixos messages[:i] incrementalmente faria cada turno parecer "o último" na sua
-própria fatia e desalinharia a máscara. Por isso os spans do assistant são localizados por
-offset de caractere numa única renderização completa — o mesmo princípio do
-train_on_responses_only do Unsloth.
+de uma vez só (a conversa inteira). O Qwen3-8B extrai o reasoning de blocos <think> embutidos
+em cada content de assistant. Renderizar prefixos messages[:i] incrementalmente faria cada
+turno parecer "o último" na própria fatia e poderia desalinhá-lo. Por isso os spans do
+assistant são localizados por offset de caractere numa única renderização completa — o mesmo
+princípio do train_on_responses_only do Unsloth.
 """
 import argparse
 import json
@@ -44,11 +43,10 @@ def assistant_spans(text: str) -> list[tuple[int, int]]:
 
 def build_example(tokenizer, messages, tools):
     """Retorna (input_ids, labels, text). Turnos não-assistant (e o que o template injeta em volta) ficam IGNORE."""
-    # enable_thinking=False explicito: em modelos hibridos (ex. Qwen3-8B) o default varia entre
-    # renderizar turno completo (fecha <think></think> vazio) e prompt de geracao (deixa aberto) —
-    # forcar False aqui garante que bate com o que eval_harness.py/inference_loop.py usam na geracao.
+    # Neste branch o alvo é o Qwen3-8B com reasoning habilitado. Em turnos já completos, o
+    # template extrai <think> do content quando presente e deixa os demais turnos sem stub.
     text = tokenizer.apply_chat_template(
-        messages, tools=tools, tokenize=False, add_generation_prompt=False, enable_thinking=False
+        messages, tools=tools, tokenize=False, add_generation_prompt=False, enable_thinking=True
     )
     enc = tokenizer(text, add_special_tokens=False, return_offsets_mapping=True)
     ids, offsets = list(enc["input_ids"]), enc["offset_mapping"]
@@ -85,7 +83,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("file", type=Path)
     ap.add_argument("--out", type=Path, default=ROOT / "data" / "clean" / "train.jsonl")
-    ap.add_argument("--model", default="Qwen/Qwen3-4B-Instruct-2507")
+    ap.add_argument("--model", default="Qwen/Qwen3-8B")
     ap.add_argument("--show-masks", action="store_true")
     ap.add_argument("--max-len", type=int, default=4096)
     args = ap.parse_args()

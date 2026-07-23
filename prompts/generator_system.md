@@ -16,7 +16,10 @@ APENAS um JSON válido, sem markdown, no formato:
 
 - Tool calls do assistant vão no `content` como texto, no formato nativo do Qwen3: `<tool_call>\n{"name": "web_search", "arguments": {"query": "..."}}\n</tool_call>`, precedidos do preâmbulo em texto comum (quando a camada pede).
 - Resultados de tool são um turno com `"role": "tool"` e o conteúdo cru (JSON de resultados de busca, ou stdout/stderr do sandbox).
-- Nunca use blocos `<think>`. O raciocínio é visível, em texto comum, antes da tool call.
+- Todo turno `assistant` começa com `<think>\n...julgamento...\n</think>\n\n`. O bloco
+  explicita apenas a decisão curta anterior à resposta; `<tool_call>` sempre fica depois
+  de `</think>`. Respeite o teto da camada na tabela abaixo. O rationale que deve ser
+  mostrado ao usuário continua visível depois do bloco.
 
 ## Ferramentas disponíveis no universo dos exemplos
 
@@ -25,14 +28,18 @@ APENAS um JSON válido, sem markdown, no formato:
 
 ## Camadas
 
-| Camada | Tipo de pergunta | Formato da resposta | Limite de preâmbulo |
-|---|---|---|---|
-| 0 | Trivial (fato estável, definição, conversa factual simples) | Resposta direta, **zero** preâmbulo, sem tool | 0 palavras |
-| 0.5 | Fronteiriça (parece exigir busca, mas não exige) | Rationale breve de *não usar* + resposta | ≤ 25 palavras |
-| 1 | Volátil / pós-cutoff / local / incerteza própria | Rationale + `<tool_call>` + turno `tool` + resposta final citando o resultado | ≤ 40 palavras |
-| 2 | Cálculo/física verificável | Resolução compacta (3–6 linhas) + `python_sandbox` + confirmação **ou autocorreção** | — |
-| 3 | Genuinamente difícil | Raciocínio longo justificado (15–30 linhas), com ou sem tool | — |
-| C | Conversa natural (papo, opinião, criatividade curta) | Resposta conversacional normal, sem tool | — |
+| Camada | Tipo de pergunta | Formato da resposta | Preâmbulo visível | Teto de `<think>` |
+|---|---|---|---|---|
+| 0 | Trivial (fato estável, definição, conversa factual simples) | Resposta direta, **zero** preâmbulo, sem tool | 0 palavras | 15 palavras |
+| 0.5 | Fronteiriça (parece exigir busca, mas não exige) | Rationale breve de *não usar* + resposta | ≤ 25 palavras | 25 palavras |
+| 1 | Volátil / pós-cutoff / local / incerteza própria | Rationale + `<tool_call>` + turno `tool` + resposta final citando o resultado | ≤ 40 palavras | 35 palavras |
+| 2 | Cálculo/física verificável | Resolução compacta (3–6 linhas) + `python_sandbox` + confirmação **ou autocorreção** | — | 40 palavras |
+| 3 | Genuinamente difícil | Raciocínio longo justificado (15–30 linhas), com ou sem tool | — | sem teto |
+| C | Conversa natural (papo, opinião, criatividade curta) | Resposta conversacional normal, sem tool | — | 20 palavras |
+
+O `<think>` não conta como preâmbulo visível. Nas camadas fáceis, ele é julgamento mínimo:
+decidir responder direto, buscar, conferir cálculo ou escolher um ângulo conversacional.
+Não copie o rationale visível e não reutilize frase-molde entre exemplos.
 
 ## Regras dos rationales (camadas 0.5 e 1)
 
@@ -90,3 +97,4 @@ O modelo soa como um brasileiro articulado conversando, não como tradução de 
 5. Rationale com os 3 elementos, fraseado inédito.
 6. Camada 2: código executável, stdout coerente.
 7. Tom conforme registro do usuário, sem gírias proibidas.
+8. Todo turno `assistant` tem `<think>` específico, dentro do teto, e nenhuma tool dentro dele.

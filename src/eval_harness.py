@@ -1,8 +1,8 @@
 """Avaliação: decisão de tool + comprimento de preâmbulo (Fases 0 e 4).
 
 Roda no Colab (L4) ou em qualquer máquina com GPU:
-    python src/eval_harness.py --model Qwen/Qwen3-4B-Instruct-2507 --out outputs/baseline_metrics.json
-    python src/eval_harness.py --model Qwen/Qwen3-4B-Instruct-2507 --adapter outputs/adapter --out outputs/trained_metrics.json
+    python src/eval_harness.py --model Qwen/Qwen3-8B --out outputs/baseline_metrics.json
+    python src/eval_harness.py --model Qwen/Qwen3-8B --adapter outputs/adapter --out outputs/trained_metrics.json
 
 Métricas: precisão/recall/F1 por tool, matriz de confusão, taxa de tool call com JSON
 válido, mediana de palavras/tokens de preâmbulo por camada. Amostra 20 respostas para
@@ -49,7 +49,7 @@ def main():
     ap.add_argument("--adapter", default=None, help="pasta do adapter LoRA (Fase 4)")
     ap.add_argument("--testset", type=Path, default=ROOT / "data" / "eval" / "testset.jsonl")
     ap.add_argument("--out", type=Path, default=ROOT / "outputs" / "metrics.json")
-    ap.add_argument("--max-new-tokens", type=int, default=512)
+    ap.add_argument("--max-new-tokens", type=int, default=2048)
     ap.add_argument("--limit", type=int, default=None, help="avaliar só os N primeiros (debug)")
     args = ap.parse_args()
 
@@ -73,10 +73,9 @@ def main():
     preamble_tokens = defaultdict(list)
 
     for i, case in enumerate(cases, 1):
-        # enable_thinking=False: mesma justificativa de build_dataset.py — mantem geracao
-        # consistente com o formato (sem <think> real) que o treino ensinou.
+        # O branch Qwen3-8B treina reasoning real nos itens difíceis de camada 3.
         prompt = tokenizer.apply_chat_template(
-            case["messages"], tools=tools, tokenize=False, add_generation_prompt=True, enable_thinking=False
+            case["messages"], tools=tools, tokenize=False, add_generation_prompt=True, enable_thinking=True
         )
         inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
         with torch.no_grad():
