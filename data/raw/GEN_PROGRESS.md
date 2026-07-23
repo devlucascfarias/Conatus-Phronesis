@@ -65,6 +65,79 @@ O retrofit das camadas 0/0.5/1/2/C foi concluído e validado. O modelo passa a v
 curtas nas tarefas simples e reasoning progressivamente maior conforme a camada, sem
 depender de um roteador externo.
 
+### Inclusão dos 176 itens de camada 2 parados + batch_021 (reforço) — 595 → 846
+
+Decisão registrada em conversa (não repetida aqui em detalhe): os 176 itens de camada 2
+das 8 famílias "difíceis" do GPT-5.6 que nunca entraram em treino (reservados desde a
+seleção original, ver seção "Trilha GPT-5.6" abaixo) foram incluídos inteiros —
+`src/build_gpt56_selection.py` agora pega `camada2[3:]` de cada família (os 3 primeiros
+continuam reservados pro held-out `math_rigor_testset.jsonl`, sem vazamento, conferido).
+Isso levou camada 2 pra ~40% do dataset, bem acima do alvo formal (18%) — calculado que
+rebalancear pra bater o alvo formal exigiria mais de 1.000 itens novos, desproporcional;
+decisão foi aceitar o desvio (mesmo precedente já usado pra camada 3) e proteger
+especificamente o que já regrediu uma vez (recall de `web_search`) com um lote de reforço
+em vez de perseguir a proporção.
+
+`batch_021` (75 itens): 25 camada 1 (`volatilidade_temporal`/`incerteza_propria`,
+reforço direto do recall que caiu no episódio de regressão documentado abaixo) + 20
+camada 0.5 + 20 camada C + 10 camada 0 (as mais carentes do alvo). 595→846 itens,
+846/846 na validação, 0 colisões de n-grama.
+
+### Lote corretivo 7 (batch_022) — pós-demo do 8B treinado com thinking
+
+Primeiro treino real do 8B (846 itens) revelou, num demo ao vivo: (1) fabricação de fonte
+não presente no `tool_response` (cotação do dólar citando "Banco Central" que não veio na
+busca); (2) o mesmo bug de divisão inteira (`//`) resurgindo numa pergunta nova, apesar de
+3 lotes corretivos anteriores (018/020); (3) alucinação de unidade ("R$" numa pergunta sem
+contexto de dinheiro); (4) erro factual numa curiosidade numérica (ângulo de polígono
+regular). 14 itens dirigidos, incluindo contraste explícito "com unidade" vs "sem unidade".
+846→860, 860/860 na validação.
+
+### batch_023 + batch_024 — "nunca fecha sem verificar" e "desistência graciosa"
+
+Avaliação mais profunda do 8B (bateria manual de 16 perguntas de nível avançado +
+comparação `do_sample=False` vs `do_sample=True`, registrada em
+`data/eval/thinking_8b_eval_notes.md`) revelou dois padrões sistêmicos, não mais casos
+pontuais: **greedy colapsa em loop de repetição** quando a autocorreção falha mais de uma
+vez (~25% do held-out, ex.: autovalores, EDO com ressonância, campo elétrico, incerteza
+quântica — trocando um número a cada linha, evadindo `no_repeat_ngram_size`); **sampling
+evita o loop mas inventa resposta confiante sem verificar** (3 casos que o greedy tinha
+acertado — integral dupla, esfera na cúpula, dilatação temporal — o sampling errou sem
+nenhum sinal de alerta, porque nunca chamou `python_sandbox` antes do `\boxed{}`).
+
+Causa raiz: nenhum exemplo do dataset mostra autocorreção que ainda não fechou depois de
+uma segunda tentativa — só existe o caso feliz (corrige de primeira). `batch_023` (50
+itens): 28 "nunca fecha sem verificar" (todo `\boxed{}` só depois do sandbox, temas
+variados) + 22 "desistência graciosa" em camada 3 (duas tentativas reais, a segunda
+também falha genuinamente, resposta final com ressalva sem drama). `batch_024` (12
+itens): mesmo padrão de desistência graciosa, mas em camada 2 (cálculo de rotina) — faltava
+no batch_023, que tinha posto os 22 todos em camada 3. 860→922, 922/922 na validação.
+
+Decodificação também mudou: `do_sample=True` com os parâmetros reais do
+`generation_config.json` do Qwen3-8B (`temperature=0.6, top_k=20, top_p=0.95`) virou
+padrão em `eval_harness.py` (com seed fixa por caso, pra manter comparabilidade entre
+rodadas), `inference_loop.py` e o notebook — loop de repetição é pior que resposta errada
+(trava a geração inteira), e a expectativa é que `batch_023`/`batch_024` reduzam o problema
+que fez o sampling errar sem aviso.
+
+`src/validate_data.py` passou a reexecutar sandbox também na camada 3 (antes só camada 2)
+— achou na hora um bug pré-existente na heurística de detecção de traceback (`"error" in
+texto` casava com `alternating_error_bound=0.0099` num stdout legítimo e reprovava o item
+à toa); corrigido pra exigir `Traceback` ou nome de exceção Python em início de linha.
+
+**Pendente**: `batch_025` (~40 itens, só camada 1) foi encomendado pra reverter a diluição
+— camada 1 caiu de 25,4% (595 itens) pra 19,6% (922 itens), abaixo do ponto que já causou a
+regressão de recall documentada na seção seguinte. Retreinar sem isso arrisca reproduzir o
+mesmo problema.
+
+**Scorer de rigor matemático construído, ainda não rodado**: `data/eval/math_rigor_testset.jsonl`
+(40 itens held-out, nunca usados em treino) tinha gabarito mas nenhum consumidor —
+`src/run_math_rigor_eval.py` (gera respostas do modelo no Colab) +
+`src/score_math_rigor.py` (`prepare`/`apply`, mesmo padrão de `src/judge_data.py` — juiz é
+Claude Code, sem API externa, porque comparação simbólica de LaTeX é frágil demais pra um
+comparador mecânico) + `prompts/judge_math_rigor.md`. Falta rodar contra um checkpoint
+treinado de verdade.
+
 ### Iteração pós-treino do 4B com o dataset combinado (579 → regressão medida)
 
 Treinou-se o 4B com os 579 exemplos (pipeline 491 + seleção GPT-5.6 v1, 100 itens incluindo 34

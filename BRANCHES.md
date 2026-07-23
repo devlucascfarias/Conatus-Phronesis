@@ -1,5 +1,11 @@
 # Branches deste repositório — leia antes de commitar
 
+> **Nota (branch `phronesis-thinking`)**: `plano.md`, `MODEL_CARD.md` e `README.md`,
+> citados abaixo, foram removidos deste branch por decisão explícita (experimento de
+> thinking no Qwen3-8B, não documentado nesses arquivos). Eles continuam existindo em
+> `main` — troque de branch pra consultá-los. O conteúdo deste arquivo abaixo descreve
+> `main`, que segue com esses três arquivos intactos.
+
 Este repositório hospeda **dois projetos diferentes** que não têm nenhuma relação de
 código entre si. Eles compartilham o mesmo repositório Git só por conveniência
 histórica, mas vivem em branches separadas e **nunca devem ser misturados**.
