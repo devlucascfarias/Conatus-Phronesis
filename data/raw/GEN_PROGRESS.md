@@ -35,6 +35,25 @@ Resultado: `python src/build_gpt56_selection.py` gera `data/raw/gpt56_combined_s
 → **579 aprovados, 0 rejeitados**. Distribuição final: camada 0 16.2%, 0.5 9.2%, **1 (web_search) 24.9%**
 (queda real mas não pela metade), 2 25.4%, 3 10.0% (2x o alvo original, deliberado), C 14.3%.
 `train.jsonl` já gerado a partir desse `dataset.jsonl` (579 exemplos, 0 descartados por tamanho).
+
+### O que fazer com os 366 exemplos do GPT-5.6 que ficaram de fora
+
+`eval_harness.py` só mede escolha de tool (web_search/sandbox/nenhuma) e comprimento de preâmbulo —
+nunca mediu se o raciocínio em si é correto ou rigoroso, e `data/eval/testset.jsonl` tem **zero
+exemplos de camada 3** e só 20 de camada 2. Ou seja: não havia forma sistemática de checar se o
+próximo treino corrige os bugs documentados em `prompts/generator_math_gpt56.md` (indeterminação
+falsa, pular resolução, autocontradição) — só manualmente, como no teste ao vivo contra o Ollama.
+
+Decisão: `python src/build_math_rigor_testset.py` monta `data/eval/math_rigor_testset.jsonl`
+(**40 itens, held-out**: 3 camada 2 + 2 camada 3 por família, das 8 famílias difíceis, nenhum deles
+usado na seleção de treino — confirmado sem overlap). Cada item já carrega a resolução de referência
+completa (com `\boxed{}`) como ground truth pra comparar contra o que o modelo treinado produzir.
+Ainda não construí um scorer automático — o modelo desta rodada nem foi treinado ainda; isso é pra
+fazer depois do treino, quando houver o que avaliar de verdade.
+
+Os outros **~326 exemplos** (metades de camada 2 das 8 famílias + o excedente de camada 3 além do
+usado no eval/treino) ficam reservados em `data/raw/gpt56_*.jsonl`, sem uso definido ainda — decisão
+de incluir mais (ou não) fica pra depois de ver o resultado do eval desta iteração.
 - Próximo passo: treinar o 4B na Fase 3 e avaliar na Fase 4; análise de erro guia se vale escalar além de 300
 
 ### Lições recorrentes (evitar retrabalho)
