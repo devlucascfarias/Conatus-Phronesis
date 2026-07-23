@@ -10,9 +10,31 @@
 
 ## Estado
 
-- Batches concluídos: **001**–**015** (300 base + 16 cam3 + 47 corretivo + 24 corretivo2 + 26 rebalanceamento + 10 polimento)
+- Batches concluídos: **001**–**017** (300 base + 16 cam3 + 47 corretivo + 24 corretivo2 + 26 rebalanceamento
+  + 10 polimento + 20 identidade [016] + 16 recall câmbio/cargo [017])
 - Pilotos Fase 1: 20 exemplos aprovados (`data/raw/pilot.jsonl`)
-- **Total aprovado: 443** (423 gerados + 20 pilotos), 443/443 na validação
+- **Total aprovado (pipeline original): 479** (459 gerados + 20 pilotos), 479/479 na validação
+
+### Trilha GPT-5.6 (matemática/física pós-graduação) — decisão de merge
+
+Paralelo ao pipeline acima, `prompts/generator_math_gpt56.md` gerou 466 exemplos (camada 2/3) via
+GPT-5.6 em 8 famílias + cálculo rápido + multiturno (ver `data/raw/gpt56_*.jsonl`). Concatenar tudo
+direto inflaria camada 3 de 5% pro alvo pra ~24% do total e diluiria o recall de `web_search`
+(camada 1) de 30% pra 14% — risco real, já que esse recall levou 3 lotes corretivos pra estabilizar
+(ver notas de batch 012/013 abaixo).
+
+**Decisão**: `src/build_gpt56_selection.py` monta uma seleção de 100 itens da trilha GPT-5.6 —
+`calculo_rapido` (50) e `multiturno` (16) inteiros (comportamento que não existe em nenhum outro
+lugar do dataset: autocorreção real e reação genuína a follow-up), mais uma amostra estratificada
+de 34 itens de camada 3 (~4-5 por família) das 8 famílias difíceis. Nenhuma das metades de camada 2
+dessas 8 famílias entra neste treino — ficam salvas em `data/raw/gpt56_*.jsonl` pra uso futuro.
+
+Resultado: `python src/build_gpt56_selection.py` gera `data/raw/gpt56_combined_selection.jsonl`
+(100 itens); validado junto com o pipeline original via
+`python src/validate_data.py data/raw/pilot.jsonl data/raw/gen/*.jsonl data/raw/gpt56_combined_selection.jsonl`
+→ **579 aprovados, 0 rejeitados**. Distribuição final: camada 0 16.2%, 0.5 9.2%, **1 (web_search) 24.9%**
+(queda real mas não pela metade), 2 25.4%, 3 10.0% (2x o alvo original, deliberado), C 14.3%.
+`train.jsonl` já gerado a partir desse `dataset.jsonl` (579 exemplos, 0 descartados por tamanho).
 - Próximo passo: treinar o 4B na Fase 3 e avaliar na Fase 4; análise de erro guia se vale escalar além de 300
 
 ### Lições recorrentes (evitar retrabalho)
