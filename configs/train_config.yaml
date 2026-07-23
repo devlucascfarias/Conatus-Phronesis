@@ -1,4 +1,15 @@
 # Hiperparâmetros de treino (Fase 3) — QLoRA via Unsloth
+#
+# Rodada com 962 exemplos (branch phronesis-thinking). Os valores abaixo mudaram em
+# relação ao 4B original (579 exemplos, 1 época) porque a avaliação pós-treino mostrou
+# um padrão consistente: lotes corretivos pequenos NÃO generalizavam — o bug de divisão
+# inteira reapareceu 3x em contextos novos, a fabricação de fonte vazou pra cenários
+# não treinados, e comportamentos ensinados por poucos exemplos não pegavam. Ver
+# data/eval/thinking_8b_eval_notes.md.
+#
+# Diagnóstico: com batch efetivo 16 e 1 época, 962 exemplos dão ~60 passos de
+# otimização no total. Comportamentos com poucos exemplos (ex.: desistência graciosa,
+# 34 itens) recebiam ~2 passos de exposição — regime de sub-treino, não de overfit.
 
 model:
   base: Qwen/Qwen3-8B                  # alvo deste branch: híbrido com reasoning real
@@ -8,9 +19,12 @@ model:
   max_seq_len: 4096
 
 lora:
-  r: 16
-  alpha: 32
-  dropout: 0.05
+  r: 32                # era 16 (herdado do 4B/579 exemplos): dataset cresceu 66% e ganhou
+                       # comportamentos novos (thinking em todas as camadas, desistência
+                       # graciosa, verificação-antes-de-fechar). r=16 num 8B é conservador.
+  alpha: 64            # mantém a convenção alpha = 2*r
+  dropout: 0.05        # mantido: com ~120 passos ainda estamos longe do regime de overfit,
+                       # regularizar demais atrapalharia o aprendizado
   target_modules:
     - q_proj
     - k_proj
@@ -23,10 +37,20 @@ lora:
 training:
   learning_rate: 2.0e-4
   scheduler: cosine
-  warmup_ratio: 0.03
-  num_epochs: 1
+  warmup_ratio: 0.05   # era 0.03: com ~120 passos, 3% dava só ~4 passos de warmup
+  num_epochs: 2        # era 1 — a mudança principal. Dobra a exposição (60 → ~120 passos).
+                       # Não fomos pra 3 direto porque o eval split (abaixo) vai dizer se
+                       # ainda há espaço: se a val loss continuar caindo no fim da época 2,
+                       # a próxima rodada sobe.
+  weight_decay: 0.01   # era 0.0 (default do HF): regularização padrão de SFT
+  neftune_noise_alpha: 5  # ruído nos embeddings durante o treino; técnica específica pra
+                          # generalização em instruction tuning. Aplicado de forma
+                          # defensiva no notebook (só se a versão do TRL suportar).
   per_device_batch_size: 2
   gradient_accumulation_steps: 8      # batch efetivo ~16
   seed: 42
   logging_steps: 5
+  val_split: 0.05      # split de validação estratificado por camada — antes não existia
+                       # nenhum, então treinar >1 época seria às cegas (sem como saber se
+                       # a época extra ajudou ou começou a decorar)
   save_merged_16bit: true             # p/ avaliação na Fase 4

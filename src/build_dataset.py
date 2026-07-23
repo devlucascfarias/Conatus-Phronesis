@@ -105,7 +105,11 @@ def main():
             if len(ids) > args.max_len:
                 n_long += 1
                 continue
-            f.write(json.dumps({"text": text, "input_ids": ids, "labels": labels}, ensure_ascii=False) + "\n")
+            # `layer` viaja junto so pra permitir split de validacao estratificado no
+            # notebook (camada 2 e ~40% do dataset; um split aleatorio nao representaria
+            # as outras camadas). O treino em si remove tudo menos `text`.
+            layer = str(ex.get("layer", ex.get("_task", {}).get("layer", "?")))
+            f.write(json.dumps({"text": text, "layer": layer, "input_ids": ids, "labels": labels}, ensure_ascii=False) + "\n")
     print(f"{len(examples) - n_long} exemplos → {args.out} ({n_long} descartados por exceder {args.max_len} tokens)")
     print("No Colab, alinhe o train_on_responses_only do Unsloth com esta máscara "
           "(instruction_part='<|im_start|>user', response_part='<|im_start|>assistant').")
