@@ -72,6 +72,33 @@ verdadeiras e verificáveis em temas novos). `dataset.jsonl`/`train.jsonl` já r
 `python src/validate_data.py data/raw/pilot.jsonl data/raw/gen/*.jsonl data/raw/gpt56_combined_selection.jsonl`
 → **591 aprovados, 0 rejeitados** (491 pipeline original + 100 seleção GPT-5.6).
 
+### Lote corretivo 6 (batch 020) — o bug de `//` reapareceu mesmo com a correção do batch 018 no dataset
+
+Nova demo ao vivo (4B retreinado já com os 587 exemplos do batch 018+019) reproduziu o **mesmo bug**
+que o batch 018 já tinha corrigido no dataset — e de forma pior: `print(3*18420//8)` de novo (divisão
+inteira), e dessa vez a resposta final nem sequer corrigiu o valor de cabeça (ficou em "6907", igual
+ao checker truncado) e ainda trocou os dígitos do enunciado ("18.240" em vez de "18.420"). O exemplo
+de correção exata (task 702, `37,5% de 18.420` com `/`) **estava presente no dataset de treino**, então
+isso não é falta de dado — é sinal de que 1 exemplo verbatim, com 1 época de treino, não gerou peso de
+gradiente suficiente pra sobrepor o prior do modelo base nesse padrão específico.
+
+8 exemplos novos, focados em **reforçar a regra geral em vez de só repetir o mesmo par pergunta-resposta**:
+6 variações de fração-percentual com números diferentes (incluindo um caso onde o resultado da divisão
+real também é inteiro, pra não ensinar "// serve quando eu já espero um inteiro"), 1 exemplo de
+auto-explicação da regra (por que `/` e não `//`) pra reforçar o princípio em vez de só memorizar pares,
+e a pergunta exata do demo (`37,5% de 18.420`) **repetida duas vezes** (task 901 e 908) — a segunda com
+ênfase extra em citar os números do enunciado sem trocar dígito — já que essa é literalmente a pergunta
+fixa usada na célula 15 do notebook a cada rodada de demo.
+
+`python src/validate_data.py data/raw/pilot.jsonl data/raw/gen/*.jsonl data/raw/gpt56_combined_selection.jsonl`
+→ **595 aprovados, 0 rejeitados**. `dataset.jsonl`/`train.jsonl` a regenerar no próximo treino (a célula
+4 do notebook já faz isso automaticamente a partir do `dataset.jsonl` atualizado).
+
+Se o bug persistir depois desse lote, o próximo passo não é mais dado — é hiperparâmetro: considerar
+`num_train_epochs: 2` em `configs/train_config.yaml` (hoje 1 época só), já que o resto do dataset está
+com bom recall exceto justamente os padrões corrigidos há pouco tempo (repetição fresca, ainda não
+consolidada).
+
 ### Trilha GPT-5.6 (matemática/física pós-graduação) — decisão de merge
 
 Paralelo ao pipeline acima, `prompts/generator_math_gpt56.md` gerou 466 exemplos (camada 2/3) via

@@ -197,7 +197,10 @@ def main():
     tools = load_tools()
 
     def generate(messages) -> str:
-        prompt = tokenizer.apply_chat_template(messages, tools=tools, tokenize=False, add_generation_prompt=True)
+        # enable_thinking=False: mesma justificativa de build_dataset.py/eval_harness.py.
+        prompt = tokenizer.apply_chat_template(
+            messages, tools=tools, tokenize=False, add_generation_prompt=True, enable_thinking=False
+        )
         inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
         with torch.no_grad():
             out = model.generate(**inputs, max_new_tokens=args.max_new_tokens, do_sample=False,

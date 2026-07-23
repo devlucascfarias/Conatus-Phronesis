@@ -44,7 +44,12 @@ def assistant_spans(text: str) -> list[tuple[int, int]]:
 
 def build_example(tokenizer, messages, tools):
     """Retorna (input_ids, labels, text). Turnos não-assistant (e o que o template injeta em volta) ficam IGNORE."""
-    text = tokenizer.apply_chat_template(messages, tools=tools, tokenize=False, add_generation_prompt=False)
+    # enable_thinking=False explicito: em modelos hibridos (ex. Qwen3-8B) o default varia entre
+    # renderizar turno completo (fecha <think></think> vazio) e prompt de geracao (deixa aberto) —
+    # forcar False aqui garante que bate com o que eval_harness.py/inference_loop.py usam na geracao.
+    text = tokenizer.apply_chat_template(
+        messages, tools=tools, tokenize=False, add_generation_prompt=False, enable_thinking=False
+    )
     enc = tokenizer(text, add_special_tokens=False, return_offsets_mapping=True)
     ids, offsets = list(enc["input_ids"]), enc["offset_mapping"]
     spans = assistant_spans(text)

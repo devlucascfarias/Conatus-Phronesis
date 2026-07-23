@@ -73,8 +73,10 @@ def main():
     preamble_tokens = defaultdict(list)
 
     for i, case in enumerate(cases, 1):
+        # enable_thinking=False: mesma justificativa de build_dataset.py — mantem geracao
+        # consistente com o formato (sem <think> real) que o treino ensinou.
         prompt = tokenizer.apply_chat_template(
-            case["messages"], tools=tools, tokenize=False, add_generation_prompt=True
+            case["messages"], tools=tools, tokenize=False, add_generation_prompt=True, enable_thinking=False
         )
         inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
         with torch.no_grad():
