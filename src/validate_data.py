@@ -92,13 +92,29 @@ def run_sandbox_code(code: str, timeout: int) -> tuple[str, str]:
 
 NUM_RE = re.compile(r"-?\d+(?:[.,]\d+)?")
 
+# Traceback de verdade, nao a palavra "error" solta: `alternating_error_bound=0.0099` num
+# stdout legitimo casava com um `"error" in texto` ingenuo e reprovava o item (visto no
+# task 1338). Exige "Traceback" ou um nome de excecao Python no inicio de linha.
+TRACEBACK_RE = re.compile(
+    r"^\s*Traceback \(most recent call last\)|^\s*[A-Za-z_][A-Za-z0-9_]*(?:Error|Exception|Interrupt)\s*:",
+    re.MULTILINE,
+)
+
+
+def looks_like_traceback(text: str) -> bool:
+    return bool(TRACEBACK_RE.search(text or ""))
+
 
 def numbers_of(text: str) -> list[str]:
     return [n.replace(",", ".") for n in NUM_RE.findall(text)]
 
 
-def check_layer2_execution(ex: dict, timeout: int) -> str | None:
-    """Executa de verdade cada python_sandbox e confere que o turno tool seguinte bate."""
+def check_sandbox_execution(ex: dict, timeout: int) -> str | None:
+    """Executa de verdade cada python_sandbox e confere que o turno tool seguinte bate.
+
+    Vale para camadas 2 e 3: a camada 3 passou a ter sandbox de verdade (batch_023 em
+    diante) e ficava sem reexecucao, um ponto cego real — stdout fabricado passaria batido.
+    """
     msgs = ex["messages"]
     for i, m in enumerate(msgs):
         if m.get("role") != "assistant":
@@ -112,7 +128,7 @@ def check_layer2_execution(ex: dict, timeout: int) -> str | None:
                     expected = m2.get("content") or ""
                     break
             stdout, stderr = run_sandbox_code(call["arguments"].get("code", ""), timeout)
-            if "error" in expected.lower() or "traceback" in expected.lower():
+            if looks_like_traceback(expected):
                 if not stderr:  # o exemplo afirma erro, mas o código roda limpo
                     return "tool_response_afirma_erro_mas_codigo_roda"
                 continue
@@ -189,8 +205,8 @@ def validate(files: list[Path]) -> None:
             if over is not None:
                 reject(ex, f"preambulo_acima_de_{limit}_palavras"); continue
 
-        if layer == "2":
-            err = check_layer2_execution(ex, vcfg["sandbox_exec_timeout_s"])
+        if layer in {"2", "3"}:
+            err = check_sandbox_execution(ex, vcfg["sandbox_exec_timeout_s"])
             if err:
                 reject(ex, err); continue
 

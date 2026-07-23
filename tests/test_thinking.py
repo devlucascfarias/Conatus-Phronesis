@@ -5,6 +5,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from common import preamble_text, strip_think_blocks, think_format_error, think_text, word_count
+from validate_data import looks_like_traceback
 
 
 def test_preamble_ignores_thinking_before_tool_call():
@@ -52,3 +53,18 @@ def test_think_text_supports_layer_word_limits():
     content = "<think>\nDecisão curta, específica e verificável.\n</think>\n\nResposta."
     assert think_text(content) == "Decisão curta, específica e verificável."
     assert word_count(think_text(content)) == 5
+
+
+def test_traceback_detection_accepts_real_python_errors():
+    assert looks_like_traceback(
+        'Traceback (most recent call last):\n  File "x.py", line 1\nNameError: name \'sym\' is not defined'
+    )
+    assert looks_like_traceback("ZeroDivisionError: division by zero")
+    assert looks_like_traceback("  SyntaxError: unterminated string literal")
+
+
+def test_traceback_detection_ignores_error_inside_variable_names():
+    # stdout legitimo do task 1338: 'error' aparece so como parte de um nome de variavel
+    stdout = "partial_N10000=0.599898768421624\nalternating_error_bound=0.009999500"
+    assert not looks_like_traceback(stdout)
+    assert not looks_like_traceback("relative_error=0.0001\nmax_error_estimate=1e-9")
