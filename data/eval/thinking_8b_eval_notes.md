@@ -12,8 +12,10 @@ recomendados do Qwen3) quando ela terminar.
   resolvia o loop de repetição — ver conclusão abaixo).
 - Dois conjuntos testados: (1) bateria manual de 9 perguntas (`perguntas_avaliacao` no
   notebook, inclui os 3 casos que já tinham falhado ao vivo antes do `batch_022`), e
-  (2) `data/eval/math_rigor_testset.jsonl` — 16 itens held-out de camada 2/3, nunca
-  usados em treino, com resolução de referência.
+  (2) bateria manual à parte de 16 perguntas (célula escrita pelo usuário, não é o
+  arquivo `data/eval/math_rigor_testset.jsonl` — são perguntas próprias de nível
+  similar em computação/matemática/física, sem gabarito de referência no repositório;
+  os vereditos abaixo vêm de conferência manual, não de comparação automática).
 
 ## Resultado 1 — bateria de 9 perguntas (regressão + amostra geral)
 
@@ -29,7 +31,7 @@ recomendados do Qwen3) quando ela terminar.
 | 8 | Pizza com abacaxi | OK |
 | 9 | Bhaskara 2x²-11x+12=0 | OK — matemática certa (raízes 4 e 3/2), só um glitch de LaTeX (`\±`) |
 
-## Resultado 2 — held-out `math_rigor_testset.jsonl` (16 itens, camada 2/3)
+## Resultado 2 — bateria manual de 16 perguntas (computação/matemática/física, sem gabarito no repo)
 
 | # | Tema | Veredito |
 |---|---|---|
@@ -84,10 +86,15 @@ texto nunca conta como "token repetido" pro mecanismo de penalidade enxergar.
 
 ## Pendente — comparação com `do_sample=True`
 
-Rodando com os parâmetros recomendados do `generation_config.json` real do Qwen3-8B
-(confirmado, não estimado): `temperature=0.6`, `top_k=20`, `top_p=0.95`,
-`repetition_penalty=1.15`, `no_repeat_ngram_size=8` mantidos.
+**Ainda não rodada de verdade.** Uma rodada anterior foi assumida como sampling por
+engano — a célula executada usava a função `generate()` com `do_sample=False` fixo no
+código (a mesma bateria de 16 perguntas, resultado idêntico ao registrado acima). O
+teste com sampling (`generate_sampling`, célula 17 do notebook, com os parâmetros
+recomendados confirmados no `generation_config.json` real do Qwen3-8B —
+`temperature=0.6`, `top_k=20`, `top_p=0.95`, `repetition_penalty=1.15`,
+`no_repeat_ngram_size=8`) continua pendente de execução.
 
-**Preencher depois que a rodada terminar**: os mesmos 16 itens do held-out saem do loop
-de repetição com sampling? Os erros de derivação/física (2, 12, 13, 14) mudam ou
-persistem (esses não são sobre repetição, então sampling sozinho não deveria corrigi-los)?
+**Preencher depois que a rodada com `generate_sampling` de fato rodar**: os mesmos 16
+itens saem do loop de repetição com sampling? Os erros de derivação/física (2, 12, 13,
+14) mudam ou persistem (esses não são sobre repetição, então sampling sozinho não
+deveria corrigi-los)?
