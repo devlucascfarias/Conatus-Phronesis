@@ -10,10 +10,30 @@
 
 ## Estado
 
-- Batches concluídos: **001**–**017** (300 base + 16 cam3 + 47 corretivo + 24 corretivo2 + 26 rebalanceamento
-  + 10 polimento + 20 identidade [016] + 16 recall câmbio/cargo [017])
+- Batches concluídos: **001**–**018** (300 base + 16 cam3 + 47 corretivo + 24 corretivo2 + 26 rebalanceamento
+  + 10 polimento + 20 identidade [016] + 16 recall câmbio/cargo [017] + 12 divisão real/curiosidade [018])
 - Pilotos Fase 1: 20 exemplos aprovados (`data/raw/pilot.jsonl`)
-- **Total aprovado (pipeline original): 479** (459 gerados + 20 pilotos), 479/479 na validação
+- **Total aprovado (pipeline original): 491** (471 gerados + 20 pilotos), 491/491 na validação
+
+### Lote corretivo 4 (batch 018) — pós-demo do 4B treinado com o dataset novo
+
+Demo ao vivo (Fase 5, modelo recém-treinado com os 579 exemplos da iteração anterior) mostrou
+2 falhas reais em 3 turnos testados: (1) camada 2 — o modelo escreveu `print(3*18420//8)` (divisão
+inteira) pro cálculo de `37,5% de 18.420`, o checker devolveu `6907` (truncado), mas a resposta
+final disse "6907,5" — o valor certo, só que **diferente do que o checker realmente retornou**,
+sinal de que o modelo ignorou o resultado da tool e substituiu por conta de cabeça própria (acertou
+por sorte, não por grounding). (2) camada C — "me conta uma curiosidade" sobre átomos na Terra vs.
+grão de areia saiu fisicamente incoerente e autocontraditória (dois expoentes diferentes pra mesma
+razão no mesmo parágrafo), regressão do padrão que o batch 015 já tinha corrigido uma vez.
+
+12 exemplos dirigidos: 6 camada 2 (percentual/fração via sandbox, sempre com `/` — nunca `//` —,
+incluindo autocorreção explícita do exato bug observado: código com `//`, checker trunca, modelo
+reconhece a divisão inteira como causa, corrige pra `/`, resposta final = literalmente o que o
+checker devolveu) + 6 camada C (curiosidades verificadas, incluindo a mesma comparação
+átomos-Terra-vs-grão-de-areia refeita com números conferidos e consistentes, mais 5 outras
+verdadeiras e verificáveis em temas novos). `dataset.jsonl`/`train.jsonl` já regenerados com
+`python src/validate_data.py data/raw/pilot.jsonl data/raw/gen/*.jsonl data/raw/gpt56_combined_selection.jsonl`
+→ **591 aprovados, 0 rejeitados** (491 pipeline original + 100 seleção GPT-5.6).
 
 ### Trilha GPT-5.6 (matemática/física pós-graduação) — decisão de merge
 
