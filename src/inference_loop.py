@@ -203,9 +203,12 @@ def main():
         )
         inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
         with torch.no_grad():
-            # repetition_penalty: greedy puro entra em loop de repeticao variando um numero a
-            # cada linha (evade no_repeat_ngram_size, que so bloqueia n-gramas identicos).
-            out = model.generate(**inputs, max_new_tokens=args.max_new_tokens, do_sample=False,
+            # do_sample=True com os parametros recomendados do Qwen3-8B (generation_config.json
+            # real do modelo) — greedy puro entra em loop de repeticao variando um numero a cada
+            # linha, medido em data/eval/thinking_8b_eval_notes.md. Sem seed fixa aqui de
+            # proposito: isto e uso interativo/demo, nao comparacao de metricas entre rodadas.
+            out = model.generate(**inputs, max_new_tokens=args.max_new_tokens, do_sample=True,
+                                 temperature=0.6, top_k=20, top_p=0.95,
                                  repetition_penalty=1.15, no_repeat_ngram_size=8,
                                  pad_token_id=tokenizer.eos_token_id)
         return tokenizer.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True).strip()
