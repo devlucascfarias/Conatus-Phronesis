@@ -84,17 +84,57 @@ texto nunca conta como "token repetido" pro mecanismo de penalidade enxergar.
    (frequências erradas), ciclo termodinâmico (eficiência >100% aceita sem questionar),
    campo elétrico (auto-contradição na própria derivação).
 
-## Pendente — comparação com `do_sample=True`
+## Resultado 3 — mesma bateria de 16, agora com `do_sample=True`
 
-**Ainda não rodada de verdade.** Uma rodada anterior foi assumida como sampling por
-engano — a célula executada usava a função `generate()` com `do_sample=False` fixo no
-código (a mesma bateria de 16 perguntas, resultado idêntico ao registrado acima). O
-teste com sampling (`generate_sampling`, célula 17 do notebook, com os parâmetros
-recomendados confirmados no `generation_config.json` real do Qwen3-8B —
 `temperature=0.6`, `top_k=20`, `top_p=0.95`, `repetition_penalty=1.15`,
-`no_repeat_ngram_size=8`) continua pendente de execução.
+`no_repeat_ngram_size=8` (confirmado no `generation_config.json` real do Qwen3-8B).
 
-**Preencher depois que a rodada com `generate_sampling` de fato rodar**: os mesmos 16
-itens saem do loop de repetição com sampling? Os erros de derivação/física (2, 12, 13,
-14) mudam ou persistem (esses não são sobre repetição, então sampling sozinho não
-deveria corrigi-los)?
+| # | Tema | Greedy (antes) | Sampling (agora) |
+|---|---|---|---|
+| 1 | Complexidade merge sort | OK (Θ(n log n) tempo e espaço) | Parcial — espaço dado como Θ(n) (provavelmente errado, deveria ser Θ(n log n)); tool call não verifica nada de verdade |
+| 2 | Estabilidade numérica sqrt(x²+1)-x | Falha de derivação (identidade inventada) | Derivação **melhor** (1/(√(x²+1)+x), correta) mas código quebra 2x seguidas (string não fechada, sintaxe malformada) — nunca entrega a função pedida |
+| 3 | GIL / threading / Lock | OK | OK |
+| 4 | Bellman-Ford vs Dijkstra | OK | OK |
+| 5 | Cache locality | OK | OK (com exagero não verificado: "mil vezes mais rápido"; alega TLB miss igual nos dois casos, questionável) |
+| 6 | Autovalores/exp(tA) | **Falha grave** — "diagonalizável" (errado) + loop de ~60 linhas | **Método certo dessa vez** (decomposição de Jordan, conclui corretamente "não diagonalizável"), mas tangente sem sentido tentando λ=3 primeiro, e a matriz final de exp(tA) tem erro de digitação/álgebra |
+| 7 | Integral dupla u,v | **OK** (conferido: 8/3·sinh(1)) | **Regressão — errado com confiança**: alega o integrando é ímpar em v (falso) e conclui que a integral vale 0, sem nenhuma verificação |
+| 8 | EDO com ressonância | Falha grave (loop "o que está errado?") | Não entra em loop, mas divaga em álgebra sem sentido, chama tool inexistente (`python_jupyter_cell`), nunca fecha com resposta final |
+| 9 | Convergência de série | OK | Conclusão majoritariamente certa, mas se autocontradiz no fim (diz que converge pontualmente em x=1, quando a própria explicação anterior mostrou que diverge ali) |
+| 10 | Bayes/sensibilidade | Falha — fabrica "1994" do nada | **Melhor** — sem número fabricado, chega em ~15 falsos por verdadeiro (correto ≈15,3), mesmo com um deslize (usa 98.000 em vez de 99.800 na população saudável) |
+| 11 | Esfera deslizando em cúpula | **OK** (conferido: cosθ=2/3) | **Regressão — errado com confiança**: erro de sinal na álgebra, chega em "sinθ=3/5" (não segue nem da própria equação escrita) |
+| 12 | Osciladores acoplados | Falha (conclui frequências iguais) | Ainda errado, mas ao menos reconhece que as frequências deveriam ser diferentes; usa uma matriz numérica inventada sem relação com o sistema físico real |
+| 13 | Campo elétrico | Falha grave (tool "python" inexistente, `</think>` malformado) | Ainda falha — mais nomes de tool inventados (`python_sandro`), variável não definida, código quebrado, nunca fecha |
+| 14 | Ciclo termodinâmico | Falha — alucina inconsistência que não existe, aceita eficiência de 131% | **Melhoria real**: reconhece corretamente que o ciclo FECHA (T_B=2T0, T_C=T0, T_A=T0 — bate com a conferência manual) — mas o código final é nonsense (usa `input()` dentro do sandbox, que não faz sentido ali) e nunca entrega números |
+| 15 | Dilatação temporal relativística | **OK** (conferido: γβ≈4,90) | **Regressão — errado com confiança**: calcula β=0,8 (deveria ser √(24/25)≈0,98), resultado final incorreto (4cτ₀ em vez de ~4,9cτ₀), e a "previsão sem dilatação" sai com unidade sem sentido |
+| 16 | Partícula na caixa, incerteza | Falha grave (loop "incerteza é zero" ~15x) | Não entra em loop, mas erra a normalização desde o primeiro passo (esquece metade do termo), chega em P₁=P₂=1/2 (deveria ser 1/5, 4/5 — isso é dado quase direto pelo enunciado) e numa resposta final com unidades inconsistentes |
+
+### Veredito da comparação
+
+**O loop de repetição sumiu por completo (0/16 com sampling, contra 4/16 no greedy)** —
+sampling resolve estruturalmente esse problema, confirmando a hipótese.
+
+**Mas surgiu uma troca ruim: respostas erradas COM confiança, sem nenhum sinal de
+alerta.** Três itens que o greedy acertou (7, 11, 15) o sampling errou de forma
+fluente e assertiva — sem repetição, sem "o que está errado?", só uma resposta limpa
+e incorreta. Isso é mais perigoso que o loop: o loop pelo menos é obviamente quebrado
+pra quem estiver lendo; uma resposta errada bem escrita passa despercebida.
+
+**Chamada de tool inexistente piorou**: 4 nomes inventados diferentes só nesta rodada
+(`python_jupyter_cell`, `python_print`, `python_eval`, `python_sandro`/`python_sandox`),
+contra 1 no greedy (`python`). Código com erro de sintaxe também ficou mais frequente.
+
+**Contagem aproximada**: greedy = 8 certos / 4 loop-quebrado / 4 errado-sem-loop.
+Sampling = ~5 certos / 0 loop / ~7 errado-com-confiança / 4 nunca fecha (código quebra
+antes de chegar a uma resposta, mas sem virar lixo repetitivo).
+
+### Conclusão prática
+
+Nenhum dos dois modos de decodificação é "a solução". `repetition_penalty` +
+`no_repeat_ngram_size` sozinhos (greedy) não bastam contra o colapso em loop; sampling
+resolve o loop mas piora confiabilidade de tool-calling e introduz erros silenciosos.
+Isso reforça a hipótese de dado (não decodificação) como causa raiz: o modelo precisa
+de mais exemplos de (a) verificação real via tool antes de assumir um resultado como
+final — vários dos erros "confiantes" da rodada de sampling (7, 11, 15) nunca chamaram
+`python_sandbox` pra conferir, foram direto pro `\boxed{}` sem checagem — e (b)
+desistência graciosa quando a autocorreção não fecha, em vez de degenerar (greedy) ou
+inventar uma resposta plausível sem verificar (sampling).
