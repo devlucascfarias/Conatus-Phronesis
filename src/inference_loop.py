@@ -166,7 +166,16 @@ def run_agent(messages, generate, max_iters=MAX_TOOL_ITERATIONS, verbose=True):
             break
         call = calls[0]
         executor = EXECUTORS.get(call.get("name"))
-        result = executor(call.get("arguments", {})) if executor else f"Erro: tool desconhecida '{call.get('name')}'"
+        if not executor:
+            result = f"Erro: tool desconhecida '{call.get('name')}'"
+        else:
+            try:
+                result = executor(call.get("arguments", {}))
+            except (KeyError, TypeError) as e:
+                # JSON com schema errado (ex.: {"()": "..."} em vez de {"code": "..."}) não
+                # pode derrubar a sessão inteira — vira erro que volta pro modelo, mesmo
+                # padrão de "tool desconhecida", pra ele ter chance de se corrigir.
+                result = f"Erro: argumentos inválidos para '{call.get('name')}' — {e!r}"
         if verbose:
             print(f"[{call.get('name')}] → {result[:400]}{'…' if len(result) > 400 else ''}\n")
         messages.append({"role": "tool", "content": result})
