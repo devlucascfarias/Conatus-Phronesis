@@ -5,7 +5,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from common import preamble_text, strip_think_blocks, think_format_error, think_text, word_count
-from validate_data import looks_like_traceback
+from validate_data import check_answer_echoes_tool, looks_like_traceback
 
 
 def test_preamble_ignores_thinking_before_tool_call():
@@ -68,3 +68,42 @@ def test_traceback_detection_ignores_error_inside_variable_names():
     stdout = "partial_N10000=0.599898768421624\nalternating_error_bound=0.009999500"
     assert not looks_like_traceback(stdout)
     assert not looks_like_traceback("relative_error=0.0001\nmax_error_estimate=1e-9")
+
+
+def _tool_episode(stdout: str, answer: str) -> dict:
+    return {
+        "messages": [
+            {"role": "user", "content": "Calcule."},
+            {
+                "role": "assistant",
+                "content": (
+                    "<think>\nPreciso conferir o valor.\n</think>\n\n"
+                    '<tool_call>\n{"name":"python_sandbox","arguments":{"code":"print(1)"}}\n'
+                    "</tool_call>"
+                ),
+            },
+            {"role": "tool", "content": stdout},
+            {
+                "role": "assistant",
+                "content": f"<think>\nO valor retornado é consistente.\n</think>\n\n{answer}",
+            },
+        ]
+    }
+
+
+def test_answer_echo_accepts_locale_formatting_and_rounding():
+    ex = _tool_episode("6907.5", r"O total é \(\boxed{\text{R\$ }6.907,50}\).")
+    assert check_answer_echoes_tool(ex) is None
+
+
+def test_answer_echo_rejects_a_competing_number():
+    ex = _tool_episode("6907.5", r"O total é \(\boxed{\text{R\$ }6.906,75}\).")
+    assert check_answer_echoes_tool(ex) == "resposta_nao_ecoa_resultado_tool"
+
+
+def test_answer_echo_accepts_raw_value_before_unit_conversion():
+    ex = _tool_episode(
+        "annual_rate=0.119016563",
+        r"A forma decimal é \(0.119016563\), ou \(\boxed{11{,}902\%}\).",
+    )
+    assert check_answer_echoes_tool(ex) is None

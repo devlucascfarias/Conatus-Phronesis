@@ -16,6 +16,29 @@ Limites: camada 0 = 0 palavras de preâmbulo; 0.5 ≤ 25; 1 ≤ 40. Camada 2 exi
 - 3: correto mas duro/traduzido, ou descontração levemente forçada.
 - 1: caricato (gírias proibidas: "mano", "véi", "top demais", "brabo", "cringe"), emoji não provocado, diminutivos em cascata, ou informalidade dentro de raciocínio matemático.
 
+## Critério 3 — Load-bearing do `<think>` (`loadbearing_score`, só camadas 2 e 3)
+
+Nas camadas 2/3 o `<think>` é deliberação que deve **preceder e determinar** a resposta —
+não uma justificativa escrita depois de uma solução já pronta (pós-hoc). Aplique o **teste
+contrafactual**:
+
+> Apague mentalmente o bloco `<think>`. A parte visível fica sem justificativa para pelo
+> menos UMA escolha (qual método, por que a forma não é indeterminada, por que a abordagem
+> óbvia falha)?
+
+- 5: sim — o `<think>` carrega pelo menos um passo do qual a resposta depende (verificação
+  da forma, descarte da abordagem ingênua, escolha genuína entre técnicas) e a parte visível
+  **executa** em vez de re-argumentar a escolha. Deliberação específica do item.
+- 3: há alguma deliberação real, mas parcialmente redundante com a parte visível, ou a
+  resposta se sustentaria quase inteira sem o `<think>`.
+- 1: pós-hoc — o `<think>` só antecipa/reafirma a conclusão (ex.: "é igual a −γ") e a parte
+  visível repete a mesma escolha; OU deliberação decorativa/teatral (dúvida inventada em
+  problema reto); OU o `<think>` afirma um valor/intermediário que a resposta final
+  contradiz.
+
+Camadas 0/0.5/1/C são rationale curto e calibrado (não derivação): este critério **não se
+aplica** — reporte `loadbearing_score: 5`.
+
 ## Verificações objetivas (qualquer falha ⇒ nota 1 no critério afetado)
 
 - Tool call com JSON inválido ou tool inexistente.
@@ -30,6 +53,7 @@ Limites: camada 0 = 0 palavras de preâmbulo; 0.5 ≤ 25; 1 ≤ 40. Camada 2 exi
 
 ## Saída
 
-APENAS JSON: `{"rationale_score": n, "tone_score": n, "verdict": "keep" | "discard", "reason": "uma frase"}`
+APENAS JSON: `{"rationale_score": n, "tone_score": n, "loadbearing_score": n, "verdict": "keep" | "discard", "reason": "uma frase"}`
 
-`verdict: keep` somente se ambas as notas ≥ 4.
+`verdict: keep` somente se `rationale_score` e `tone_score` ≥ 4 e — nas camadas 2/3 —
+também `loadbearing_score` ≥ 4 (nas demais camadas o load-bearing é sempre 5, não bloqueia).

@@ -26,6 +26,7 @@ from common import (
     load_yaml,
     preamble_text,
     read_jsonl,
+    strip_think_blocks,
     think_format_error,
     think_text,
     word_count,
@@ -107,6 +108,183 @@ def looks_like_traceback(text: str) -> bool:
 
 def numbers_of(text: str) -> list[str]:
     return [n.replace(",", ".") for n in NUM_RE.findall(text)]
+
+
+# Números na resposta VISÍVEL do assistant. O corpus é bilíngue: pt-BR usa "." de
+# milhar e "," decimal ("6.907,50"); en-US usa o inverso ("$554,395", "0.042212253").
+# A mesma grafia "47.426" é ambígua entre locales, então extraímos TODAS as leituras
+# plausíveis de cada token — o check só reprova se NENHUMA bate (ambiguidade ⇒ leniência).
+ANS_NUM_RE = re.compile(r"-?\d[\d.,]*\d|-?\d")
+
+
+def _interpretations(tok: str) -> list[float]:
+    tok = tok.replace("−", "-")           # minus unicode → hífen ASCII
+    out = set()
+
+    def add(s):
+        try:
+            out.add(float(s))
+        except ValueError:
+            pass
+
+    add(tok.replace(",", "").replace(" ", ""))            # en-US: "," = milhar
+    add(tok.replace(".", "").replace(",", "."))           # pt-BR: "." = milhar, "," = decimal
+    if tok.count(",") == 0 and tok.count(".") <= 1:
+        add(tok)                                           # decimal simples "6907.5"
+    return list(out)
+
+
+def answer_numbers(text: str) -> list[float]:
+    vals = []
+    for tok in ANS_NUM_RE.findall((text or "").replace("−", "-")):
+        vals.extend(_interpretations(tok))
+    return vals
+
+
+def _answer_after_tool(msgs: list[dict], tool_i: int) -> str | None:
+    """Primeira resposta visível do assistant depois do turno tool (sem <think>).
+
+    Tem de ser a que RESPONDE àquele tool, não o último turno da conversa — em
+    multi-turno o último assistant costuma responder a outra pergunta.
+    """
+    for m in msgs[tool_i + 1:]:
+        if m.get("role") == "assistant":
+            return strip_think_blocks(m.get("content") or "").strip()
+    return None
+
+
+def _echoes(target: float, ans_nums: list[float]) -> bool:
+    """A resposta ecoa o resultado se contém o número — inclusive arredondado.
+
+    Para cada número da resposta, confere se o alvo, arredondado à mesma quantidade
+    de casas, bate. Assim 26,83 casa com 26.8328 (round legítimo), mas 6.906,75 NÃO
+    casa com 6907.5 (corrupção real). floor/int também vale.
+    """
+    for a in ans_nums:
+        s = repr(a)
+        d = len(s.split(".")[1]) if "." in s and not s.endswith(".0") else 0
+        if abs(round(target, d) - a) < 1e-9:
+            return True
+        if abs(int(target) - a) < 1e-9:   # truncamento explícito
+            return True
+    return False
+
+
+def check_answer_echoes_tool(ex: dict) -> str | None:
+    """O resultado do último python_sandbox tem de reaparecer na resposta.
+
+    Fecha o ponto cego de check_sandbox_execution: aquele confere código→turno-tool,
+    este confere turno-tool→resposta. Pega o modo de falha do modelo (sandbox devolve
+    6907.5 e a resposta escreve 6.906,75).
+
+    Só age quando o stdout tem UM número — headline inequívoca. Stdout com vários
+    valores é ambíguo demais pra cobrar mecanicamente; fica pro LLM-juiz.
+    """
+    msgs = ex["messages"]
+    last_tool_i, last_result = None, None
+    for i, m in enumerate(msgs):
+        if m.get("role") != "assistant":
+            continue
+        if any(c.get("name") == "python_sandbox" for c in extract_tool_calls(m.get("content") or "")):
+            for j in range(i + 1, len(msgs)):
+                if msgs[j].get("role") == "tool":
+                    last_tool_i, last_result = j, msgs[j].get("content") or ""
+                    break
+    if last_tool_i is None:
+        return None
+    tool_nums = numbers_of(last_result)
+    if len(tool_nums) != 1:
+        return None
+    answer = _answer_after_tool(msgs, last_tool_i)
+    if not answer:
+        return None
+    if not _echoes(float(tool_nums[0]), answer_numbers(answer)):
+        return "resposta_nao_ecoa_resultado_tool"
+    return None
+
+
+# Só números com separador decimal explícito ("5,0801", "30.6", "0,33%") — inteiros
+# soltos ("10 vezes", anos, contagens) são derivados/paráfrase demais pra cobrar
+# mecanicamente e geram falso-positivo. É exatamente a precisão falsa observada no bug
+# real (compra R$ 5,0801 / venda R$ 5,0907, citado sem existir em nenhum snippet).
+WS_PRECISE_NUM_RE = re.compile(r"-?\d[\d.,]*[.,]\d+")
+
+
+def _websearch_result_text(tool_content: str) -> str:
+    """Concatena title+url+snippet de todo resultado do turno tool de web_search."""
+    try:
+        data = json.loads(tool_content)
+    except json.JSONDecodeError:
+        return tool_content
+    parts = []
+    for r in data.get("results", []) if isinstance(data, dict) else []:
+        parts += [str(r.get("title", "")), str(r.get("url", "")), str(r.get("snippet", ""))]
+    return " ".join(parts) if parts else tool_content
+
+
+def _final_visible_answer(msgs: list[dict]) -> str | None:
+    """Texto da ÚLTIMA mensagem assistant da conversa, sem <think> nem <tool_call> soltos.
+
+    Diferente de _answer_after_tool (que pega o PRIMEIRO assistant depois de um tool
+    específico — certo quando esse tool é a última ação da conversa, errado quando vem
+    mais tool depois, ex.: web_search seguido de python_sandbox). O grounding de busca
+    tem de julgar a resposta final de verdade, não um turno intermediário que ainda tem
+    outra tool_call — código de sandbox tem números literais (ex. "1.0115" para 1,15%)
+    que não são "citação da busca" e derrubariam o check por engano.
+    """
+    for m in reversed(msgs):
+        if m.get("role") == "assistant":
+            visible = strip_think_blocks(m.get("content") or "")
+            return TOOL_CALL_RE.sub("", visible).strip()
+    return None
+
+
+def check_websearch_grounding(ex: dict) -> str | None:
+    """Todo número com precisão decimal citado na resposta final pós-web_search precisa
+    aparecer (em alguma leitura pt-BR/en-US, sinal incluído ou não) nos resultados
+    retornados pela busca.
+
+    Fecha o bug real observado: cotação fabricada com 4 casas decimais ("R$ 5,0801")
+    atribuída a uma fonte que não estava nos resultados. Só olha o ÚLTIMO web_search
+    da conversa — turnos anteriores podem ter sido substituídos por uma busca melhor.
+
+    Só age quando a conversa usa SÓ web_search (nenhum python_sandbox). Quando as duas
+    tools aparecem juntas (ex.: busca a taxa, depois calcula payback/juros no sandbox),
+    o número final é ARITMÉTICA DERIVADA, não citação — grounded em cálculo, não em
+    busca. Cobrar isso aqui duplicaria (mal) o que check_answer_echoes_tool já verifica
+    contra o stdout real; misturar os dois conceitos gera falso-positivo mecânico.
+    """
+    msgs = ex["messages"]
+    last_result, has_sandbox = None, False
+    for i, m in enumerate(msgs):
+        if m.get("role") != "assistant":
+            continue
+        calls = extract_tool_calls(m.get("content") or "")
+        if any(c.get("name") == "python_sandbox" for c in calls):
+            has_sandbox = True
+        if any(c.get("name") == "web_search" for c in calls):
+            for j in range(i + 1, len(msgs)):
+                if msgs[j].get("role") == "tool":
+                    last_result = msgs[j].get("content") or ""
+                    break
+    if last_result is None or has_sandbox:
+        return None
+    answer = _final_visible_answer(msgs)
+    if not answer:
+        return None
+    ans_precise = WS_PRECISE_NUM_RE.findall(answer)
+    if not ans_precise:
+        return None
+    source_text = _websearch_result_text(last_result)
+    source_nums = answer_numbers(source_text)
+    source_abs = {abs(s) for s in source_nums}
+    for tok in ans_precise:
+        vals = _interpretations(tok)
+        # Sinal pode legitimamente virar: "-2,3%" na busca vira "queda de 2,3%" na
+        # fala — compara também por magnitude, não só valor com sinal.
+        if not any(_echoes(v, source_nums) or any(abs(abs(v) - a) <= 1e-6 * max(1.0, a) for a in source_abs) for v in vals):
+            return "resposta_numero_nao_grounded_em_busca"
+    return None
 
 
 def check_sandbox_execution(ex: dict, timeout: int) -> str | None:
@@ -209,6 +387,15 @@ def validate(files: list[Path]) -> None:
             err = check_sandbox_execution(ex, vcfg["sandbox_exec_timeout_s"])
             if err:
                 reject(ex, err); continue
+            err = check_answer_echoes_tool(ex)
+            if err:
+                reject(ex, err); continue
+
+        # Não fica preso a camada 2/3: web_search aparece nas camadas 1 e 3 (e a função
+        # já é auto-guardada — no-op se não há web_search, ou se há sandbox junto).
+        err = check_websearch_grounding(ex)
+        if err:
+            reject(ex, err); continue
 
         stage1.append(ex)
 

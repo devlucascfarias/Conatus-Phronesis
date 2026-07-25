@@ -17,7 +17,7 @@ dataset:
 # think_max_words (branch phronesis-thinking): teto de palavras do bloco <think> por camada.
 # Calibrado pra ficar curto nas camadas fáceis (o modelo aprende a dosar o esforço de
 # deliberação pela dificuldade real, não só o preâmbulo visível) e livre na camada 3
-# (raciocínio longo, ver prompts/editor_thinking_gpt56.md). Não conta como preâmbulo visível
+# (raciocínio longo, ver prompts/generator_thinking_gpt56.md). Não conta como preâmbulo visível
 # — strip_think_blocks() em src/common.py já exclui o <think> da métrica de preambulo_max_words.
 layers:
   "0":   { share: 0.20, preamble_max_words: 0,  think_max_words: 15 }

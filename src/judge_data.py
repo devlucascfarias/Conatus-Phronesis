@@ -35,10 +35,22 @@ def apply(dataset: Path, verdicts_file: Path) -> None:
     missing = [i for i in range(1, len(examples) + 1) if i not in verdicts]
     if missing:
         raise SystemExit(f"Faltam vereditos para os índices: {missing[:20]}{'…' if len(missing) > 20 else ''}")
-    kept = [ex for i, ex in enumerate(examples, 1)
-            if verdicts[i].get("verdict") == "keep"
-            and verdicts[i].get("rationale_score", 0) >= 4
-            and verdicts[i].get("tone_score", 0) >= 4]
+
+    def layer_of(ex: dict) -> str:
+        return str(ex.get("layer", ex.get("_task", {}).get("layer", "")))
+
+    def keep(ex: dict, v: dict) -> bool:
+        if v.get("verdict") != "keep":
+            return False
+        if v.get("rationale_score", 0) < 4 or v.get("tone_score", 0) < 4:
+            return False
+        # Load-bearing só bloqueia camadas 2/3 (onde o <think> é derivação, não rationale
+        # curto). Ausência do campo defaulta 5 p/ não reprovar vereditos anteriores à Critério 3.
+        if layer_of(ex) in {"2", "3"} and v.get("loadbearing_score", 5) < 4:
+            return False
+        return True
+
+    kept = [ex for i, ex in enumerate(examples, 1) if keep(ex, verdicts[i])]
     out = CLEAN_DIR / "dataset_judged.jsonl"
     with open(out, "w", encoding="utf-8") as f:
         for ex in kept:

@@ -44,6 +44,27 @@ principal aprovou **595/595** exemplos, e a validação separada das oito famíl
 aprovou **400/400**. A renderização real com o tokenizer do Qwen3-8B manteve **595/595**
 exemplos sob o limite de 4096 tokens, com zero descarte.
 
+### Correção think-first — geração nova substitui o retrofit nas famílias difíceis
+
+`prompts/generator_thinking_gpt56.md` tornou explícito que o retrofit de uma resposta já
+resolvida produz racionalização pós-hoc. A substituição agora é feita família por família,
+com problemas novos resolvidos do zero: o `<think>` antecede e sustenta a escolha do método;
+se a derivação chega a um resultado errado, o item inteiro é descartado.
+
+- **Limites e séries: concluída** — `data/raw/gpt56_limites.jsonl` foi regenerado com 50
+  itens inéditos think-first, 25 de camada 2 e 25 de camada 3. Há 9 casos de
+  falsa aparência de indeterminação espalhados no lote e 2 episódios com
+  `python_sandbox`, ambos executados de verdade e com o stdout ecoado na resposta.
+- As aberturas dos 50 blocos `<think>` são todas distintas; cada item tem exatamente uma
+  resposta final em `\boxed{}`, e a auditoria não encontrou repetição exata de conectiva
+  de verificação cruzada.
+- **Ainda pendentes no formato antigo**: álgebra linear, física matemática, física 1,
+  física 2, física computacional, análise complexa e equações diferenciais. Os retrofits
+  dessas sete famílias não devem ser confundidos com geração think-first concluída.
+- `gpt56_combined_selection.jsonl` e `math_rigor_testset.jsonl` foram reconstruídos com a
+  nova família. Validação global: **1027/1027 aprovados**; renderização no tokenizer
+  `Qwen/Qwen3-8B`: **1027/1027** sob 4096 tokens, zero descarte.
+
 ### Correção de rota — `enable_thinking=True` fica global, sem roteador externo
 
 Decisão original: treinar `<think>` só na camada 3 e manter `enable_thinking=False` fixo na
@@ -137,6 +158,46 @@ mesmo problema.
 Claude Code, sem API externa, porque comparação simbólica de LaTeX é frágil demais pra um
 comparador mecânico) + `prompts/judge_math_rigor.md`. Falta rodar contra um checkpoint
 treinado de verdade.
+
+### batch_027 — desistência graciosa fora do formato de arredondamento (9 itens)
+
+`thinking_8b_eval_notes.md` documentou colapso em loop (greedy) e resposta confiante sem
+verificação (sampling) em ~25-50% do held-out de 16 perguntas quando a autocorreção falha
+mais de uma vez. `batch_023`/`batch_024` (34 itens) já tinham endereçado "desistência
+graciosa", mas auditando o conteúdo real dos itens (não só a mensagem do commit), os 34
+cobrem só UM formato: duas rotas numéricas válidas que discordam por arredondamento/precisão
+(ex.: `"minha conta rápida... comparo... ainda não bate..."`, quase idêntico nos 3 primeiros
+itens do batch_024). Nenhum exemplo cobre os três padrões que de fato quebraram ao vivo:
+
+1. **Nome de tool inventado ao debugar código real** (`python_sandro`, `python_jupyter_cell`,
+   `python` — 4 variações só na rodada de sampling). 3 itens (autovalores/Jordan — mesmo tema
+   que quebrou ao vivo com "A-4I é nula"; física computacional Euler-Cromer; EDO com sympy):
+   código quebra de verdade (`NameError`/`IndexError`, tracebacks reais, capturados rodando o
+   código), o `<think>` da correção afirma explicitamente que a tool continua sendo
+   `python_sandbox` — nunca troca de nome —, e só o código é corrigido.
+2. **Desconfiar da própria álgebra e diferir ao checker, sem loop** (osciladores acoplados —
+   mesmo tema do "frequências iguais" errado ao vivo; campo elétrico de esfera não uniforme —
+   mesmo tema da autocontradição \(r^4/R^4\) vs \(r^4/R^3\); bloco em cúpula — mesmo tema do
+   erro de sinal \(\sin\theta\) vs \(\cos\theta\)). 3 itens: o `<think>` nomeia explicitamente
+   o erro clássico do problema como risco antes de cometê-lo, confirma com UMA chamada de
+   sandbox (não uma sequência de tentativas), e fecha — sem re-derivar simbolicamente em loop.
+3. **Autocontradição pega e corrigida dentro da mesma resposta** (convergência de série no
+   bordo — mesmo tema do "converge em x=1" que se contradizia ao vivo; eficiência de ciclo
+   termodinâmico >100% — mesmo tema aceito sem questionar ao vivo; sequência limitada vs.
+   convergente). 3 itens: o texto escreve a afirmação apressada, explicita a contradição
+   ("isso não pode estar certo... reconheço o erro") e corrige na mesma resposta, sem tool.
+
+Todo código com `python_sandbox` foi executado de verdade (nunca stdout/traceback fabricado —
+mesmo invariante do projeto); os 3 itens do padrão 1 têm traceback real capturado rodando o
+bug intencional antes de escrever o item. Verificado com
+`python src/validate_data.py data/raw/pilot.jsonl data/raw/gen/*.jsonl
+data/raw/gpt56_combined_selection.jsonl`: **1034/1034 aprovados** (1025 + 9), os 2 rejeitados
+do lote total (`resposta_numero_nao_grounded_em_busca`, massa do próton e cloud egress) são
+resíduos pré-existentes, nenhum do batch_027.
+
+**Pendente de verdade** (fora do escopo desta rodada — exige rodar modelo, não dado): nenhum
+destes 9 itens foi avaliado contra um checkpoint treinado ainda. Junto com o
+`math_rigor_testset.jsonl`, seguem como held-out não medido.
 
 ### Iteração pós-treino do 4B com o dataset combinado (579 → regressão medida)
 
