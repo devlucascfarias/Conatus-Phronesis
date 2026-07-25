@@ -1,6 +1,6 @@
 {
-  "input": 1036,
-  "kept": 1034,
+  "input": 1066,
+  "kept": 1064,
   "rejected_total": 2,
   "rejected_by_reason": {
     "resposta_numero_nao_grounded_em_busca": 2
@@ -8,27 +8,27 @@
   "layer_distribution": {
     "0": {
       "n": 104,
-      "share": 0.101
+      "share": 0.098
     },
     "0.5": {
-      "n": 73,
-      "share": 0.071
+      "n": 79,
+      "share": 0.074
     },
     "1": {
-      "n": 245,
-      "share": 0.237
+      "n": 269,
+      "share": 0.253
     },
     "2": {
       "n": 407,
-      "share": 0.394
+      "share": 0.383
     },
     "3": {
       "n": 78,
-      "share": 0.075
+      "share": 0.073
     },
     "C": {
       "n": 127,
-      "share": 0.123
+      "share": 0.119
     }
   },
   "layer_targets": {
