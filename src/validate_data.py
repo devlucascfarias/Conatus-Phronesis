@@ -67,6 +67,28 @@ def assistant_turns(ex: dict) -> list[str]:
     return [m.get("content") or "" for m in ex["messages"] if m.get("role") == "assistant"]
 
 
+def deliberation_turns(ex: dict) -> list[str]:
+    """Turnos assistant que DELIBERAM — exclui os que só avaliam resultado de tool.
+
+    O piso `think_min_words` existe para pegar `<think>` que é legenda da resposta em vez
+    do raciocínio que a produziu. Isso só faz sentido para o turno que decide o caminho,
+    antes de agir. O turno que vem DEPOIS de um `tool` tem outra função: conferir se o
+    resultado bate com o esperado — e `prompts/generator_thinking_gpt56.md` prevê
+    explicitamente que ele "pode ter seu próprio `<think>` menor". Cobrar o mesmo piso ali
+    reprovava episódios de autocorreção corretos, cujo segundo think é legitimamente uma
+    ou duas frases ("o checker deu X, errei o sinal em Y").
+    """
+    msgs = ex["messages"]
+    out = []
+    for i, m in enumerate(msgs):
+        if m.get("role") != "assistant":
+            continue
+        if i > 0 and msgs[i - 1].get("role") == "tool":
+            continue
+        out.append(m.get("content") or "")
+    return out
+
+
 def shingles(text: str, n: int = 3) -> set:
     words = re.findall(r"\w+", text.lower())
     return {" ".join(words[i:i + n]) for i in range(max(0, len(words) - n + 1))}
@@ -134,9 +156,24 @@ def _interpretations(tok: str) -> list[float]:
     return list(out)
 
 
+# Tipografia numérica do LaTeX, que o extrator cru não enxerga. Sem normalizar isto,
+# "355\,687\,428\,096\,000" vira cinco números soltos (355, 687, 428, ...) em vez de um só,
+# e "1{,}0995" vira 1 e 0995 — o que reprovava por engano respostas que citavam o valor
+# EXATO do stdout, apenas bem tipografado. Falso positivo real, visto no batch_029.
+_LATEX_THIN_SPACE_RE = re.compile(r"(?<=\d)(?:\\[,;:!]|\\ |~)(?=\d)")
+_LATEX_DECIMAL_RE = re.compile(r"(?<=\d)\{([.,])\}(?=\d)")
+
+
+def _normalize_latex_numbers(text: str) -> str:
+    """Colapsa separador de milhar (\\,) e vírgula decimal ({,}) do LaTeX em dígitos crus."""
+    out = _LATEX_THIN_SPACE_RE.sub("", text or "")
+    return _LATEX_DECIMAL_RE.sub(r"\1", out)
+
+
 def answer_numbers(text: str) -> list[float]:
     vals = []
-    for tok in ANS_NUM_RE.findall((text or "").replace("−", "-")):
+    normalizado = _normalize_latex_numbers((text or "").replace("−", "-"))
+    for tok in ANS_NUM_RE.findall(normalizado):
         vals.extend(_interpretations(tok))
     return vals
 
@@ -151,6 +188,23 @@ def _answer_after_tool(msgs: list[dict], tool_i: int) -> str | None:
         if m.get("role") == "assistant":
             return strip_think_blocks(m.get("content") or "").strip()
     return None
+
+
+def _grounded_in(shown: float, source_nums: list[float]) -> bool:
+    """`shown` (número exibido na resposta) tem origem em algum valor de `source_nums`?
+
+    Complementa `_echoes`, que arredonda o ALVO à precisão do número exibido — direção
+    certa para "stdout 26.8328 → resposta 26,83", errada para o caso inverso, em que a
+    resposta arredonda a fonte para menos casas ("stdout 5882.88 → resposta R$ 5.883").
+    Aqui arredondamos a FONTE em cada precisão de 0 a 6 casas: se alguma bate, o número
+    exibido é derivação legítima, não fabricação. Também aceita diferença só de sinal
+    ("-2,3%" na busca vira "queda de 2,3%" na fala).
+    """
+    for a in source_nums:
+        for k in range(7):
+            if abs(round(a, k) - shown) < 1e-9 or abs(round(abs(a), k) - abs(shown)) < 1e-9:
+                return True
+    return False
 
 
 def _echoes(target: float, ans_nums: list[float]) -> bool:
@@ -170,6 +224,11 @@ def _echoes(target: float, ans_nums: list[float]) -> bool:
     return False
 
 
+# Escalas aceitas ao casar stdout multi-valor com a resposta: fração↔percentual é
+# conversão legítima (stdout imprime 0.25, resposta diz "25%"), não fabricação.
+_ECHO_SCALES = (1.0, 100.0, 0.01)
+
+
 def check_answer_echoes_tool(ex: dict) -> str | None:
     """O resultado do último python_sandbox tem de reaparecer na resposta.
 
@@ -177,8 +236,18 @@ def check_answer_echoes_tool(ex: dict) -> str | None:
     este confere turno-tool→resposta. Pega o modo de falha do modelo (sandbox devolve
     6907.5 e a resposta escreve 6.906,75).
 
-    Só age quando o stdout tem UM número — headline inequívoca. Stdout com vários
-    valores é ambíguo demais pra cobrar mecanicamente; fica pro LLM-juiz.
+    Stdout com UM número: exige eco exato daquele valor (arredondamento explícito vale).
+
+    Stdout com VÁRIOS números (2026-07-26, item 4 do plano de correção): antes esta função
+    desistia — `len(tool_nums) != 1` retornava None e o item passava sem nenhuma checagem.
+    Era o maior buraco do grounding: o modo de falha real do modelo (documentado em
+    data/eval/thinking_8b_eval_notes.md, item 10 do held-out) foi justamente com stdout
+    multi-valor — o sandbox devolveu 2994 falsos positivos e o `<think>` seguinte trocou
+    pra "1994", número que a resposta final então usou. Agora exigimos que ao menos UM dos
+    valores do stdout apareça na resposta: se nenhum aparece, a resposta não está falando
+    do que o código calculou. É deliberadamente leniente (um eco basta, e aceita escala
+    percentual) porque stdout multi-valor mistura diagnóstico com headline — o objetivo é
+    pegar fabricação total, não auditar cada valor intermediário.
     """
     msgs = ex["messages"]
     last_tool_i, last_result = None, None
@@ -192,14 +261,23 @@ def check_answer_echoes_tool(ex: dict) -> str | None:
                     break
     if last_tool_i is None:
         return None
+    # Traceback é episódio de debug (batch_027): a resposta discute a CAUSA do erro, não
+    # ecoa números do stderr. Cobrar eco aqui reprovaria o padrão inteiro por engano.
+    if looks_like_traceback(last_result):
+        return None
     tool_nums = numbers_of(last_result)
-    if len(tool_nums) != 1:
+    if not tool_nums:
         return None
     answer = _answer_after_tool(msgs, last_tool_i)
     if not answer:
         return None
-    if not _echoes(float(tool_nums[0]), answer_numbers(answer)):
-        return "resposta_nao_ecoa_resultado_tool"
+    ans_nums = answer_numbers(answer)
+    if len(tool_nums) == 1:
+        if not _echoes(float(tool_nums[0]), ans_nums):
+            return "resposta_nao_ecoa_resultado_tool"
+        return None
+    if not any(_echoes(float(t) * s, ans_nums) for t in tool_nums for s in _ECHO_SCALES):
+        return "resposta_nao_ecoa_nenhum_valor_do_tool"
     return None
 
 
@@ -248,26 +326,33 @@ def check_websearch_grounding(ex: dict) -> str | None:
     atribuída a uma fonte que não estava nos resultados. Só olha o ÚLTIMO web_search
     da conversa — turnos anteriores podem ter sido substituídos por uma busca melhor.
 
-    Só age quando a conversa usa SÓ web_search (nenhum python_sandbox). Quando as duas
-    tools aparecem juntas (ex.: busca a taxa, depois calcula payback/juros no sandbox),
-    o número final é ARITMÉTICA DERIVADA, não citação — grounded em cálculo, não em
-    busca. Cobrar isso aqui duplicaria (mal) o que check_answer_echoes_tool já verifica
-    contra o stdout real; misturar os dois conceitos gera falso-positivo mecânico.
+    Conversa mista (web_search + python_sandbox) — ex.: busca a taxa, depois calcula
+    payback/juros: o número final é ARITMÉTICA DERIVADA, não citação. Antes (até
+    2026-07-26) essa conversa era simplesmente ignorada por completo — `has_sandbox`
+    retornava None e nenhum número era conferido, nem os que vinham direto da busca sem
+    passar por cálculo nenhum. Item 4 do plano de correção: em vez de desistir, agora
+    fazemos o grounding contra a UNIÃO das fontes (resultados da busca + todo stdout de
+    sandbox da conversa). Assim o número derivado do cálculo continua passando (aparece
+    no stdout), mas uma cotação fabricada que nunca esteve em fonte nenhuma é pega.
     """
     msgs = ex["messages"]
-    last_result, has_sandbox = None, False
+    last_result = None
+    sandbox_stdouts: list[str] = []
     for i, m in enumerate(msgs):
         if m.get("role") != "assistant":
             continue
         calls = extract_tool_calls(m.get("content") or "")
         if any(c.get("name") == "python_sandbox" for c in calls):
-            has_sandbox = True
+            for j in range(i + 1, len(msgs)):
+                if msgs[j].get("role") == "tool":
+                    sandbox_stdouts.append(msgs[j].get("content") or "")
+                    break
         if any(c.get("name") == "web_search" for c in calls):
             for j in range(i + 1, len(msgs)):
                 if msgs[j].get("role") == "tool":
                     last_result = msgs[j].get("content") or ""
                     break
-    if last_result is None or has_sandbox:
+    if last_result is None:
         return None
     answer = _final_visible_answer(msgs)
     if not answer:
@@ -277,12 +362,39 @@ def check_websearch_grounding(ex: dict) -> str | None:
         return None
     source_text = _websearch_result_text(last_result)
     source_nums = answer_numbers(source_text)
+    # Stdout de sandbox conta como fonte legítima: numa conversa mista o valor final é
+    # calculado, não citado — mas ainda tem de vir de ALGUMA execução real, nunca do nada.
+    for out in sandbox_stdouts:
+        source_nums.extend(answer_numbers(out))
     source_abs = {abs(s) for s in source_nums}
+    def grounded(tok: str) -> bool:
+        # Três formas de estar grounded, todas legítimas: eco direto (com a fonte
+        # arredondada à precisão exibida), magnitude igual ignorando sinal, ou a resposta
+        # arredondando a fonte para menos casas (_grounded_in).
+        return any(
+            _echoes(v, source_nums)
+            or _grounded_in(v, source_nums)
+            or any(abs(abs(v) - a) <= 1e-6 * max(1.0, a) for a in source_abs)
+            for v in _interpretations(tok)
+        )
+
+    if sandbox_stdouts:
+        # Conversa mista: o valor final costuma ser ARITMÉTICA DERIVADA de vários valores
+        # (ex.: diferença entre custo da dívida e ganho do CDI, arredondada para "cerca de
+        # R$ 1.600"), ou um cenário hipotético do próprio texto ("se você mover 4.000 GB").
+        # Nenhum dos dois é rastreável mecanicamente a um número de fonte, e exigir isso
+        # reprovaria itens corretos. O que ainda dá pra afirmar com segurança é o extremo:
+        # se NENHUM número preciso da resposta tem origem em fonte alguma, a resposta não
+        # está falando dos dados que buscou/calculou — aí é fabricação, não derivação.
+        if not any(grounded(tok) for tok in ans_precise):
+            return "resposta_numero_nao_grounded_em_busca"
+        return None
+
+    # Conversa só de busca: todo número preciso é CITAÇÃO, não cálculo — exigência estrita,
+    # que é o que pega a cotação fabricada com 4 casas ("R$ 5,0801" atribuído a fonte que
+    # não estava nos resultados).
     for tok in ans_precise:
-        vals = _interpretations(tok)
-        # Sinal pode legitimamente virar: "-2,3%" na busca vira "queda de 2,3%" na
-        # fala — compara também por magnitude, não só valor com sinal.
-        if not any(_echoes(v, source_nums) or any(abs(abs(v) - a) <= 1e-6 * max(1.0, a) for a in source_abs) for v in vals):
+        if not grounded(tok):
             return "resposta_numero_nao_grounded_em_busca"
     return None
 
@@ -357,6 +469,17 @@ def validate(files: list[Path]) -> None:
             over_think = next((t for t in turns_with_think if word_count(think_text(t)) > think_limit), None)
             if over_think is not None:
                 reject(ex, f"think_acima_de_{think_limit}_palavras"); continue
+
+        # think_min_words (camadas 2/3): pega o bloco <think> "legenda" — uma frase de
+        # conclusão que só descreve a resposta já pronta, não a deliberação que a produziu
+        # (ver comentário em configs/gen_config.yaml). Aplica-se apenas aos turnos de
+        # DELIBERAÇÃO: o think de avaliação pós-tool é curto por especificação.
+        think_min = layers.get(layer, {}).get("think_min_words")
+        if think_min is not None:
+            delib = [t for t in deliberation_turns(ex) if THINK_TAG_RE.search(t)]
+            under_think = next((t for t in delib if word_count(think_text(t)) < think_min), None)
+            if under_think is not None:
+                reject(ex, f"think_abaixo_de_{think_min}_palavras"); continue
 
         err = next((e for t in turns for c in extract_tool_calls(t) if (e := check_schema(c, schemas))), None)
         if err:

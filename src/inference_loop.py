@@ -14,6 +14,7 @@ chat de terminal usa input() e não roda bem dentro de uma célula de notebook.
 """
 import argparse
 import ast
+import difflib
 import json
 import os
 import subprocess
@@ -150,12 +151,58 @@ def exec_python_sandbox(code: str) -> str:
 EXECUTORS = {"web_search": lambda a: exec_web_search(a["query"]),
              "python_sandbox": lambda a: exec_python_sandbox(a["code"])}
 
+# Assinatura de argumentos → tool. As duas tools do projeto têm parâmetros obrigatórios
+# DISJUNTOS ("query" vs "code"), então a chave presente identifica a intenção sem
+# ambiguidade — sinal muito mais forte que semelhança de string entre nomes.
+_ARG_SIGNATURE = {"code": "python_sandbox", "query": "web_search"}
 
-def run_agent(messages, generate, max_iters=MAX_TOOL_ITERATIONS, verbose=True):
+
+def repair_tool_name(call: dict) -> tuple[dict, str | None]:
+    """Normaliza nome de tool alucinado para o nome real. Devolve (call, nome_original).
+
+    Item 5 do plano de correção (2026-07-26). O 8B treinado inventa nomes de tool com
+    frequência — `python_sandro`, `python_sandox`, `python_jupyter_cell`, `python_eval`,
+    `python` foram todos observados em data/eval/thinking_8b_eval_notes.md, 4 variações
+    distintas só na rodada de sampling. Devolver "tool desconhecida" e deixar o modelo
+    tentar de novo NÃO converge: na transcrição real ele responde inventando outro nome
+    errado, gastando as 3 iterações do turno sem nunca executar nada.
+
+    O reparo é determinístico e roda antes do dispatch:
+      1. nome já válido            → passa direto;
+      2. nome inválido, mas os argumentos casam com uma assinatura conhecida → renomeia
+         (é o caminho que pega todas as variações observadas, já que todas levavam `code`);
+      3. sem assinatura, nome parecido com um válido → renomeia por difflib;
+      4. nada disso                → devolve intacto e o erro sobe normalmente.
+
+    Deliberadamente NÃO vive em `common.py`: o validador de dataset precisa REPROVAR
+    nome de tool inválido (`check_schema` → `tool_desconhecida:*`), nunca consertar. Só a
+    inferência repara; o dado de treino continua estrito.
+    """
+    name = call.get("name")
+    if name in EXECUTORS:
+        return call, None
+    args = call.get("arguments")
+    if isinstance(args, dict):
+        for key, target in _ARG_SIGNATURE.items():
+            if key in args:
+                return {**call, "name": target}, name
+    parecidos = difflib.get_close_matches(str(name), list(EXECUTORS), n=1, cutoff=0.6)
+    if parecidos:
+        return {**call, "name": parecidos[0]}, name
+    return call, None
+
+
+def run_agent(messages, generate, max_iters=MAX_TOOL_ITERATIONS, verbose=True, repairs=None):
     """Loop do agente para UM turno já com a mensagem do usuário em `messages`.
     `generate(messages) -> str` é a função de geração do modelo. Executa tool calls
     (web_search/python_sandbox) e realimenta, até `max_iters` iterações. Retorna a
-    lista `messages` atualizada. Usável direto numa célula de notebook (Colab)."""
+    lista `messages` atualizada. Usável direto numa célula de notebook (Colab).
+
+    Passe uma lista em `repairs` para coletar os nomes de tool alucinados que foram
+    reparados, como tuplas (nome_gerado, nome_real) — é a métrica que diz se o problema
+    ainda existe no checkpoint, já que o reparo o torna invisível na saída."""
+    if repairs is None:
+        repairs = []
     for _ in range(max_iters + 1):
         reply = generate(messages)
         messages.append({"role": "assistant", "content": reply})
@@ -164,10 +211,19 @@ def run_agent(messages, generate, max_iters=MAX_TOOL_ITERATIONS, verbose=True):
         calls = [c for c in extract_tool_calls(reply) if "_invalid" not in c]
         if not calls:
             break
-        call = calls[0]
+        call, alucinado = repair_tool_name(calls[0])
+        if alucinado is not None:
+            repairs.append((alucinado, call["name"]))
+            if verbose:
+                print(f"[nome de tool reparado: '{alucinado}' -> '{call['name']}']\n")
         executor = EXECUTORS.get(call.get("name"))
         if not executor:
-            result = f"Erro: tool desconhecida '{call.get('name')}'"
+            # Só chega aqui se nem a assinatura de argumentos nem a semelhança de nome
+            # resolveram — aí o erro precisa ser DIRETIVO, listando os nomes válidos, em
+            # vez do genérico "tool desconhecida" que fazia o modelo inventar outro nome.
+            result = (f"Erro: tool '{call.get('name')}' não existe. "
+                      f"Tools disponíveis: {', '.join(sorted(EXECUTORS))}. "
+                      f"Repita a chamada usando exatamente um desses nomes.")
         else:
             try:
                 result = executor(call.get("arguments", {}))

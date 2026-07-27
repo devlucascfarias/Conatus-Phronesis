@@ -1,0 +1,50 @@
+{"idx": 0, "layer": "2", "lang": "pt-BR", "enunciado": "Resolva \\(y'=y^2\\), \\(y(0)=1\\), e determine o intervalo maximal da solução."}
+{"idx": 1, "layer": "3", "lang": "pt-BR", "enunciado": "Prove o teorema local de Picard–Lindelöf para \\(y'=f(t,y)\\) usando o teorema do ponto fixo de Banach."}
+{"idx": 2, "layer": "2", "lang": "pt-BR", "enunciado": "Mostre que o problema \\(y'=3y^{2/3}\\), \\(y(0)=0\\), possui infinitas soluções."}
+{"idx": 3, "layer": "3", "lang": "pt-BR", "enunciado": "Prove a desigualdade de Grönwall integral e use-a para obter dependência contínua das soluções em relação aos dados iniciais."}
+{"idx": 4, "layer": "2", "lang": "pt-BR", "enunciado": "Resolva \\(y'+2ty=t\\), com \\(y(0)=1\\)."}
+{"idx": 5, "layer": "3", "lang": "pt-BR", "enunciado": "Mostre como uma solução particular de uma equação de Riccati reduz o problema a uma equação linear de primeira ordem."}
+{"idx": 6, "layer": "2", "lang": "pt-BR", "enunciado": "Resolva a equação de Euler \\(t^2y''-3ty'+4y=0\\) para \\(t>0\\)."}
+{"idx": 7, "layer": "3", "lang": "pt-BR", "enunciado": "Derive a identidade de Abel para o Wronskiano de duas soluções de \\(y''+p(t)y'+q(t)y=0\\)."}
+{"idx": 8, "layer": "2", "lang": "pt-BR", "enunciado": "Encontre uma solução particular de \\(y''+y=\\cos t\\) e explique o efeito da ressonância."}
+{"idx": 9, "layer": "3", "lang": "pt-BR", "enunciado": "Derive a fórmula de variação de parâmetros para \\(y''+p(t)y'+q(t)y=g(t)\\)."}
+{"idx": 10, "layer": "2", "lang": "pt-BR", "enunciado": "Resolva \\(X'=AX\\), com \\(A=\\begin{pmatrix}2&1\\\\0&2\\end{pmatrix}\\), e confirme a matriz fundamental simbolicamente."}
+{"idx": 11, "layer": "3", "lang": "pt-BR", "enunciado": "Mostre como a forma de Jordan determina a exponencial de uma matriz e a estrutura das soluções de \\(X'=AX\\)."}
+{"idx": 12, "layer": "2", "lang": "pt-BR", "enunciado": "Resolva \\(y''+4y=\\delta(t-\\pi)\\), com \\(y(0)=y'(0)=0\\), no sentido distribucional."}
+{"idx": 13, "layer": "3", "lang": "pt-BR", "enunciado": "Construa a função de Green para \\(-y''+y=f\\) em \\([0,1]\\), com \\(y(0)=y(1)=0\\)."}
+{"idx": 14, "layer": "2", "lang": "pt-BR", "enunciado": "Determine os autovalores e autofunções de \\(-y''=\\lambda y\\) em \\([0,L]\\), com condições de Neumann \\(y'(0)=y'(L)=0\\)."}
+{"idx": 15, "layer": "3", "lang": "pt-BR", "enunciado": "Prove uma forma do teorema de comparação de Sturm para \\(y''+q_1(t)y=0\\) e \\(z''+q_2(t)z=0\\), supondo \\(q_2>q_1\\)."}
+{"idx": 16, "layer": "2", "lang": "pt-BR", "enunciado": "Encontre os expoentes indiciales da equação de Bessel \\(x^2y''+xy'+(x^2-\\nu^2)y=0\\) em \\(x=0\\)."}
+{"idx": 17, "layer": "3", "lang": "pt-BR", "enunciado": "Obtenha por Frobenius a solução analítica \\(J_0(x)\\) de \\(x^2y''+xy'+x^2y=0\\) e confirme os primeiros termos."}
+{"idx": 18, "layer": "2", "lang": "pt-BR", "enunciado": "Classifique \\(x=0\\) para \\(x^2y''+x\\sin x\\,y'+e^x y=0\\) e escreva a equação indicial."}
+{"idx": 19, "layer": "3", "lang": "pt-BR", "enunciado": "Mostre por séries de potências por que a equação de Legendre admite polinômios apenas para \\(\\lambda=\\ell(\\ell+1)\\), e prove sua ortogonalidade."}
+{"idx": 20, "layer": "2", "lang": "pt-BR", "enunciado": "Resolva a equação logística \\(y'=ry(1-y/K)\\), com \\(r,K>0\\), e classifique seus equilíbrios."}
+{"idx": 21, "layer": "3", "lang": "pt-BR", "enunciado": "Prove o teorema direto de Lyapunov para estabilidade assintótica de um equilíbrio de \\(x'=f(x)\\)."}
+{"idx": 22, "layer": "2", "lang": "pt-BR", "enunciado": "O equilíbrio zero de \\(x'=-x^3\\) pode ser classificado pela linearização? Determine sua estabilidade."}
+{"idx": 23, "layer": "3", "lang": "pt-BR", "enunciado": "Use o princípio de invariância de LaSalle para estudar o pêndulo amortecido \\(\\theta'=\\omega\\), \\(\\omega'=-b\\omega-\\sin\\theta\\), com \\(b>0\\)."}
+{"idx": 24, "layer": "2", "lang": "pt-BR", "enunciado": "Resolva \\(y''+4y'+13y=0\\) e classifique o amortecimento, confirmando simbolicamente."}
+{"idx": 25, "layer": "3", "lang": "pt-BR", "enunciado": "Analise a bifurcação de Hopf na forma normal complexa \\(z'=(\\mu+i\\omega)z-|z|^2z\\), com \\(\\omega>0\\)."}
+{"idx": 26, "layer": "2", "lang": "pt-BR", "enunciado": "Classifique e resolva a EDP \\(u_{xx}+4u_{xy}+3u_{yy}=0\\)."}
+{"idx": 27, "layer": "3", "lang": "pt-BR", "enunciado": "Resolva a equação de Burgers invíscida \\(u_t+uu_x=0\\) antes da formação de choque e determine o primeiro tempo de quebra das características. Aplique a \\(u_0(x)=-\\sin x\\)."}
+{"idx": 28, "layer": "2", "lang": "pt-BR", "enunciado": "Resolva \\(u_t+cu_x=e^{-t}\\cos(x-ct)\\), com \\(u(x,0)=f(x)\\)."}
+{"idx": 29, "layer": "3", "lang": "pt-BR", "enunciado": "Resolva o problema de Riemann para \\(u_t+(u^2/2)_x=0\\), distinguindo choque e rarefação pela condição de entropia."}
+{"idx": 30, "layer": "2", "lang": "pt-BR", "enunciado": "Resolva por Laplace \\(y'+y=H(t-1)\\), \\(y(0)=0\\)."}
+{"idx": 31, "layer": "3", "lang": "pt-BR", "enunciado": "Derive a fórmula de Duhamel para o problema linear não homogêneo \\(u'(t)=Au(t)+f(t)\\), \\(u(0)=u_0\\)."}
+{"idx": 32, "layer": "2", "lang": "pt-BR", "enunciado": "Resolva \\(u_t=\\kappa u_{xx}\\) em \\(0<x<L\\), com \\(u(0,t)=0\\), \\(u(L,t)=1\\) e \\(u(x,0)=x/L+\\sin(\\pi x/L)\\)."}
+{"idx": 33, "layer": "3", "lang": "pt-BR", "enunciado": "Prove unicidade para a equação do calor com condições de Dirichlet homogêneas usando uma estimativa de energia."}
+{"idx": 34, "layer": "2", "lang": "pt-BR", "enunciado": "Em \\(0<x<\\pi\\), resolva \\(u_{tt}-u_{xx}=\\sin(2x)\\cos(2t)\\), com bordas de Dirichlet e dados iniciais nulos, confirmando a ressonância."}
+{"idx": 35, "layer": "3", "lang": "pt-BR", "enunciado": "Derive a conservação de energia para a equação da onda com condições de Dirichlet e use-a para provar unicidade."}
+{"idx": 36, "layer": "2", "lang": "pt-BR", "enunciado": "Resolva \\(u_{xx}+u_{yy}=0\\) no retângulo \\(0<x<\\pi\\), \\(0<y<a\\), com \\(u=0\\) em três lados e \\(u(x,a)=\\sin(nx)\\)."}
+{"idx": 37, "layer": "3", "lang": "pt-BR", "enunciado": "Derive a formulação fraca do problema \\(-\\Delta u=f\\) com condição de Dirichlet homogênea e prove unicidade da solução fraca."}
+{"idx": 38, "layer": "3", "lang": "pt-BR", "enunciado": "Estabeleça a alternativa de Fredholm para \\(-y''-\\pi^2y=f\\) em \\([0,1]\\), com condições de Dirichlet."}
+{"idx": 39, "layer": "2", "lang": "pt-BR", "enunciado": "Resolva o problema periódico \\(y'+ay=f(t)\\), \\(y(0)=y(T)\\), e discuta o caso \\(a=0\\)."}
+{"idx": 40, "layer": "3", "lang": "pt-BR", "enunciado": "Prove o teorema de Floquet para o sistema \\(X'=A(t)X\\), com \\(A(t+T)=A(t)\\)."}
+{"idx": 41, "layer": "2", "lang": "pt-BR", "enunciado": "Analise a estabilidade de \\(y'=(a+b\\cos t)y\\) usando o multiplicador de Floquet."}
+{"idx": 42, "layer": "3", "lang": "pt-BR", "enunciado": "Use o método de Poincaré–Lindstedt para obter a primeira correção da frequência em \\(x''+x+\\varepsilon x^3=0\\), com amplitude \\(A\\)."}
+{"idx": 43, "layer": "2", "lang": "pt-BR", "enunciado": "Descreva as soluções de \\(y''-xy=0\\) e identifique a solução que decai quando \\(x\\to+\\infty\\)."}
+{"idx": 44, "layer": "3", "lang": "pt-BR", "enunciado": "Analise a camada inicial no problema singularmente perturbado \\(\\varepsilon y'+y=t\\), \\(y(0)=1\\), para \\(0<\\varepsilon\\ll1\\)."}
+{"idx": 45, "layer": "2", "lang": "pt-BR", "enunciado": "Resolva \\(\\varepsilon y''+y'=0\\), \\(y(0)=0\\), \\(y(1)=1\\), e identifique a camada limite, confirmando a solução."}
+{"idx": 46, "layer": "3", "lang": "pt-BR", "enunciado": "Determine o limiar de estabilidade da equação com atraso \\(x'(t)=-a x(t-\\tau)\\), com \\(a,\\tau>0\\)."}
+{"idx": 47, "layer": "2", "lang": "pt-BR", "enunciado": "Use o método dos passos para resolver \\(x'(t)=-x(t-1)\\), com história \\(x(t)=1\\) em \\([-1,0]\\), até \\(t=2\\)."}
+{"idx": 48, "layer": "3", "lang": "pt-BR", "enunciado": "Derive as condições lineares para instabilidade de Turing num sistema de reação–difusão de duas espécies."}
+{"idx": 49, "layer": "2", "lang": "pt-BR", "enunciado": "Obtenha a velocidade mínima de uma frente viajante da equação de Fisher–KPP \\(u_t=Du_{xx}+ru(1-u/K)\\)."}

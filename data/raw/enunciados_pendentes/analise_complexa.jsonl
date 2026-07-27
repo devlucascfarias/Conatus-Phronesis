@@ -1,0 +1,50 @@
+{"idx": 0, "layer": "2", "lang": "pt-BR", "enunciado": "Determine onde \\(f(z)=\\overline z^{,2}\\) é complexamente diferenciável e se ela é holomorfa em algum aberto."}
+{"idx": 1, "layer": "3", "lang": "pt-BR", "enunciado": "Prove que, se \\(u,v\\) têm derivadas parciais contínuas numa vizinhança e satisfazem Cauchy–Riemann, então \\(f=u+iv\\) é holomorfa."}
+{"idx": 2, "layer": "2", "lang": "pt-BR", "enunciado": "Encontre uma conjugada harmônica de \\(u(x,y)=e^x\\cos y\\) e identifique a função holomorfa correspondente."}
+{"idx": 3, "layer": "3", "lang": "pt-BR", "enunciado": "Prove o teorema de Morera: uma função contínua cujas integrais sobre todo triângulo são nulas é holomorfa."}
+{"idx": 4, "layer": "2", "lang": "pt-BR", "enunciado": "Calcule \\(\\displaystyle\\oint_{|z|=2}\\frac{z^2}{z-1}\\,dz\\), com orientação positiva."}
+{"idx": 5, "layer": "3", "lang": "pt-BR", "enunciado": "Derive a fórmula integral de Cauchy para derivadas e obtenha as estimativas de Cauchy num disco."}
+{"idx": 6, "layer": "2", "lang": "pt-BR", "enunciado": "No ramo principal de \\(\\operatorname{Log}z\\), qual é o valor em \\(z=-1\\)? Calcule também os limites ao aproximar o eixo negativo por cima e por baixo."}
+{"idx": 7, "layer": "3", "lang": "pt-BR", "enunciado": "Seja \\(D\\) um domínio e \\(f\\) holomorfa sem zeros em \\(D\\). Prove que \\(f\\) admite logaritmo holomorfo se, e somente se, \\(\\oint_\\gamma f'/f\\,dz=0\\) para toda curva fechada em \\(D\\)."}
+{"idx": 8, "layer": "2", "lang": "pt-BR", "enunciado": "Encontre as séries de Laurent de \\(1/[z(z-1)]\\) centradas em zero nas regiões \\(0<|z|<1\\) e \\(|z|>1\\)."}
+{"idx": 9, "layer": "3", "lang": "pt-BR", "enunciado": "Classifique uma singularidade isolada por sua série de Laurent e prove o critério de singularidade removível por limitação local."}
+{"idx": 10, "layer": "2", "lang": "pt-BR", "enunciado": "Calcule \\(\\operatorname{Res}_{z=1} e^z/(z-1)^3\\) e confirme simbolicamente."}
+{"idx": 11, "layer": "3", "lang": "pt-BR", "enunciado": "Prove o teorema dos resíduos para uma função meromorfa no interior de um contorno simples fechado."}
+{"idx": 12, "layer": "2", "lang": "pt-BR", "enunciado": "Calcule o resíduo no infinito de \\(f(z)=z^2/[(z-1)(z-2)(z-3)]\\)."}
+{"idx": 13, "layer": "3", "lang": "pt-BR", "enunciado": "Calcule \\(\\displaystyle\\int_{-\\infty}^{\\infty}\\frac{dx}{x^4+1}\\) pelo teorema dos resíduos e confirme numericamente."}
+{"idx": 14, "layer": "2", "lang": "pt-BR", "enunciado": "Para \\(a>0\\) e \\(b>0\\), calcule \\(\\displaystyle\\int_{-\\infty}^{\\infty}\\frac{\\cos(ax)}{x^2+b^2}dx\\)."}
+{"idx": 15, "layer": "3", "lang": "pt-BR", "enunciado": "Use um contorno de chave para provar \\(\\displaystyle\\int_0^\\infty\\frac{x^{\\alpha-1}}{1+x}dx=\\frac{\\pi}{\\sin(\\pi\\alpha)}\\), para \\(0<\\alpha<1\\)."}
+{"idx": 16, "layer": "2", "lang": "pt-BR", "enunciado": "Calcule o valor principal de Cauchy \\(\\displaystyle\\operatorname{PV}\\int_{-\\infty}^{\\infty}e^{ix}/x\\,dx\\)."}
+{"idx": 17, "layer": "3", "lang": "pt-BR", "enunciado": "Prove o princípio do argumento e interprete-o como número de enrolamentos da imagem de um contorno."}
+{"idx": 18, "layer": "2", "lang": "pt-BR", "enunciado": "Quantos zeros de \\(p(z)=z^5+10z+1\\) há no disco unitário?"}
+{"idx": 19, "layer": "3", "lang": "pt-BR", "enunciado": "Prove o teorema de Rouché para duas funções holomorfas num contorno simples e seu interior."}
+{"idx": 20, "layer": "2", "lang": "pt-BR", "enunciado": "Para \\(f(z)=(z^2-1)/[z^3(z-2)]\\), calcule \\((2\\pi i)^{-1}\\oint_{|z|=3}f'(z)/f(z)\\,dz\\)."}
+{"idx": 21, "layer": "3", "lang": "pt-BR", "enunciado": "Prove o teorema fundamental da álgebra usando o teorema de Liouville."}
+{"idx": 22, "layer": "2", "lang": "pt-BR", "enunciado": "Se \\(f\\) é inteira e \\(\\operatorname{Re}f(z)\\le M\\) para todo \\(z\\), prove que \\(f\\) é constante."}
+{"idx": 23, "layer": "3", "lang": "pt-BR", "enunciado": "Prove o princípio do módulo máximo para uma função holomorfa não constante."}
+{"idx": 24, "layer": "2", "lang": "pt-BR", "enunciado": "Se \\(f:\\mathbb D\\to\\mathbb D\\) é holomorfa, \\(f(0)=0\\) e \\(|f'(0)|=1\\), determine \\(f\\)."}
+{"idx": 25, "layer": "3", "lang": "pt-BR", "enunciado": "Prove o teorema da aplicação aberta para funções holomorfas não constantes."}
+{"idx": 26, "layer": "2", "lang": "pt-BR", "enunciado": "Mostre que \\(w=(z-i)/(z+i)\\) leva o semiplano superior biholomorficamente no disco unitário e encontre a inversa."}
+{"idx": 27, "layer": "3", "lang": "pt-BR", "enunciado": "Classifique todos os automorfismos holomorfos do disco unitário."}
+{"idx": 28, "layer": "2", "lang": "pt-BR", "enunciado": "Encontre a transformação de Möbius que envia \\(0,1,\\infty\\) em \\(-1,0,1\\), respectivamente, e confira os três valores."}
+{"idx": 29, "layer": "3", "lang": "pt-BR", "enunciado": "Prove o lema de Schwarz–Pick e derive sua forma infinitesimal."}
+{"idx": 30, "layer": "2", "lang": "pt-BR", "enunciado": "Construa um mapa conforme do primeiro quadrante no disco unitário."}
+{"idx": 31, "layer": "3", "lang": "pt-BR", "enunciado": "Prove a propriedade do valor médio e o princípio do máximo para funções harmônicas."}
+{"idx": 32, "layer": "2", "lang": "pt-BR", "enunciado": "Resolva o problema de Dirichlet no strip \\(0<\\operatorname{Im}z<\\pi\\) com valores de fronteira \\(0\\) na borda inferior e \\(1\\) na superior, entre soluções limitadas."}
+{"idx": 33, "layer": "3", "lang": "pt-BR", "enunciado": "Prove o princípio de reflexão de Schwarz através de um segmento do eixo real."}
+{"idx": 34, "layer": "2", "lang": "pt-BR", "enunciado": "Duas funções holomorfas que coincidem numa sequência necessariamente coincidem em todo o domínio? Analise o caso em que o ponto de acumulação está na fronteira."}
+{"idx": 35, "layer": "3", "lang": "pt-BR", "enunciado": "Enuncie e prove a ideia central do teorema da monodromia para continuação analítica em um domínio simplesmente conexo."}
+{"idx": 36, "layer": "2", "lang": "pt-BR", "enunciado": "Prove a equação funcional \\(\\Gamma(z+1)=z\\Gamma(z)\\) para \\(\\operatorname{Re}z>0\\)."}
+{"idx": 37, "layer": "3", "lang": "pt-BR", "enunciado": "Prove a fórmula de reflexão de Euler \\(\\Gamma(z)\\Gamma(1-z)=\\pi/\\sin(\\pi z)\\) e faça uma conferência em \\(z=1/3\\)."}
+{"idx": 38, "layer": "3", "lang": "pt-BR", "enunciado": "Derive a expansão de Mittag–Leffler \\(\\displaystyle\\pi\\cot(\\pi z)=\\frac1z+\\sum_{n=1}^\\infty\\frac{2z}{z^2-n^2}\\)."}
+{"idx": 39, "layer": "2", "lang": "pt-BR", "enunciado": "Use a expansão de \\(\\pi\\cot(\\pi z)\\) para calcular \\(\\displaystyle\\sum_{n=1}^\\infty(n^2-1/4)^{-1}\\) e confirme por soma parcial."}
+{"idx": 40, "layer": "3", "lang": "pt-BR", "enunciado": "Prove o produto de Weierstrass \\(\\displaystyle\\frac{\\sin(\\pi z)}{\\pi z}=\\prod_{n=1}^\\infty\\left(1-\\frac{z^2}{n^2}\\right)\\)."}
+{"idx": 41, "layer": "2", "lang": "pt-BR", "enunciado": "Classifique a singularidade de \\(e^{1/z}\\) em zero e mostre três comportamentos distintos ao aproximar-se do ponto."}
+{"idx": 42, "layer": "3", "lang": "pt-BR", "enunciado": "Prove o teorema de Casorati–Weierstrass para uma singularidade essencial."}
+{"idx": 43, "layer": "2", "lang": "pt-BR", "enunciado": "Calcule o resíduo de \\(\\Gamma(z)\\) em \\(z=-n\\), para \\(n\\in\\mathbb N_0\\)."}
+{"idx": 44, "layer": "3", "lang": "pt-BR", "enunciado": "Prove que uma família localmente uniformemente limitada de funções holomorfas é normal."}
+{"idx": 45, "layer": "2", "lang": "pt-BR", "enunciado": "Se \\(f_n\\) são holomorfas e convergem uniformemente em compactos para \\(f\\), prove que \\(f_n'\to f'\\) uniformemente em compactos."}
+{"idx": 46, "layer": "3", "lang": "pt-BR", "enunciado": "Prove o teorema de Hurwitz para uma sequência de funções holomorfas sem zeros."}
+{"idx": 47, "layer": "2", "lang": "pt-BR", "enunciado": "Descreva a monodromia de \\(\\sqrt{z(z-1)}\\) ao continuar em torno de \\(0\\), de \\(1\\) e de ambos os pontos."}
+{"idx": 48, "layer": "3", "lang": "pt-BR", "enunciado": "Derive a fórmula de Stirling pelo método de Laplace aplicado à integral da função gama e verifique a aproximação em \\(20!\\)."}
+{"idx": 49, "layer": "2", "lang": "pt-BR", "enunciado": "A série geométrica \\(\\sum_{n=0}^\\infty z^n\\) fornece o valor de \\(1/(1-z)\\) em \\(z=2\\)? Explique em termos de continuação analítica."}

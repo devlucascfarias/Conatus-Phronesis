@@ -1,0 +1,50 @@
+{"idx": 0, "layer": "2", "lang": "pt-BR", "enunciado": "Aproxime \\(I=\\int_0^1e^{-x^2}\\,dx\\) pela regra dos trapézios composta com \\(N=1000\\) e compare com o valor exato."}
+{"idx": 1, "layer": "3", "lang": "pt-BR", "enunciado": "Use Simpson composta para calcular \\(T/T_0\\) de um pêndulo com amplitude \\(120^\\circ\\), avalie a convergência ao dobrar \\(N\\) e compare com a integral elíptica exata."}
+{"idx": 2, "layer": "2", "lang": "pt-BR", "enunciado": "Aplique Gauss-Legendre com quatro pontos a \\(\\int_0^1(1+x^2)^{-1}dx\\) e determine o erro."}
+{"idx": 3, "layer": "3", "lang": "pt-BR", "enunciado": "Integre adaptativamente \\(I=\\int_0^1[(x-0{,}37)^2+0{,}05^2]^{-1}dx\\) por Simpson e compare com a primitiva analítica."}
+{"idx": 4, "layer": "2", "lang": "pt-BR", "enunciado": "Aproxime \\(d(\\sin x)/dx\\) em \\(x=1\\) por diferença central com \\(h=10^{-3}\\) e calcule o erro."}
+{"idx": 5, "layer": "3", "lang": "pt-BR", "enunciado": "Use Richardson para melhorar a diferença central de \\(e^x\\) em \\(x=1\\) e verifique numericamente a ordem ao reduzir \\(h\\)."}
+{"idx": 6, "layer": "2", "lang": "pt-BR", "enunciado": "Use bisseção para obter a velocidade terminal positiva de \\(m=80\\,\\mathrm{kg}\\) sob gravidade e arrasto \\(cv^2\\), com \\(c=0{,}25\\,\\mathrm{kg/m}\\)."}
+{"idx": 7, "layer": "3", "lang": "pt-BR", "enunciado": "Resolva \\(E-e\\sin E=M\\) para \\(e=0{,}95\\), \\(M=0{,}1\\) por Newton, comparando \\(E_0=M\\) e \\(E_0=\\pi\\)."}
+{"idx": 8, "layer": "2", "lang": "pt-BR", "enunciado": "Para uma onda com \\(T=5\\,\\mathrm s\\) em profundidade \\(h=20\\,\\mathrm m\\), resolva por secante \\(\\omega^2=gk\\tanh(kh)\\) e determine \\(k\\) e \\(\\lambda\\)."}
+{"idx": 9, "layer": "3", "lang": "pt-BR", "enunciado": "Compare interpolação de grau \\(14\\) em nós equiespaçados e de Chebyshev para \\(f(x)=1/(1+25x^2)\\) em \\([-1,1]\\)."}
+{"idx": 10, "layer": "2", "lang": "pt-BR", "enunciado": "A calibração \\((T,R)=(0,100),(20,72),(40,53),(60,40)\\) está em \\(\\mathrm{^\\circ C}\\) e \\(\\Omega\\). Use Lagrange cúbico para estimar \\(R(30)\\)."}
+{"idx": 11, "layer": "3", "lang": "pt-BR", "enunciado": "Mostre numericamente como diferenciação amplifica ruído e compare diferença central com ajuste quadrático local para dados de \\(\\sin x\\)."}
+{"idx": 12, "layer": "2", "lang": "pt-BR", "enunciado": "Um projétil parte com \\(v_0=50\\,\\mathrm{m/s}\\), gravidade e arrasto linear de tempo \\(\\tau=5\\,\\mathrm s\\). Use busca áurea e integração temporal para maximizar o alcance."}
+{"idx": 13, "layer": "2", "lang": "pt-BR", "enunciado": "Integre \\(y'=-0{,}7y\\), \\(y(0)=1\\), até \\(t=5\\) por Euler explícito com \\(h=0{,}5,0{,}25,0{,}125\\) e verifique a ordem."}
+{"idx": 14, "layer": "3", "lang": "pt-BR", "enunciado": "Integre \\(x''+x=0\\), \\(x(0)=1,v(0)=0\\), até \\(t=10\\) por RK4 e confirme ordem e erro de energia."}
+{"idx": 15, "layer": "2", "lang": "pt-BR", "enunciado": "Compare Euler explícito e velocity-Verlet para \\(x''+x=0\\) durante \\(100\\) períodos, com \\(h=0{,}1\\), pelo erro de energia."}
+{"idx": 16, "layer": "3", "lang": "pt-BR", "enunciado": "Para \\(y'=-1000(y-\\cos t)-\\sin t\\), \\(y(0)=1\\), compare Euler explícito e implícito com \\(h=0{,}0025\\) até \\(t=0{,}1\\)."}
+{"idx": 17, "layer": "2", "lang": "pt-BR", "enunciado": "Integre \\(A\\to B\\), com \\(\\lambda_A=0{,}4,\\lambda_B=0{,}1\\), \\(A(0)=1,B(0)=0\\), por RK4 até \\(t=10\\) e compare com Bateman."}
+{"idx": 18, "layer": "3", "lang": "pt-BR", "enunciado": "Integre Lorenz com \\(\\sigma=10,\\rho=28,\\beta=8/3\\) para estados separados por \\(10^{-8}\\) e meça a separação em \\(t=20\\)."}
+{"idx": 19, "layer": "2", "lang": "pt-BR", "enunciado": "Simule por RK4 um projétil com \\(\\mathbf F_d=-0{,}02|\\mathbf v|\\mathbf v\\), \\(m=1\\), \\(v_0=40\\,\\mathrm{m/s}\\), \\(40^\\circ\\), até o solo."}
+{"idx": 20, "layer": "3", "lang": "pt-BR", "enunciado": "Compare Euler simplético e RK4 para \\(\\theta''+\\sin\\theta=0\\) em \\(5000\\) períodos, com \\(h=0{,}1\\)."}
+{"idx": 21, "layer": "2", "lang": "pt-BR", "enunciado": "Calcule o tempo de queda de \\(100\\,\\mathrm m\\) com \\(v'=g-0{,}25v|v|/80\\), por RK4 e evento interpolado."}
+{"idx": 22, "layer": "3", "lang": "pt-BR", "enunciado": "Use shooting com RK4 para achar o menor \\(\\lambda>0\\) tal que \\(y''+\\lambda y=0\\), \\(y(0)=0,y'(0)=1,y(1)=0\\)."}
+{"idx": 23, "layer": "2", "lang": "pt-BR", "enunciado": "Verifique por duplicação de passo a ordem de RK4 para \\(y'=-y\\), \\(y(0)=1\\), em \\(t=1\\)."}
+{"idx": 24, "layer": "3", "lang": "pt-BR", "enunciado": "Integre uma órbita kepleriana elíptica por RK4 adaptativo por duplicação de passo e avalie energia e momento angular após um período."}
+{"idx": 25, "layer": "3", "lang": "pt-BR", "enunciado": "Construa seção de Poincaré para \\(x''+0{,}2x'-x+x^3=0{,}3\\cos(1{,}2t)\\), após descartar o transitório."}
+{"idx": 26, "layer": "2", "lang": "pt-BR", "enunciado": "Aplique um passo FTCS a \\(u_t=\\alpha u_{xx}\\) com \\(u=[0,1,0,1,0]\\), \\(\\alpha=1\\), \\(\\Delta x=1\\), \\(\\Delta t=0{,}4\\), bordas nulas, e teste estabilidade."}
+{"idx": 27, "layer": "3", "lang": "pt-BR", "enunciado": "Verifique convergência FTCS para \\(u_t=u_{xx}\\), \\(0<x<1\\), bordas nulas, \\(u(x,0)=\\sin\\pi x\\), até \\(t=0{,}1\\)."}
+{"idx": 28, "layer": "2", "lang": "pt-BR", "enunciado": "Teste numericamente a condição CFL do esquema centrado para \\(u_{tt}=c^2u_{xx}\\), comparando \\(C=c\\Delta t/\\Delta x=0{,}9\\) e \\(1{,}1\\)."}
+{"idx": 29, "layer": "3", "lang": "pt-BR", "enunciado": "Integre uma onda periódica por leapfrog e verifique conservação da energia discreta ao refinar a malha."}
+{"idx": 30, "layer": "2", "lang": "pt-BR", "enunciado": "Resolva \\(-u''=1\\) em \\([0,1]\\), \\(u(0)=u(1)=0\\), por diferenças finitas com \\(N=50\\) subintervalos e compare com \\(u=x(1-x)/2\\)."}
+{"idx": 31, "layer": "3", "lang": "pt-BR", "enunciado": "Resolva \\(-\\nabla^2u=1\\) no quadrado unitário com \\(u=0\\) na borda por Jacobi e teste o resíduo."}
+{"idx": 32, "layer": "2", "lang": "pt-BR", "enunciado": "Aproxime os três menores níveis do poço infinito \\([0,1]\\) por diferenças finitas com \\(N=200\\), usando \\(-\\psi''=E\\psi\\)."}
+{"idx": 33, "layer": "3", "lang": "pt-BR", "enunciado": "Implemente Crank-Nicolson para um pacote livre unidimensional e verifique conservação da norma."}
+{"idx": 34, "layer": "2", "lang": "pt-BR", "enunciado": "Uma série amostrada a \\(100\\,\\mathrm{Hz}\\) contém \\(3\\sin(2\\pi10t)+1{,}5\\cos(2\\pi23t)\\). Use FFT para recuperar frequências e amplitudes."}
+{"idx": 35, "layer": "3", "lang": "pt-BR", "enunciado": "Compare derivada espectral por FFT e diferença central de segunda ordem para \\(f(x)=e^{\\sin x}\\) periódica."}
+{"idx": 36, "layer": "2", "lang": "pt-BR", "enunciado": "Use o método da potência para obter a maior frequência quadrada da matriz dinâmica \\(D=\\begin{pmatrix}2&-1&0\\\\-1&2&-1\\\\0&-1&2\\end{pmatrix}\\)."}
+{"idx": 37, "layer": "3", "lang": "pt-BR", "enunciado": "Resolva por gradientes conjugados o sistema de Poisson unidimensional com \\(N=500\\) incógnitas e compare com solução direta e resíduo."}
+{"idx": 38, "layer": "2", "lang": "pt-BR", "enunciado": "Estime \\(\\pi\\) por Monte Carlo com \\(10^6\\) pontos uniformes e forneça a incerteza."}
+{"idx": 39, "layer": "3", "lang": "pt-BR", "enunciado": "Estime \\(I=\\int_0^\\infty x^2e^{-x}dx\\) por importância e verifique \\(N^{-1/2}\\)."}
+{"idx": 40, "layer": "2", "lang": "pt-BR", "enunciado": "Simule \\(20000\\) caminhantes unidimensionais por \\(1000\\) passos \\(\\pm1\\) e verifique \\(\\langle X^2\\rangle=1000\\)."}
+{"idx": 41, "layer": "3", "lang": "pt-BR", "enunciado": "Simule Ising \\(20\\times20\\) a \\(T=2\\), \\(J=k_B=1\\), por Metropolis e estime energia e magnetização por spin."}
+{"idx": 42, "layer": "2", "lang": "pt-BR", "enunciado": "Simule \\(N_0=100000\\) núcleos com probabilidade de decaimento \\(0{,}01\\) por passo durante \\(100\\) passos."}
+{"idx": 43, "layer": "3", "lang": "pt-BR", "enunciado": "Simule Langevin \\(dv=-\\gamma vdt+\\sqrt{2\\gamma kT/m}\\,dW\\) por Euler-Maruyama e verifique equipartição."}
+{"idx": 44, "layer": "2", "lang": "pt-BR", "enunciado": "Estime por bootstrap o erro padrão da média de vinte medidas normais geradas com seed fixo e compare com \\(s/\\sqrt n\\)."}
+{"idx": 45, "layer": "3", "lang": "pt-BR", "enunciado": "Use Metropolis para amostrar \\(p(x)\\propto e^{-x^2/2}\\), estime \\(\\langle x^2\\rangle\\) e diagnostique autocorrelação."}
+{"idx": 46, "layer": "2", "lang": "pt-BR", "enunciado": "Gere velocidades de Maxwell tridimensionais com \\(kT/m=1\\) e verifique \\(\\langle v^2\\rangle=3\\)."}
+{"idx": 47, "layer": "3", "lang": "pt-BR", "enunciado": "Estime a probabilidade de percolação vertical de sítios numa rede \\(30\\times30\\) para \\(p=0{,}55,0{,}59,0{,}63\\)."}
+{"idx": 48, "layer": "2", "lang": "pt-BR", "enunciado": "Demonstre numericamente reprodutibilidade de gerador pseudoaleatório com seed."}
+{"idx": 49, "layer": "3", "lang": "pt-BR", "enunciado": "Compare Monte Carlo e trapézios para \\(\\int_0^1e^x dx\\) com custos comparáveis."}

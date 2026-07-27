@@ -1,34 +1,38 @@
 {
   "input": 1181,
-  "kept": 1179,
-  "rejected_total": 2,
+  "kept": 901,
+  "rejected_total": 280,
   "rejected_by_reason": {
-    "resposta_numero_nao_grounded_em_busca": 2
+    "think_abaixo_de_25_palavras": 254,
+    "think_abaixo_de_60_palavras": 22,
+    "resposta_numero_nao_grounded_em_busca": 2,
+    "resposta_nao_ecoa_nenhum_valor_do_tool": 1,
+    "resposta_nao_ecoa_resultado_tool": 1
   },
   "layer_distribution": {
     "0": {
       "n": 104,
-      "share": 0.088
+      "share": 0.115
     },
     "0.5": {
       "n": 95,
-      "share": 0.081
+      "share": 0.105
     },
     "1": {
       "n": 288,
-      "share": 0.244
+      "share": 0.32
     },
     "2": {
-      "n": 477,
-      "share": 0.405
+      "n": 221,
+      "share": 0.245
     },
     "3": {
-      "n": 78,
-      "share": 0.066
+      "n": 56,
+      "share": 0.062
     },
     "C": {
       "n": 137,
-      "share": 0.116
+      "share": 0.152
     }
   },
   "layer_targets": {

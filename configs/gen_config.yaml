@@ -16,15 +16,40 @@ dataset:
 # Proporções por camada (soma = 1.0) — seção 4.1 do PLANO.md
 # think_max_words (branch phronesis-thinking): teto de palavras do bloco <think> por camada.
 # Calibrado pra ficar curto nas camadas fáceis (o modelo aprende a dosar o esforço de
-# deliberação pela dificuldade real, não só o preâmbulo visível) e livre na camada 3
+# deliberação pela dificuldade real, não só o preâmbulo visível) e livre nas camadas 2/3
 # (raciocínio longo, ver prompts/generator_thinking_gpt56.md). Não conta como preâmbulo visível
 # — strip_think_blocks() em src/common.py já exclui o <think> da métrica de preambulo_max_words.
+#
+# think_min_words (2026-07-26, item 2 do plano de correção pós-diagnóstico): auditoria de
+# data/clean/dataset.jsonl mostrou mediana de 18-21 palavras de <think> na camada 3 MESMO
+# com think_max_words: null — o teto null nunca impediu blocos curtos, só evitava bloquear
+# os longos. O retrofit pós-hoc (prompts/editor_thinking_gpt56.md, item já resolvido antes
+# de escrever o <think>) convergiu pra frases de conclusão ("A é bloco de Jordan; o termo
+# nilpotente não pode desaparecer antes da verificação") em vez de deliberação real — uma
+# legenda da resposta, não o processo que a produziu. Isso ensina o Qwen3-8B (que nativamente
+# gera centenas/milhares de tokens de reasoning em thinking mode) a suprimir o próprio
+# mecanismo de raciocínio. think_min_words nas camadas 2/3 rejeita blocos curtos demais pra
+# serem deliberação genuína, forçando regeneração via rejection sampling (item 3) em vez de
+# retrofit. Camadas 0/0.5/1/C não ganham mínimo — o think curto ali é roteamento de tool
+# (buscar? calcular? só responder?), não derivação, e os evals mostraram que funciona bem
+# nesse comprimento.
+#
+# Calibração dos valores (não são chute): medidos contra `gpt56_limites.jsonl`, a única
+# família já regenerada think-first e verificada — o padrão-ouro. Camada 2 dela tem
+# comprimentos 13..37 (mediana 31); camada 3, 63..113 (mediana 82).
+#   camada 2 = 25 → corta 436/465 (93,8%) das legendas de retrofit e preserva 23/27 do
+#     padrão-ouro. Um corte em 30 subiria para 462/465 (99,4%) mas derrubaria 11 dos 27
+#     itens bons — problema fácil legitimamente tem deliberação curta ("substituição
+#     direta resolve, a função é contínua no ponto"), e puni-la empurra o gerador a inflar
+#     o think, que é exatamente o teatro que queremos evitar.
+#   camada 3 = 60 → abaixo do mínimo observado no padrão-ouro (63), então não corta nada
+#     de bom, e ainda assim elimina toda legenda de uma frase.
 layers:
   "0":   { share: 0.20, preamble_max_words: 0,  think_max_words: 15 }
   "0.5": { share: 0.12, preamble_max_words: 25, think_max_words: 25 }
   "1":   { share: 0.25, preamble_max_words: 40, think_max_words: 35 }
-  "2":   { share: 0.18, preamble_max_words: null, think_max_words: 40 }
-  "3":   { share: 0.05, preamble_max_words: null, think_max_words: null }
+  "2":   { share: 0.18, preamble_max_words: null, think_max_words: null, think_min_words: 25 }
+  "3":   { share: 0.05, preamble_max_words: null, think_max_words: null, think_min_words: 60 }
   "C":   { share: 0.20, preamble_max_words: null, think_max_words: 20 }
 
 # Propriedades da camada 1 (verbalizadas no rationale)

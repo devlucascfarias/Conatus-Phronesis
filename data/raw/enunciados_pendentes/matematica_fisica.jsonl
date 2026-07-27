@@ -1,0 +1,50 @@
+{"idx": 0, "layer": "3", "lang": "pt-BR", "enunciado": "Partindo do princípio de ação estacionária com extremidades fixas, derive as equações de Euler–Lagrange para \\(n\\) coordenadas generalizadas."}
+{"idx": 1, "layer": "2", "lang": "pt-BR", "enunciado": "Para \\(L=\\frac m2(\\dot r^2+r^2\\dot\\theta^2)-V(r)\\), identifique a coordenada cíclica e a quantidade conservada correspondente."}
+{"idx": 2, "layer": "3", "lang": "pt-BR", "enunciado": "Mostre diretamente pelas equações de Euler–Lagrange que, se \\(L(q,\\dot q)\\) não depende explicitamente do tempo, então \\(E=\\sum_i\\dot q_i\\,\\partial L/\\partial\\dot q_i-L\\) é conservada. Explique a hipótese de regularidade necessária."}
+{"idx": 3, "layer": "2", "lang": "pt-BR", "enunciado": "Considere \\(L=\\frac m2(\\dot x-\\dot y)^2-V(x-y)\\). A transformação de Legendre para \\((x,y)\\) é invertível?"}
+{"idx": 4, "layer": "2", "lang": "pt-BR", "enunciado": "Para o oscilador harmônico com \\(m=\\omega=1\\), derive o fluxo hamiltoniano e confirme a evolução até \\(t=\\pi/2\\) simbolicamente."}
+{"idx": 5, "layer": "3", "lang": "pt-BR", "enunciado": "A partir de \\(\\{q_i,p_j\\}=\\delta_{ij}\\), derive a álgebra de Poisson do momento angular \\(L_i=\\varepsilon_{ijk}q_jp_k\\)."}
+{"idx": 6, "layer": "2", "lang": "pt-BR", "enunciado": "Mostre que \\(Q=q\\cos\\alpha+p\\sin\\alpha\\), \\(P=-q\\sin\\alpha+p\\cos\\alpha\\) define uma transformação canônica."}
+{"idx": 7, "layer": "3", "lang": "pt-BR", "enunciado": "Prove o teorema de Liouville para um fluxo hamiltoniano: o volume no espaço de fases é preservado."}
+{"idx": 8, "layer": "2", "lang": "pt-BR", "enunciado": "Resolva a equação de Hamilton–Jacobi para uma partícula livre unidimensional com energia \\(E>0\\) e recupere sua trajetória."}
+{"idx": 9, "layer": "3", "lang": "pt-BR", "enunciado": "Duas massas iguais \\(m\\) estão alinhadas entre paredes e ligadas por três molas idênticas de constante \\(k\\). Determine, por pequenas oscilações, as frequências e os modos normais, confirmando o problema espectral."}
+{"idx": 10, "layer": "2", "lang": "pt-BR", "enunciado": "Prove a ortogonalidade de autofunções de um problema regular de Sturm–Liouville associadas a autovalores distintos."}
+{"idx": 11, "layer": "3", "lang": "pt-BR", "enunciado": "Construa a função de Green de \\(-d^2/dx^2\\) em \\([0,L]\\) com condições de Dirichlet e use-a para representar a solução de \\(-u''=f\\)."}
+{"idx": 12, "layer": "2", "lang": "pt-BR", "enunciado": "Resolva \\(u_t+c,u_x=0\\) em \\(\\mathbb R\\), com \\(u(x,0)=f(x)\\), pelo método das características."}
+{"idx": 13, "layer": "3", "lang": "pt-BR", "enunciado": "Derive pela transformada de Fourier a solução fundamental da equação do calor \\(u_t=\\kappa u_{xx}\\) em \\(\\mathbb R\\) e justifique a condição inicial delta."}
+{"idx": 14, "layer": "2", "lang": "pt-BR", "enunciado": "Resolva o problema de Cauchy \\(u_{tt}=c^2u_{xx}\\), \\(u(x,0)=f(x)\\), \\(u_t(x,0)=g(x)\\), em toda a reta."}
+{"idx": 15, "layer": "3", "lang": "pt-BR", "enunciado": "Resolva o problema de Dirichlet para a equação de Laplace no disco de raio \\(R\\), com dado de fronteira \\(u(R,\\theta)=f(\\theta)\\), e obtenha o núcleo de Poisson."}
+{"idx": 16, "layer": "2", "lang": "pt-BR", "enunciado": "Para \\(a>0\\), expresse \\(\\delta(x^2-a^2)\\) como soma de deltas simples e calcule sua ação sobre uma função teste \\(\\varphi\\)."}
+{"idx": 17, "layer": "3", "lang": "pt-BR", "enunciado": "Obtenha os modos normais de uma membrana circular de raio \\(R\\) presa na borda e mostre a ortogonalidade radial dos modos de Bessel."}
+{"idx": 18, "layer": "2", "lang": "pt-BR", "enunciado": "Use a fórmula de Rodrigues para calcular \\(P_4(x)\\) e verifique que ele é ortogonal a \\(P_2(x)\\) em \\([-1,1]\\)."}
+{"idx": 19, "layer": "3", "lang": "pt-BR", "enunciado": "Derive os autovalores do Laplaciano angular na esfera e explique por que, para cada \\(\\ell\\), há degenerescência \\(2\\ell+1\\)."}
+{"idx": 20, "layer": "2", "lang": "pt-BR", "enunciado": "Qual função de Green em três dimensões satisfaz \\((\\nabla^2+k^2)G=-\\delta^{(3)}(\\mathbf r)\\) e a condição de radiação de saída?"}
+{"idx": 21, "layer": "3", "lang": "pt-BR", "enunciado": "Derive, a partir das equações de Maxwell no vácuo, a relação de dispersão e a transversalidade de uma onda eletromagnética plana."}
+{"idx": 22, "layer": "2", "lang": "pt-BR", "enunciado": "Deduza as condições de salto dos campos \\(\\mathbf E\\) e \\(\\mathbf B\\) numa interface com densidade superficial de carga \\(\\sigma\\) e corrente superficial \\(\\mathbf K\\)."}
+{"idx": 23, "layer": "3", "lang": "pt-BR", "enunciado": "Derive o teorema de Poynting a partir das equações de Maxwell e identifique densidade e fluxo de energia eletromagnética."}
+{"idx": 24, "layer": "2", "lang": "pt-BR", "enunciado": "Mostre que a transformação de calibre \\(\\mathbf A'=\\mathbf A+\\nabla\\chi\\), \\(\\phi'=\\phi-\\partial_t\\chi\\) não altera os campos eletromagnéticos."}
+{"idx": 25, "layer": "3", "lang": "pt-BR", "enunciado": "Prove o teorema de unicidade para o problema eletrostático de Dirichlet numa região limitada."}
+{"idx": 26, "layer": "2", "lang": "pt-BR", "enunciado": "Obtenha os termos monopolar e dipolar do potencial de uma distribuição de carga localizada, observada a uma distância muito maior que seu tamanho."}
+{"idx": 27, "layer": "3", "lang": "pt-BR", "enunciado": "Uma carga \\(q\\) está a uma distância \\(d>a\\) do centro de uma esfera condutora aterrada de raio \\(a\\). Resolva o potencial exterior pelo método das imagens e verifique a fronteira para \\(a=2\\), \\(d=5\\)."}
+{"idx": 28, "layer": "3", "lang": "pt-BR", "enunciado": "Prove o teorema de reciprocidade de Green para duas distribuições eletrostáticas de carga em uma mesma região com condições de fronteira homogêneas."}
+{"idx": 29, "layer": "2", "lang": "pt-BR", "enunciado": "Para campos harmônicos escritos como \\(\\mathbf E=\\operatorname{Re}(\\mathbf E_0e^{-i\\omega t})\\) e \\(\\mathbf H=\\operatorname{Re}(\\mathbf H_0e^{-i\\omega t})\\), determine o vetor de Poynting médio."}
+{"idx": 30, "layer": "3", "lang": "pt-BR", "enunciado": "Obtenha os potenciais retardados no calibre de Lorenz e mostre como a conservação de carga garante a condição de calibre."}
+{"idx": 31, "layer": "2", "lang": "pt-BR", "enunciado": "Determine os estados estacionários e as energias de uma partícula no poço infinito \\(0<x<L\\)."}
+{"idx": 32, "layer": "3", "lang": "pt-BR", "enunciado": "Use operadores de criação e aniquilação para obter o espectro do oscilador harmônico quântico unidimensional."}
+{"idx": 33, "layer": "2", "lang": "pt-BR", "enunciado": "Uma partícula com \\(E>V_0\\) incide num degrau \\(V(x)=0\\) para \\(x<0\\) e \\(V_0\\) para \\(x>0\\). Calcule os coeficientes de reflexão e transmissão."}
+{"idx": 34, "layer": "3", "lang": "pt-BR", "enunciado": "Prove a relação de incerteza de Robertson \\(\\Delta A\\,\\Delta B\\ge\\frac12|\\langle[A,B]\\rangle|\\) para observáveis autoadjuntos."}
+{"idx": 35, "layer": "2", "lang": "pt-BR", "enunciado": "Um spin \\(1/2\\) começa em \\(|+x\\rangle\\) e evolui sob \\(H=\\hbar\\Omega\\sigma_z/2\\). Determine o estado e as probabilidades de medir \\(\\sigma_y=\\pm1\\) em \\(t=\\pi/(2\\Omega)\\), confirmando simbolicamente."}
+{"idx": 36, "layer": "3", "lang": "pt-BR", "enunciado": "Derive o teorema de Ehrenfest para posição e momento de uma partícula com \\(H=p^2/(2m)+V(x)\\)."}
+{"idx": 37, "layer": "2", "lang": "pt-BR", "enunciado": "Para um qubit com \\(\\rho=\\frac12(I+\\mathbf r\\cdot\\boldsymbol\\sigma)\\), determine a condição de positividade e quando o estado é puro."}
+{"idx": 38, "layer": "3", "lang": "pt-BR", "enunciado": "Para uma barreira retangular de altura \\(V_0\\) e largura \\(a\\), derive o coeficiente de transmissão quando \\(0<E<V_0\\) e obtenha o limite de barreira espessa."}
+{"idx": 39, "layer": "2", "lang": "pt-BR", "enunciado": "Derive a equação de continuidade da probabilidade para a equação de Schrödinger com potencial real."}
+{"idx": 40, "layer": "3", "lang": "pt-BR", "enunciado": "A partir dos comutadores do momento angular, derive os autovalores simultâneos de \\(L^2\\) e \\(L_z\\) usando operadores escada."}
+{"idx": 41, "layer": "2", "lang": "pt-BR", "enunciado": "Se \\(\\langle[A,B]\\rangle=0\\) em um estado, pode-se concluir que \\(A\\) e \\(B\\) são compatíveis? Analise \\(A=\\sigma_x\\), \\(B=\\sigma_y\\) no estado \\(|+x\\rangle\\)."}
+{"idx": 42, "layer": "3", "lang": "pt-BR", "enunciado": "Use uma gaussiana variacional para obter uma cota superior para a energia fundamental de \\(H=p^2/2+x^4\\), em unidades \\(m=\\hbar=1\\), e confirme a minimização simbolicamente."}
+{"idx": 43, "layer": "2", "lang": "pt-BR", "enunciado": "No poço infinito \\(0<x<L\\), calcule a correção de primeira ordem causada pela perturbação \\(H'=\\lambda x\\)."}
+{"idx": 44, "layer": "3", "lang": "pt-BR", "enunciado": "No primeiro nível excitado degenerado do oscilador harmônico isotrópico bidimensional, determine a separação de primeira ordem produzida por \\(H'=\\varepsilon xy\\) e confirme a diagonalização."}
+{"idx": 45, "layer": "2", "lang": "pt-BR", "enunciado": "Uma onda plana \\(e^{ikx}\\) pode ser normalizada a norma \\(1\\) em \\(L^2(\\mathbb R)\\)? Dê a normalização distribucional correta."}
+{"idx": 46, "layer": "3", "lang": "pt-BR", "enunciado": "Aplique a condição de quantização WKB ao oscilador harmônico e mostre que ela reproduz o espectro exato."}
+{"idx": 47, "layer": "3", "lang": "pt-BR", "enunciado": "Derive o propagador da partícula livre unidimensional e verifique seu limite de tempo curto."}
+{"idx": 48, "layer": "2", "lang": "pt-BR", "enunciado": "Determine a diferença de fase de Aharonov–Bohm entre dois caminhos que circundam um fluxo magnético \\(\\Phi\\), embora \\(\\mathbf B=0\\) ao longo dos caminhos."}
+{"idx": 49, "layer": "2", "lang": "pt-BR", "enunciado": "Calcule a função de partição e a energia média de um oscilador harmônico quântico em equilíbrio térmico."}
