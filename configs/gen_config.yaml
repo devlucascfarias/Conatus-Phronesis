@@ -44,13 +44,44 @@ dataset:
 #     o think, que é exatamente o teatro que queremos evitar.
 #   camada 3 = 60 → abaixo do mínimo observado no padrão-ouro (63), então não corta nada
 #     de bom, e ainda assim elimina toda legenda de uma frase.
+# REVISÃO DOS ALVOS (2026-07-27). Os `share` abaixo mudaram; os tetos/pisos de palavras não.
+#
+# Os alvos originais (0: 0.20, 0.5: 0.12, 1: 0.25, 2: 0.18, 3: 0.05, C: 0.20) foram definidos
+# na seção 4.1 do plano, quando o projeto era só calibração de tool-use: decidir entre buscar,
+# verificar no sandbox ou responder direto. Desde então o escopo cresceu — a avaliação
+# pós-treino (data/eval/thinking_8b_eval_notes.md) mostrou que o modo de falha dominante não é
+# roteamento de ferramenta, e sim rigor matemático/físico: 8 de 16 itens da bateria erraram por
+# derivação inválida, física errada ou autocontradição, não por chamar a tool errada. A resposta
+# a isso foi a destilação de matemática via GPT-5.6 (prompts/generator_math_gpt56.md), que
+# adicionou centenas de itens de camada 2 e 3.
+#
+# Com isso a camada 2 chegou a 0.282 contra um alvo de 0.18. A alternativa a revisar o alvo era
+# PODAR — mas fechar 0.18 exigiria deletar ~150 dos 340 itens de camada 2, que são exatamente a
+# distilação mais cara do corpus. Apagar dado bom para bater um número herdado de outro escopo
+# inverte meio e fim: o alvo existe para descrever o corpus que queremos, não o contrário.
+#
+# Os novos valores ficam perto da distribuição real, mantendo pressão apenas onde há evidência
+# de que o desequilíbrio custa caro:
+#   - camada 2 = 0.26 (real 0.282): reconhece o papel ampliado, mas segue puxando pra baixo.
+#     Sobre-representar camada 2 tem risco medido de generalização torta — batch_012/013
+#     registram o modelo super-aplicando o padrão de uma camada fora do contexto dela.
+#   - camada C = 0.18 (real 0.165): puxa pra CIMA, e o valor não é chute. O batch_014 mediu
+#     regressão de coerência conversacional com C em 0.143 e a resolveu subindo pra 0.182 —
+#     então 0.18 é o nível empiricamente validado, mais defensável que os 0.20 originais.
+#   - camada 0 = 0.16 (real 0.158) e 0.5 = 0.10 (real 0.103): alinhados ao corpus real. Ambas
+#     são camadas de resposta curta; o alvo alto anterior não tinha evidência por trás.
+#   - camada 1 = 0.24 (real 0.239) e 3 = 0.06 (real 0.054): praticamente onde já estavam.
+#
+# `share` alimenta só duas coisas: os pesos de amostragem do plano de tasks em
+# src/generate_data.py e a coluna de comparação em data/clean/report.json. Nada no treino lê
+# isto — mudar aqui não altera nenhum exemplo já validado.
 layers:
-  "0":   { share: 0.20, preamble_max_words: 0,  think_max_words: 15 }
-  "0.5": { share: 0.12, preamble_max_words: 25, think_max_words: 25 }
-  "1":   { share: 0.25, preamble_max_words: 40, think_max_words: 35 }
-  "2":   { share: 0.18, preamble_max_words: null, think_max_words: null, think_min_words: 25 }
-  "3":   { share: 0.05, preamble_max_words: null, think_max_words: null, think_min_words: 60 }
-  "C":   { share: 0.20, preamble_max_words: null, think_max_words: 20 }
+  "0":   { share: 0.16, preamble_max_words: 0,  think_max_words: 15 }
+  "0.5": { share: 0.10, preamble_max_words: 25, think_max_words: 25 }
+  "1":   { share: 0.24, preamble_max_words: 40, think_max_words: 35 }
+  "2":   { share: 0.26, preamble_max_words: null, think_max_words: null, think_min_words: 25 }
+  "3":   { share: 0.06, preamble_max_words: null, think_max_words: null, think_min_words: 60 }
+  "C":   { share: 0.18, preamble_max_words: null, think_max_words: 20 }
 
 # Propriedades da camada 1 (verbalizadas no rationale)
 layer1_properties:
