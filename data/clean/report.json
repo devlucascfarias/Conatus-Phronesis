@@ -1,6 +1,6 @@
 {
-  "input": 1351,
-  "kept": 1071,
+  "input": 1486,
+  "kept": 1206,
   "rejected_total": 280,
   "rejected_by_reason": {
     "think_abaixo_de_25_palavras": 254,
@@ -11,28 +11,28 @@
   },
   "layer_distribution": {
     "0": {
-      "n": 130,
-      "share": 0.121
+      "n": 190,
+      "share": 0.158
     },
     "0.5": {
-      "n": 99,
-      "share": 0.092
+      "n": 124,
+      "share": 0.103
     },
     "1": {
       "n": 288,
-      "share": 0.269
+      "share": 0.239
     },
     "2": {
       "n": 340,
-      "share": 0.317
+      "share": 0.282
     },
     "3": {
       "n": 65,
-      "share": 0.061
+      "share": 0.054
     },
     "C": {
-      "n": 149,
-      "share": 0.139
+      "n": 199,
+      "share": 0.165
     }
   },
   "layer_targets": {
