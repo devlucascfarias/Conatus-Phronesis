@@ -12,11 +12,25 @@
 # 34 itens) recebiam ~2 passos de exposição — regime de sub-treino, não de overfit.
 
 model:
-  base: Qwen/Qwen3-8B                  # alvo deste branch: híbrido com reasoning real
+  # 2026-07-27: alvo migrado de Qwen3-8B para Qwen3-14B. Motivo: a bateria de problemas
+  # difíceis (limites, séries, EDO, eletromagnetismo) mostrou que boa parte do que falha não é
+  # roteamento de ferramenta nem formato — é capacidade matemática/física crua do modelo-base
+  # (constante de integração errada num PVI, intervalo de convergência centrado no ponto
+  # errado, ½CV² errado por duas ordens de grandeza). Isso vem do pré-treino, não do SFT.
+  # Continua na mesma família de propósito: chat template, formato <tool_call> e canal <think>
+  # são idênticos aos do 8B, então o dataset entra sem nenhuma conversão.
+  base: Qwen/Qwen3-14B                 # alvo atual
+  base_8b: Qwen/Qwen3-8B               # alvo anterior, mantido para comparação A/B
   base_4b: Qwen/Qwen3-4B-Instruct-2507 # referência sem thinking para comparação
   guinea_pig: Qwen/Qwen3-1.7B         # cobaia para validar o pipeline
   load_in_4bit: true
-  max_seq_len: 4096
+  # 4096 -> 2048. Medido em data/clean/train.jsonl (1206 exemplos): o item MAIS LONGO tem 1536
+  # tokens, p99 = 1314, mediana = 576. O teto de 4096 nunca foi atingido — era folga herdada de
+  # quando o corpus ainda podia crescer em comprimento. Cortar pra 2048 trunca ZERO exemplos e
+  # reduz bastante a memória de ativação, que é o que decide se o QLoRA do 14B cabe no T4 de
+  # 16GB do Colab free. Se o corpus voltar a ganhar itens longos, conferir esta distribuição
+  # antes de treinar — build_dataset.py descarta silenciosamente o que passar do teto.
+  max_seq_len: 2048
 
 lora:
   r: 32                # era 16 (herdado do 4B/579 exemplos): dataset cresceu 66% e ganhou
