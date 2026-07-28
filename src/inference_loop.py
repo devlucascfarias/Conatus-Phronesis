@@ -260,25 +260,28 @@ def main():
         model = PeftModel.from_pretrained(model, args.adapter)
     model.eval()
     # Ver comentario em src/eval_harness.py: silencia o aviso max_new_tokens/max_length que o
-    # generation_config.json do Qwen3-8B dispara a cada turno do chat.
+    # generation_config.json de alguns bases dispara a cada turno (no-op no Granite 4.1).
     model.generation_config.max_length = None
     tools = load_tools()
 
     def generate(messages) -> str:
-        # O modelo-alvo deste branch usa o canal de reasoning do Qwen3-8B.
+        # Sem `enable_thinking`: no Granite o <think> e comportamento treinado, nao um canal do
+        # template (ver src/build_dataset.py). O historico vai inteiro, com os <think> dos
+        # turnos anteriores — o template do Granite repassa o content verbatim, e o treino foi
+        # renderizado do mesmo jeito.
         prompt = tokenizer.apply_chat_template(
-            messages, tools=tools, tokenize=False, add_generation_prompt=True, enable_thinking=True
+            messages, tools=tools, tokenize=False, add_generation_prompt=True
         )
         inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
         with torch.no_grad():
-            # do_sample=True com os parametros recomendados do Qwen3-8B (generation_config.json
-            # real do modelo) — greedy puro entra em loop de repeticao variando um numero a cada
-            # linha, medido em data/eval/thinking_8b_eval_notes.md. Sem seed fixa aqui de
-            # proposito: isto e uso interativo/demo, nao comparacao de metricas entre rodadas.
+            # do_sample=True — greedy puro entra em loop de repeticao variando um numero a cada
+            # linha, medido em data/eval/thinking_8b_eval_notes.md. Valores herdados do Qwen3
+            # (ver nota em eval_harness.py). Sem seed fixa aqui de proposito: isto e uso
+            # interativo/demo, nao comparacao de metricas entre rodadas.
             out = model.generate(**inputs, max_new_tokens=args.max_new_tokens, do_sample=True,
                                  temperature=0.6, top_k=20, top_p=0.95,
                                  repetition_penalty=1.15, no_repeat_ngram_size=8,
-                                 pad_token_id=tokenizer.eos_token_id)
+                                 pad_token_id=tokenizer.pad_token_id or tokenizer.eos_token_id)
         return tokenizer.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True).strip()
 
     messages = []

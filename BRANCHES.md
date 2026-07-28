@@ -2,7 +2,8 @@
 
 > **Nota (branch `phronesis-thinking`)**: `plano.md`, `MODEL_CARD.md` e `README.md`,
 > citados abaixo, foram removidos deste branch por decisão explícita (experimento de
-> thinking no Qwen3-8B, não documentado nesses arquivos). Eles continuam existindo em
+> thinking, hoje sobre `ibm-granite/granite-4.1-8b` — antes Qwen3-8B e depois Qwen3-14B —,
+> não documentado nesses arquivos). Eles continuam existindo em
 > `main` — troque de branch pra consultá-los. O conteúdo deste arquivo abaixo descreve
 > `main`, que segue com esses três arquivos intactos.
 

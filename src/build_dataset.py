@@ -1,4 +1,4 @@
-"""Monta o JSONL final no chat template do Qwen3, com máscara de loss (seção 4.3).
+"""Monta o JSONL final no chat template do Granite 4.1, com máscara de loss (seção 4.3).
 
 Loss APENAS nos tokens do assistant (preâmbulos e tool calls incluídos).
 Mascarados: system, user e <tool_response> (conteúdo de tool é input, não comportamento).
@@ -8,11 +8,18 @@ Uso:
     python src/build_dataset.py data/clean/dataset.jsonl --show-masks   # teste: imprime spans de 3 exemplos
 
 A renderização é SEMPRE via tokenizer.apply_chat_template — nunca concatenação manual, e SEMPRE
-de uma vez só (a conversa inteira). O Qwen3-8B extrai o reasoning de blocos <think> embutidos
-em cada content de assistant. Renderizar prefixos messages[:i] incrementalmente faria cada
-turno parecer "o último" na própria fatia e poderia desalinhá-lo. Por isso os spans do
-assistant são localizados por offset de caractere numa única renderização completa — o mesmo
-princípio do train_on_responses_only do Unsloth.
+de uma vez só (a conversa inteira). Os spans do assistant são localizados por offset de caractere
+numa única renderização completa, o mesmo princípio do train_on_responses_only do Unsloth.
+
+Sobre o <think> no Granite: ao contrário do Qwen3, o template do Granite não tem canal de
+reasoning — nenhum `enable_thinking`, nenhum stub injetado. Ele repassa o content do assistant
+VERBATIM. Duas consequências:
+
+  - O <think> deste branch é comportamento aprendido pelo SFT, não um canal do modelo-base.
+    `<think>` e `</think>` são tokens próprios do vocabulário (special=false), então entram
+    inteiros no span treinável.
+  - O <think> de turnos ANTERIORES fica no histórico renderizado. O template do Qwen3 o removia.
+    É o comportamento desejado: treino e inferência passam a ver exatamente o mesmo histórico.
 """
 import argparse
 import json
@@ -21,8 +28,11 @@ from pathlib import Path
 from common import ROOT, load_tools, read_jsonl
 
 IGNORE = -100
-ASSISTANT_MARKER = "<|im_start|>assistant\n"
-TURN_MARKER = "<|im_start|>"
+# Template do Granite 4.1: <|start_of_role|>papel<|end_of_role|>conteúdo<|end_of_text|>\n.
+# O span do assistant vai até o próximo <|start_of_role|>, o que inclui o <|end_of_text|> —
+# de propósito: o token de parada precisa estar sob loss, senão o modelo não aprende a parar.
+ASSISTANT_MARKER = "<|start_of_role|>assistant<|end_of_role|>"
+TURN_MARKER = "<|start_of_role|>"
 
 
 def assistant_spans(text: str) -> list[tuple[int, int]]:
@@ -43,10 +53,10 @@ def assistant_spans(text: str) -> list[tuple[int, int]]:
 
 def build_example(tokenizer, messages, tools):
     """Retorna (input_ids, labels, text). Turnos não-assistant (e o que o template injeta em volta) ficam IGNORE."""
-    # Neste branch o alvo é o Qwen3-8B com reasoning habilitado. Em turnos já completos, o
-    # template extrai <think> do content quando presente e deixa os demais turnos sem stub.
+    # Sem `enable_thinking`: o Granite não tem esse kwarg. O bloco <think> viaja dentro do
+    # content de cada turno assistant e o template o repassa como está (ver docstring).
     text = tokenizer.apply_chat_template(
-        messages, tools=tools, tokenize=False, add_generation_prompt=False, enable_thinking=True
+        messages, tools=tools, tokenize=False, add_generation_prompt=False
     )
     enc = tokenizer(text, add_special_tokens=False, return_offsets_mapping=True)
     ids, offsets = list(enc["input_ids"]), enc["offset_mapping"]
@@ -83,9 +93,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("file", type=Path)
     ap.add_argument("--out", type=Path, default=ROOT / "data" / "clean" / "train.jsonl")
-    ap.add_argument("--model", default="Qwen/Qwen3-8B")
+    ap.add_argument("--model", default="ibm-granite/granite-4.1-8b")
     ap.add_argument("--show-masks", action="store_true")
-    ap.add_argument("--max-len", type=int, default=4096)
+    ap.add_argument("--max-len", type=int, default=2048)   # espelha configs/train_config.yaml
     args = ap.parse_args()
 
     from transformers import AutoTokenizer
@@ -112,7 +122,8 @@ def main():
             f.write(json.dumps({"text": text, "layer": layer, "input_ids": ids, "labels": labels}, ensure_ascii=False) + "\n")
     print(f"{len(examples) - n_long} exemplos → {args.out} ({n_long} descartados por exceder {args.max_len} tokens)")
     print("No Colab, alinhe o train_on_responses_only do Unsloth com esta máscara "
-          "(instruction_part='<|im_start|>user', response_part='<|im_start|>assistant').")
+          "(instruction_part='<|start_of_role|>user<|end_of_role|>', "
+          "response_part='<|start_of_role|>assistant<|end_of_role|>').")
 
 
 if __name__ == "__main__":

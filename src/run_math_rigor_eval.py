@@ -8,7 +8,7 @@ script só gera as respostas; a nota (src/score_math_rigor.py) é dada por
 Claude Code lendo par a par, mesmo padrão de src/judge_data.py.
 
 Uso (Colab, mesma GPU do treino):
-    python src/run_math_rigor_eval.py --model Qwen/Qwen3-8B --adapter outputs/adapter_8b \
+    python src/run_math_rigor_eval.py --model ibm-granite/granite-4.1-8b --adapter outputs/adapter_8b \
         --out outputs/math_rigor_responses.jsonl
 """
 import argparse
@@ -38,7 +38,7 @@ def main():
         model = PeftModel.from_pretrained(model, args.adapter)
     model.eval()
     # Ver comentario em src/eval_harness.py: silencia o aviso max_new_tokens/max_length que o
-    # generation_config.json do Qwen3-8B dispara a cada caso do eval.
+    # generation_config.json de alguns bases dispara a cada caso do eval (no-op no Granite 4.1).
     model.generation_config.max_length = None
 
     tools = load_tools()
@@ -52,20 +52,23 @@ def main():
             question = next(m["content"] for m in case["messages"] if m["role"] == "user")
             reference = next(m["content"] for m in case["messages"] if m["role"] == "assistant")
 
+            # Sem `enable_thinking`: no Granite o <think> é comportamento treinado, não um
+            # canal do template (ver src/build_dataset.py).
             prompt = tokenizer.apply_chat_template(
                 [{"role": "user", "content": question}], tools=tools, tokenize=False,
-                add_generation_prompt=True, enable_thinking=True,
+                add_generation_prompt=True,
             )
             inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
             with torch.no_grad():
                 # Mesma seed determinística por caso do eval_harness.py — reprodutível
                 # entre rodadas, mesmo com do_sample=True (evita o loop de repetição do
-                # greedy, ver data/eval/thinking_8b_eval_notes.md).
+                # greedy, ver data/eval/thinking_8b_eval_notes.md). Parâmetros de sampling:
+                # ver a nota em eval_harness.py (herdados do Qwen3, a revalidar no Granite).
                 torch.manual_seed(2000 + i)
                 out = model.generate(**inputs, max_new_tokens=args.max_new_tokens, do_sample=True,
                                      temperature=0.6, top_k=20, top_p=0.95,
                                      repetition_penalty=1.15, no_repeat_ngram_size=8,
-                                     pad_token_id=tokenizer.eos_token_id)
+                                     pad_token_id=tokenizer.pad_token_id or tokenizer.eos_token_id)
             response = tokenizer.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True).strip()
 
             f.write(json.dumps({

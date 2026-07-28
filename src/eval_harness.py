@@ -1,8 +1,8 @@
 """Avaliação: decisão de tool + comprimento de preâmbulo (Fases 0 e 4).
 
 Roda no Colab (L4) ou em qualquer máquina com GPU:
-    python src/eval_harness.py --model Qwen/Qwen3-8B --out outputs/baseline_metrics.json
-    python src/eval_harness.py --model Qwen/Qwen3-8B --adapter outputs/adapter --out outputs/trained_metrics.json
+    python src/eval_harness.py --model ibm-granite/granite-4.1-8b --out outputs/baseline_metrics.json
+    python src/eval_harness.py --model ibm-granite/granite-4.1-8b --adapter outputs/adapter --out outputs/trained_metrics.json
 
 Métricas: precisão/recall/F1 por tool, matriz de confusão, taxa de tool call com JSON
 válido, mediana de palavras/tokens de preâmbulo por camada. Amostra 20 respostas para
@@ -62,11 +62,13 @@ def main():
         from peft import PeftModel
         model = PeftModel.from_pretrained(model, args.adapter)
     model.eval()
-    # O generation_config.json do Qwen3-8B traz max_length=40960. Como toda chamada aqui passa
-    # max_new_tokens, o transformers loga o aviso "Both max_new_tokens and max_length seem to
-    # have been set" a CADA generate() — ruido que polui o log de eval linha a linha e esconde
-    # a saida real. Zerar aqui e inofensivo: _prepare_generated_length sobrescreve max_length
-    # com max_new_tokens + input_ids_length logo depois de emitir o aviso.
+    # Defesa contra o aviso "Both max_new_tokens and max_length seem to have been set", que o
+    # transformers loga a CADA generate() quando o generation_config.json do modelo define
+    # max_length — ruido que polui o log de eval linha a linha e esconde a saida real. O
+    # generation_config do Granite 4.1 nao define max_length (so os ids de token), entao aqui
+    # isto e no-op; mantido porque volta a morder em qualquer base que defina (o Qwen3 definia
+    # 40960). Zerar e inofensivo: _prepare_generated_length sobrescreve max_length com
+    # max_new_tokens + input_ids_length logo depois de emitir o aviso.
     model.generation_config.max_length = None
 
     tools = load_tools()
@@ -79,22 +81,25 @@ def main():
     preamble_tokens = defaultdict(list)
 
     for i, case in enumerate(cases, 1):
-        # O branch Qwen3-8B treina reasoning real nos itens difíceis de camada 3.
+        # Sem `enable_thinking`: no Granite o <think> e comportamento treinado, nao um canal do
+        # template (ver src/build_dataset.py). O modelo emite o bloco por conta propria.
         prompt = tokenizer.apply_chat_template(
-            case["messages"], tools=tools, tokenize=False, add_generation_prompt=True, enable_thinking=True
+            case["messages"], tools=tools, tokenize=False, add_generation_prompt=True
         )
         inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
         with torch.no_grad():
-            # do_sample=True com os parametros recomendados do Qwen3-8B (generation_config.json
-            # real do modelo): greedy puro entra em loop de repeticao variando um numero a cada
+            # do_sample=True: greedy puro entra em loop de repeticao variando um numero a cada
             # linha (evade no_repeat_ngram_size), medido em data/eval/thinking_8b_eval_notes.md.
+            # Os VALORES abaixo vieram do generation_config.json do Qwen3 — o do Granite 4.1 nao
+            # publica parametros de sampling. Mantidos de proposito na troca de base, para nao
+            # mexer em duas variaveis de uma vez; revalidar depois do primeiro eval do Granite.
             # Seed fixa por caso (nao global) para o eval continuar reproduzivel entre rodadas,
             # mesmo se --limit ou a ordem dos casos mudar.
             torch.manual_seed(1000 + i)
             out = model.generate(**inputs, max_new_tokens=args.max_new_tokens, do_sample=True,
                                  temperature=0.6, top_k=20, top_p=0.95,
                                  repetition_penalty=1.15, no_repeat_ngram_size=8,
-                                 pad_token_id=tokenizer.eos_token_id)
+                                 pad_token_id=tokenizer.pad_token_id or tokenizer.eos_token_id)
         text = tokenizer.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
 
         pred, json_ok = predict_tool(text)

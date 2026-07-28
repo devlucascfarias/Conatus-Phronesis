@@ -12,24 +12,47 @@
 # 34 itens) recebiam ~2 passos de exposição — regime de sub-treino, não de overfit.
 
 model:
-  # 2026-07-27: alvo migrado de Qwen3-8B para Qwen3-14B. Motivo: a bateria de problemas
-  # difíceis (limites, séries, EDO, eletromagnetismo) mostrou que boa parte do que falha não é
-  # roteamento de ferramenta nem formato — é capacidade matemática/física crua do modelo-base
-  # (constante de integração errada num PVI, intervalo de convergência centrado no ponto
-  # errado, ½CV² errado por duas ordens de grandeza). Isso vem do pré-treino, não do SFT.
-  # Continua na mesma família de propósito: chat template, formato <tool_call> e canal <think>
-  # são idênticos aos do 8B, então o dataset entra sem nenhuma conversão.
-  base: Qwen/Qwen3-14B                 # alvo atual
-  base_8b: Qwen/Qwen3-8B               # alvo anterior, mantido para comparação A/B
-  base_4b: Qwen/Qwen3-4B-Instruct-2507 # referência sem thinking para comparação
-  guinea_pig: Qwen/Qwen3-1.7B         # cobaia para validar o pipeline
+  # 2026-07-28: alvo migrado de Qwen3-14B para IBM Granite 4.1 8B. Diferente das migrações
+  # anteriores (8B -> 14B), esta TROCA DE FAMÍLIA — três coisas mudam e nenhuma é cosmética:
+  #
+  #   1. Chat template: <|start_of_role|>papel<|end_of_role|>…<|end_of_text|> no lugar de
+  #      <|im_start|>. Os marcadores de máscara de loss mudam junto (src/build_dataset.py e o
+  #      train_on_responses_only do notebook).
+  #   2. Tokenizer: BPE estilo GPT-2 de 100.352 tokens, não os 151k do Qwen. A contagem de
+  #      tokens em português muda — max_seq_len abaixo precisa ser reconferido a cada corpus.
+  #   3. O canal <think> NÃO é nativo. O template do Granite não tem `enable_thinking` nem
+  #      injeta stub de reasoning: ele repassa o content do assistant verbatim. O <think> deste
+  #      branch passa a ser comportamento 100% aprendido pelo SFT — que é a intenção, o corpus
+  #      já é think-first do começo ao fim.
+  #
+  # O que NÃO muda: `<think>`, `</think>`, `<tool_call>` e `</tool_call>` são tokens próprios do
+  # vocabulário do Granite e estão marcados special=false, então sobrevivem a
+  # skip_special_tokens=True e as regexes de src/common.py continuam valendo sem alteração. O
+  # system prompt de tools do próprio template pede o formato
+  # <tool_call>{"name": …, "arguments": …}</tool_call> com schema OpenAI — exatamente o que
+  # configs/tools.json e data/clean/dataset.jsonl já produzem. O dataset entra sem conversão.
+  #
+  # Risco assumido e a conferir na Fase 0: a migração para o 14B existia porque o gargalo era
+  # capacidade matemática/física crua do base. Voltar a 8B pode reintroduzir isso. Rodar o
+  # baseline de rigor matemático no Granite CRU antes de gastar o treino completo.
+  base: ibm-granite/granite-4.1-8b       # alvo atual
+  base_qwen14b: Qwen/Qwen3-14B           # alvo anterior, mantido para comparação A/B
+  base_qwen8b: Qwen/Qwen3-8B             # alvo de duas rodadas atrás (notas de eval no repo)
+  guinea_pig: ibm-granite/granite-4.1-3b # cobaia: mesma família, mesmo template, barata
   load_in_4bit: true
-  # 4096 -> 2048. Medido em data/clean/train.jsonl (1206 exemplos): o item MAIS LONGO tem 1536
-  # tokens, p99 = 1314, mediana = 576. O teto de 4096 nunca foi atingido — era folga herdada de
-  # quando o corpus ainda podia crescer em comprimento. Cortar pra 2048 trunca ZERO exemplos e
-  # reduz bastante a memória de ativação, que é o que decide se o QLoRA do 14B cabe no T4 de
-  # 16GB do Colab free. Se o corpus voltar a ganhar itens longos, conferir esta distribuição
-  # antes de treinar — build_dataset.py descarta silenciosamente o que passar do teto.
+  # 4096 -> 2048: o teto antigo nunca foi atingido, era folga herdada de quando o corpus ainda
+  # podia crescer em comprimento. Cortar pra 2048 trunca ZERO exemplos e reduz bastante a
+  # memória de ativação.
+  #
+  # Remedido com o tokenizer do Granite 4.1 em 2026-07-28, sobre os mesmos 1206 exemplos —
+  # a troca de tokenizer (BPE de 100k, contra 151k do Qwen) praticamente não mexeu na cauda:
+  #
+  #            máximo    p99     p95    mediana   descartados @2048
+  #   Qwen3     1536    1314      —       576           0
+  #   Granite   1456    1308     990      610           0
+  #
+  # Reconferir esta distribuição se o corpus ganhar itens longos: build_dataset.py descarta
+  # SILENCIOSAMENTE o que passar do teto (a linha de saída informa quantos).
   max_seq_len: 2048
 
 lora:
@@ -53,9 +76,10 @@ training:
   scheduler: cosine
   warmup_ratio: 0.05   # era 0.03: com ~120 passos, 3% dava só ~4 passos de warmup
   num_epochs: 2        # era 1 — a mudança principal. Dobra a exposição (60 → ~120 passos).
-                       # Não fomos pra 3 direto porque o eval split (abaixo) vai dizer se
-                       # ainda há espaço: se a val loss continuar caindo no fim da época 2,
-                       # a próxima rodada sobe.
+                       # Não fomos pra 3 direto por prudência. ATENÇÃO: o split de validação
+                       # que media isso foi removido do notebook (ver val_split abaixo), então
+                       # a decisão de subir pra 3 épocas agora depende da avaliação pós-treino
+                       # (eval_harness + rigor matemático), não mais da curva de val loss.
   weight_decay: 0.01   # era 0.0 (default do HF): regularização padrão de SFT
   neftune_noise_alpha: 5  # ruído nos embeddings durante o treino; técnica específica pra
                           # generalização em instruction tuning. Aplicado de forma
@@ -64,7 +88,13 @@ training:
   gradient_accumulation_steps: 8      # batch efetivo ~16
   seed: 42
   logging_steps: 5
-  val_split: 0.05      # split de validação estratificado por camada — antes não existia
-                       # nenhum, então treinar >1 época seria às cegas (sem como saber se
-                       # a época extra ajudou ou começou a decorar)
+  val_split: 0.0       # 2026-07-28: split de validação DESATIVADO por decisão explícita, pra
+                       # enxugar o notebook de treino. Existia como 0.05 estratificado por
+                       # camada, e servia pra decidir o número de épocas pela curva de val
+                       # loss. Consequência de tirar: treinar >2 épocas volta a ser às cegas —
+                       # não dá pra distinguir "a época extra ajudou" de "começou a decorar"
+                       # sem olhar a avaliação pós-treino. Pra reativar: split estratificado
+                       # sobre o campo `layer` do train.jsonl (a camada 2 é ~40% do corpus,
+                       # então split aleatório sub-representa as outras) + eval_strategy/
+                       # eval_steps no SFTConfig.
   save_merged_16bit: true             # p/ avaliação na Fase 4

@@ -26,9 +26,12 @@ dataset:
 # os longos. O retrofit pós-hoc (prompts/editor_thinking_gpt56.md, item já resolvido antes
 # de escrever o <think>) convergiu pra frases de conclusão ("A é bloco de Jordan; o termo
 # nilpotente não pode desaparecer antes da verificação") em vez de deliberação real — uma
-# legenda da resposta, não o processo que a produziu. Isso ensina o Qwen3-8B (que nativamente
-# gera centenas/milhares de tokens de reasoning em thinking mode) a suprimir o próprio
-# mecanismo de raciocínio. think_min_words nas camadas 2/3 rejeita blocos curtos demais pra
+# legenda da resposta, não o processo que a produziu. No Qwen3-8B (que nativamente gera
+# centenas/milhares de tokens de reasoning em thinking mode) isso ensinava o modelo a suprimir
+# o próprio mecanismo de raciocínio. Com o Granite 4.1 (base atual, sem canal de thinking
+# nativo) a exigência fica MAIS forte, não menos: o corpus é a única fonte do comportamento de
+# raciocínio — um <think> que é legenda ensina a fingir raciocínio, e não há pré-treino de
+# reasoning por baixo pra compensar. think_min_words nas camadas 2/3 rejeita blocos curtos demais pra
 # serem deliberação genuína, forçando regeneração via rejection sampling (item 3) em vez de
 # retrofit. Camadas 0/0.5/1/C não ganham mínimo — o think curto ali é roteamento de tool
 # (buscar? calcular? só responder?), não derivação, e os evals mostraram que funciona bem
