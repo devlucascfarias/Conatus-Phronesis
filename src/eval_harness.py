@@ -62,6 +62,12 @@ def main():
         from peft import PeftModel
         model = PeftModel.from_pretrained(model, args.adapter)
     model.eval()
+    # O generation_config.json do Qwen3-8B traz max_length=40960. Como toda chamada aqui passa
+    # max_new_tokens, o transformers loga o aviso "Both max_new_tokens and max_length seem to
+    # have been set" a CADA generate() — ruido que polui o log de eval linha a linha e esconde
+    # a saida real. Zerar aqui e inofensivo: _prepare_generated_length sobrescreve max_length
+    # com max_new_tokens + input_ids_length logo depois de emitir o aviso.
+    model.generation_config.max_length = None
 
     tools = load_tools()
     cases = read_jsonl(args.testset)

@@ -17,6 +17,31 @@
 - Pilotos Fase 1: 20 exemplos aprovados (`data/raw/pilot.jsonl`)
 - **Total aprovado (pipeline original): 505** (485 gerados + 20 pilotos), 505/505 na validação
 
+### Lote de lacunas estruturais — batches 033–045 (170 itens)
+
+Aplicado `prompts/generator_lacunas_gpt56.md` como geração think-first inédita, em 13
+arquivos e na ordem A → B → C → E → D → F → G:
+
+- A, recuperação de falha de ferramenta: 40 itens (15 entrada externa já presente no
+  enunciado, 10 nome de tool inválido, 10 SyntaxError, 5 import indisponível);
+- B, regra positiva de literais no código: 15 itens;
+- C, fronteira contrastiva de verificação: 15 pares / 30 itens;
+- E, desistência após duas falhas diferentes: 10 itens;
+- D, resposta refeita sob nova instrução: 25 conversas multi-turno;
+- F, disciplina de unidade e ancoragem de idioma: 20 itens;
+- G, rebalanceamento: 18 itens de camada 0 e 12 de camada C.
+
+Todos os turnos de tool foram obtidos por execução real. Os 10 episódios de nome inválido
+usam o erro diretivo exato e repetem os mesmos argumentos com `python_sandbox`; o validador
+continua reprovando nomes inválidos comuns e só aceita essa sequência pedagógica completa.
+Imports bloqueados são conferidos contra a mesma whitelist de `src/inference_loop.py`, sem
+depender de o pacote estar instalado ou não no ambiente do validador.
+
+Validação isolada: **170/170 aprovados**, zero rejeições. Integração global:
+**1071/1351 aprovados** — os 170 novos foram mantidos e as 280 rejeições são exatamente as
+históricas já presentes antes do lote. `pytest -q`: **36 passed**. A renderização real pelo
+tokenizer do Qwen3-8B produziu 1071 exemplos de treino, zero acima de 4096 tokens.
+
 ### Branch `phronesis-thinking` — reasoning em todas as camadas no Qwen3-8B
 
 Além dos 34 itens históricos de camada 3 já editados, o retrofit de

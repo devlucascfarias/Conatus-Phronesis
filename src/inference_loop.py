@@ -259,6 +259,9 @@ def main():
         from peft import PeftModel
         model = PeftModel.from_pretrained(model, args.adapter)
     model.eval()
+    # Ver comentario em src/eval_harness.py: silencia o aviso max_new_tokens/max_length que o
+    # generation_config.json do Qwen3-8B dispara a cada turno do chat.
+    model.generation_config.max_length = None
     tools = load_tools()
 
     def generate(messages) -> str:

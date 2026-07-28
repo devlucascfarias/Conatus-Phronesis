@@ -5,6 +5,7 @@ Os nomes testados aqui não são inventados para o teste: `python_sandro`, `pyth
 verdade no 8B treinado e estão registrados em data/eval/thinking_8b_eval_notes.md — quatro
 variações distintas só na rodada com sampling.
 """
+import json
 import sys
 from pathlib import Path
 
@@ -83,3 +84,126 @@ def test_validador_continua_reprovando_nome_invalido():
     schemas = tool_schemas()
     assert check_schema(_call("python_sandro", {"code": "print(1)"}), schemas) == \
         "tool_desconhecida:python_sandro"
+
+
+def test_validador_aceita_apenas_episodio_pedagogico_completo():
+    """A exceção nova exige erro exato e repetição cirúrgica dos mesmos argumentos."""
+    from validate_data import (
+        is_intentional_unknown_tool_repair,
+        tool_schemas,
+    )
+
+    code = "print(2 + 2)"
+    msgs = [
+        {"role": "user", "content": "Quanto é 2+2?"},
+        {
+            "role": "assistant",
+            "content": (
+                "<think>\nVou conferir a soma no sandbox antes de responder.\n</think>\n\n"
+                '<tool_call>\n{"name":"python_eval","arguments":{"code":"print(2 + 2)"}}\n'
+                "</tool_call>"
+            ),
+        },
+        {
+            "role": "tool",
+            "content": (
+                '{"error": "tool desconhecida: python_eval", '
+                '"available": ["web_search", "python_sandbox"]}'
+            ),
+        },
+        {
+            "role": "assistant",
+            "content": (
+                "<think>\nO código está certo; só corrijo o nome da ferramenta.\n</think>\n\n"
+                '<tool_call>\n{"name":"python_sandbox","arguments":{"code":"print(2 + 2)"}}\n'
+                "</tool_call>"
+            ),
+        },
+        {"role": "tool", "content": "4"},
+        {
+            "role": "assistant",
+            "content": "<think>\nO resultado confirma a soma.\n</think>\n\n4",
+        },
+    ]
+    schemas = tool_schemas()
+    call = _call("python_eval", {"code": code})
+    assert is_intentional_unknown_tool_repair(msgs, 1, call, schemas)
+
+    msgs[3]["content"] = msgs[3]["content"].replace(
+        "print(2 + 2)", "print(3 + 2)"
+    )
+    assert not is_intentional_unknown_tool_repair(msgs, 1, call, schemas)
+
+
+def test_validador_respeita_import_bloqueado_pelo_sandbox():
+    """Pacote instalado localmente continua sendo erro quando a whitelist o bloqueia."""
+    from inference_loop import check_imports
+    from validate_data import check_sandbox_execution
+
+    code = "from scipy import integrate\nprint(integrate.quad(lambda x: x, 0, 1)[0])"
+    policy_error = check_imports(code)
+    assert policy_error and policy_error.startswith("ImportError:")
+    ex = {
+        "layer": "2",
+        "messages": [
+            {"role": "user", "content": "Integre x de zero a um."},
+            {
+                "role": "assistant",
+                "content": (
+                    "<think>\nA integral está montada; tento avaliá-la numericamente.\n"
+                    "</think>\n\n"
+                    "<tool_call>\n"
+                    + json.dumps(
+                        {
+                            "name": "python_sandbox",
+                            "arguments": {"code": code},
+                        }
+                    )
+                    + "\n</tool_call>"
+                ),
+            },
+            {"role": "tool", "content": policy_error},
+            {
+                "role": "assistant",
+                "content": (
+                    "<think>\nO import foi bloqueado; preciso usar um pacote permitido.\n"
+                    "</think>\n\nA biblioteca não está disponível."
+                ),
+            },
+        ],
+    }
+    assert check_sandbox_execution(ex, timeout=5) is None
+
+
+def test_validador_nao_aceita_importerror_fabricado_para_modulo_permitido():
+    from validate_data import check_sandbox_execution
+
+    code = "import math\nprint(math.sqrt(4))"
+    ex = {
+        "layer": "2",
+        "messages": [
+            {"role": "user", "content": "Calcule a raiz de quatro."},
+            {
+                "role": "assistant",
+                "content": (
+                    "<think>\nA raiz é simples, mas vou conferir pela biblioteca padrão.\n"
+                    "</think>\n\n"
+                    '<tool_call>\n{"name":"python_sandbox","arguments":'
+                    '{"code":"import math\\nprint(math.sqrt(4))"}}\n</tool_call>'
+                ),
+            },
+            {
+                "role": "tool",
+                "content": (
+                    "ImportError: import de 'math' não permitido no sandbox "
+                    "(permitidos: [])"
+                ),
+            },
+            {
+                "role": "assistant",
+                "content": "<think>\nA ferramenta recusou a chamada.\n</think>\n\nSem resultado.",
+            },
+        ],
+    }
+    assert check_sandbox_execution(ex, timeout=5) == \
+        "tool_response_afirma_erro_mas_codigo_roda"

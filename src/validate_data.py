@@ -63,6 +63,59 @@ def check_schema(call: dict, schemas: dict) -> str | None:
     return None
 
 
+INTENTIONAL_BAD_TOOL_NAMES = {
+    "python",
+    "python_eval",
+    "run_python",
+    "calculator",
+    "python_sandox",
+}
+
+
+def is_intentional_unknown_tool_repair(
+    msgs: list[dict], assistant_i: int, call: dict, schemas: dict
+) -> bool:
+    """Aceita nome inválido só no episódio pedagógico completo de reparo.
+
+    `check_schema` continua estrito e reprova qualquer nome fora do schema. A exceção
+    vive no nível da conversa porque depende da sequência inteira: erro diretivo real,
+    seguido imediatamente pela mesma chamada (mesmos argumentos) com o nome correto.
+    Assim o lote de lacunas pode ensinar recuperação sem abrir uma anistia geral para
+    tool calls alucinadas.
+    """
+    name = call.get("name")
+    if name not in INTENTIONAL_BAD_TOOL_NAMES or name in schemas:
+        return False
+    if not isinstance(call.get("arguments"), dict):
+        return False
+    if assistant_i + 3 >= len(msgs):
+        return False
+    error_turn, repair_turn, repaired_result = msgs[assistant_i + 1:assistant_i + 4]
+    if error_turn.get("role") != "tool" or repair_turn.get("role") != "assistant":
+        return False
+    if repaired_result.get("role") != "tool":
+        return False
+    try:
+        error_payload = json.loads(error_turn.get("content") or "")
+    except json.JSONDecodeError:
+        return False
+    expected_error = {
+        "error": f"tool desconhecida: {name}",
+        "available": ["web_search", "python_sandbox"],
+    }
+    if error_payload != expected_error:
+        return False
+    repaired_calls = extract_tool_calls(repair_turn.get("content") or "")
+    if len(repaired_calls) != 1:
+        return False
+    repaired = repaired_calls[0]
+    return (
+        repaired.get("name") == "python_sandbox"
+        and repaired.get("arguments") == call.get("arguments")
+        and check_schema(repaired, schemas) is None
+    )
+
+
 def assistant_turns(ex: dict) -> list[str]:
     return [m.get("content") or "" for m in ex["messages"] if m.get("role") == "assistant"]
 
@@ -419,6 +472,14 @@ def check_sandbox_execution(ex: dict, timeout: int) -> str | None:
                     break
             stdout, stderr = run_sandbox_code(call["arguments"].get("code", ""), timeout)
             if looks_like_traceback(expected):
+                # Um pacote pode existir no ambiente do validador e ainda ser recusado
+                # pela whitelist do sandbox real. Nesse caso, valida a falha de política
+                # contra a mesma função usada em produção, sem mudar a execução de todos
+                # os exemplos históricos (alguns usam stdlib adicional permitida).
+                if expected.lstrip().startswith("ImportError: import de "):
+                    from inference_loop import check_imports
+                    if check_imports(call["arguments"].get("code", "")):
+                        continue
                 if not stderr:  # o exemplo afirma erro, mas o código roda limpo
                     return "tool_response_afirma_erro_mas_codigo_roda"
                 continue
@@ -481,7 +542,22 @@ def validate(files: list[Path]) -> None:
             if under_think is not None:
                 reject(ex, f"think_abaixo_de_{think_min}_palavras"); continue
 
-        err = next((e for t in turns for c in extract_tool_calls(t) if (e := check_schema(c, schemas))), None)
+        err = None
+        for i, msg in enumerate(ex["messages"]):
+            if msg.get("role") != "assistant":
+                continue
+            for call in extract_tool_calls(msg.get("content") or ""):
+                call_err = check_schema(call, schemas)
+                if call_err and not (
+                    call_err.startswith("tool_desconhecida:")
+                    and is_intentional_unknown_tool_repair(
+                        ex["messages"], i, call, schemas
+                    )
+                ):
+                    err = call_err
+                    break
+            if err:
+                break
         if err:
             reject(ex, err); continue
 
